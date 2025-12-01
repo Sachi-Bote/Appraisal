@@ -70,7 +70,7 @@ def research_guidance(PhD_degree_awarded, PhD_thesis_submitted, MPhil_or_PG_diss
         else:
             score += 2
 
-def  patents( patents_filed, policy_document, Awards_or_fellowship, international_level, national_level, state_level):
+def patents( patents_filed, policy_document, Awards_or_fellowship, international_level, national_level, state_level):
     score = 0
     if patents_filed == 'Yes':
         if international_level == 'Yes':
