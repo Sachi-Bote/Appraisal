@@ -1,4 +1,3 @@
-# workflow/engine.py
 
 from .states import States, VALID_TRANSITIONS
 
