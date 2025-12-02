@@ -1,0 +1,26 @@
+### LOGIN API (POST)
+POST http://127.0.0.1:8000/api/auth/login/
+Content-Type: application/json
+
+{
+  "username": "sachi",
+  "role": "faculty"
+}
+
+### SCORING API (POST)
+POST http://127.0.0.1:8000/api/score/calculate/
+Content-Type: application/json
+
+{
+  "teaching": { "total_classes_assigned": 100, "classes_taught": 90 },
+  "activities": { "activity_a": true, "activity_b": false, "activity_c": true },
+  "research": { "journal_papers": 2, "conference_papers": 1 },
+  "pbas": {
+    "teaching_process": 20,
+    "feedback": 22,
+    "department": 15,
+    "institute": 8,
+    "acr": 8,
+    "society": 6
+  }
+}
