@@ -3,7 +3,7 @@
 from typing import Dict, Tuple
 from .global_rules import is_boolean
 
-def validate_activites(payload: Dict) -> Tuple[bool, str]:
+def validate_activities(payload: Dict) -> Tuple[bool, str]:
     if not isinstance(payload, dict):
         return False, "Activities payload must be a JSON object"
     
@@ -11,7 +11,7 @@ def validate_activites(payload: Dict) -> Tuple[bool, str]:
         return True, ""
     
     for key, value in payload.items():
-        if not is_boolean(val):
+        if not is_boolean(value):
             return False, f"Activity field '{key}' must be a boolean (true or false)"
         
     return True, ""
