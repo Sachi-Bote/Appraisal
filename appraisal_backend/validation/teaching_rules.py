@@ -1,14 +1,14 @@
 from typing import Dict, Tuple
-from .global_rules import is_non_negative_int, validated_required_fields
+from .global_rules import is_non_negative_int, validate_required_fields
 
-REQUIRED_FIELDS = ["total_class_assigned", "classes_taught"]
+REQUIRED_FIELDS = ["total_classes_assigned", "classes_taught"]
 
 def validate_teaching_input(payload: Dict) -> Tuple[bool, str]:
-    ok, err = validated_required_fields(payload, REQUIRED_FIELDS)
+    ok, err = validate_required_fields(payload, REQUIRED_FIELDS)
     if not ok:
         return False, err
     
-    total = payload["total_class_assigned"]
+    total = payload["total_classes_assigned"]
     taught = payload["classes_taught"]
 
     if not is_non_negative_int(total) or not is_non_negative_int(taught):
