@@ -8,3 +8,5 @@ class ScoringAPI(APIView):
     def post(self, request):
         score = calculate_full_score(request.data)
         return Response(score)
+
+
