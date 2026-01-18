@@ -77,9 +77,8 @@ POINTS = {
     "invited_lecture_state_university": 2,
 }
 
-# -------------------------------------------------------------------
 # CALCULATION LOGIC
-# -------------------------------------------------------------------
+
 
 def calculate_research_score(payload: dict) -> dict:
     """

@@ -1,9 +1,7 @@
 # scoring/pbas.py
 
-# ============================================================
-# CONSTANTS (PBAS RULES)
-# ============================================================
 
+# CONSTANTS (PBAS RULES)
 MAX_TEACHING = 25
 MAX_FEEDBACK = 25
 MAX_DEPARTMENT = 20
@@ -22,9 +20,7 @@ ACR_GRADE_POINTS = {
     "C": 4
 }
 
-# ============================================================
 # SECTION A — TEACHING PROCESS
-# ============================================================
 
 def calculate_teaching_process(courses: list) -> float:
     """
@@ -43,10 +39,9 @@ def calculate_teaching_process(courses: list) -> float:
     score = (total_held / total_scheduled) * MAX_TEACHING
     return round(min(score, MAX_TEACHING), 2)
 
-# ============================================================
-# SECTION B — STUDENTS' FEEDBACK
-# ============================================================
 
+
+# SECTION B — STUDENTS' FEEDBACK
 def calculate_feedback(feedback_scores: list) -> float:
     """
     feedback_scores = [22, 24, 18]
@@ -58,9 +53,8 @@ def calculate_feedback(feedback_scores: list) -> float:
     avg = sum(feedback_scores) / len(feedback_scores)
     return round(min(avg, MAX_FEEDBACK), 2)
 
-# ============================================================
+
 # SECTION C — DEPARTMENTAL ACTIVITIES
-# ============================================================
 
 def calculate_departmental(activities: list) -> int:
     """
@@ -74,9 +68,7 @@ def calculate_departmental(activities: list) -> int:
     total = sum(a["credits"] for a in activities)
     return min(total, MAX_DEPARTMENT)
 
-# ============================================================
 # SECTION D — INSTITUTE ACTIVITIES
-# ============================================================
 
 def calculate_institute(activities: list) -> int:
     """
@@ -89,9 +81,7 @@ def calculate_institute(activities: list) -> int:
     total = sum(a["credits"] for a in activities)
     return min(total, MAX_INSTITUTE)
 
-# ============================================================
 # SECTION E — ACR
-# ============================================================
 
 def calculate_acr(grade: str) -> int:
     """
@@ -100,9 +90,7 @@ def calculate_acr(grade: str) -> int:
 
     return ACR_GRADE_POINTS.get(grade.upper(), 0)
 
-# ============================================================
 # SECTION F — CONTRIBUTION TO SOCIETY
-# ============================================================
 
 def calculate_society(activities: list) -> int:
     """
