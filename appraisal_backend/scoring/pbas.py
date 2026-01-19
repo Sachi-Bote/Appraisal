@@ -6,11 +6,11 @@
 
 MAX_LIMITS = {
     "teaching_process": 25,
-    "feedback": 25,
-    "department": 20,
-    "institute": 10,
-    "acr": 10,
-    "society": 10,
+    "student_feedback": 25,
+    "departmental_activities": 20,
+    "institute_activites": 10,
+    "acr_at_institute_level": 10,
+    "contribution_to_society": 10,
 }
 
 ACR_GRADE_POINTS = {
@@ -25,8 +25,8 @@ ACR_GRADE_POINTS = {
 # ============================================================
 
 def calculate_teaching_process(courses: list) -> float:
-    total_scheduled = sum(c["scheduled"] for c in courses)
-    total_held = sum(c["held"] for c in courses)
+    total_scheduled = sum(c["scheduled_classes"] for c in courses)
+    total_held = sum(c["held_classes"] for c in courses)
 
     if total_scheduled == 0:
         return 0.0
@@ -43,7 +43,7 @@ def calculate_feedback(feedback_scores: list) -> float:
         return 0.0
 
     avg = sum(feedback_scores) / len(feedback_scores)
-    return round(min(avg, MAX_LIMITS["feedback"]), 2)
+    return round(min(avg, MAX_LIMITS["student_feedback"]), 2)
 
 # ============================================================
 # SECTION C — DEPARTMENTAL ACTIVITIES
@@ -51,7 +51,7 @@ def calculate_feedback(feedback_scores: list) -> float:
 
 def calculate_department(activities: list) -> int:
     total = sum(a["credits"] for a in activities)
-    return min(total, MAX_LIMITS["department"])
+    return min(total, MAX_LIMITS["departmental_activities"])
 
 # ============================================================
 # SECTION D — INSTITUTE ACTIVITIES
@@ -59,7 +59,7 @@ def calculate_department(activities: list) -> int:
 
 def calculate_institute(activities: list) -> int:
     total = sum(a["credits"] for a in activities)
-    return min(total, MAX_LIMITS["institute"])
+    return min(total, MAX_LIMITS["institute_activites"])
 
 # ============================================================
 # SECTION E — ACR
@@ -74,7 +74,7 @@ def calculate_acr(grade: str) -> int:
 
 def calculate_society(activities: list) -> int:
     total = sum(a["credits"] for a in activities)
-    return min(total, MAX_LIMITS["society"])
+    return min(total, MAX_LIMITS["contribution_to_society"])
 
 # ============================================================
 # MASTER PBAS CALCULATOR
