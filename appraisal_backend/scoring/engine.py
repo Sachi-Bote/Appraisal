@@ -8,12 +8,20 @@ from .pbas import calculate_pbas_score
 
 def calculate_full_score(payload: dict) -> dict:
     """
-    Input payload example (matches master validator structure):
+    Expected payload (already validated):
+
     {
-      "teaching": {...},
-      "activities": {...},
-      "research": {...},
-      "pbas": {...}
+        "teaching": {...},
+        "activities": {...},
+        "research": {...},
+        "pbas": {
+            "teaching_process": int,
+            "feedback": int,
+            "department": int,
+            "institute": int,
+            "acr": int,
+            "society": int
+        }
     }
     """
 
