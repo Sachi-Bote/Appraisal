@@ -109,5 +109,5 @@ def calculate_research_score(payload: dict) -> dict:
 
     return {
         "breakdown": breakdown,
-        "total_score": total
+        "total": total
     }

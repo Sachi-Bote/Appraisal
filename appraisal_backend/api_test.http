@@ -1,26 +1,72 @@
-### LOGIN API (POST)
+### LOGIN API
 POST http://127.0.0.1:8000/api/auth/login/
 Content-Type: application/json
 
 {
   "username": "sachi",
-  "role": "faculty"
+  "password": "test@123",
+  "role": "FACULTY"
 }
 
-### SCORING API (POST)
+
+### SCORING API
 POST http://127.0.0.1:8000/api/score/calculate/
 Content-Type: application/json
 
 {
-  "teaching": { "total_classes_assigned": 100, "classes_taught": 90 },
-  "activities": { "activity_a": true, "activity_b": false, "activity_c": true },
-  "research": { "journal_papers": 2, "conference_papers": 1 },
+  "teaching": {
+    "total_classes_assigned": 120,
+    "classes_taught": 108,
+    "theory_courses": 3,
+    "practical_courses": 2,
+    "new_subjects_introduced": 1,
+    "innovative_teaching_methods": true,
+    "student_pass_percentage": 92,
+    "result_above_university_avg": true
+  },
+
+  "activities": {
+    "activity_a": true,
+    "activity_b": true,
+    "activity_c": false,
+    "seminars_attended": 4,
+    "workshops_attended": 2,
+    "fdp_attended": 1,
+    "online_certifications": 3,
+    "student_mentoring": true,
+    "industrial_visit_organized": false
+  },
+
+  "research": {
+    "journal_papers": 3,
+    "conference_papers": 2,
+    "book_international": 1,
+    "book_national": 0,
+    "book_chapter": 2,
+    "patents_filed": 1,
+    "patents_granted": 0,
+    "research_projects_applied": 2,
+    "research_projects_completed": 1,
+    "consultancy_projects": 1,
+    "phd_guided": 0,
+    "pg_projects_guided": 4,
+    "ug_projects_guided": 6
+  },
+
   "pbas": {
-    "teaching_process": 20,
-    "feedback": 22,
-    "department": 15,
-    "institute": 8,
+    "teaching_process": 22,
+    "feedback": 23,
+    "department": 18,
+    "institute": 9,
     "acr": 8,
-    "society": 6
+    "society": 7
+  },
+
+  "general": {
+    "academic_year": "2024-25",
+    "semester": "ODD",
+    "designation": "Assistant Professor",
+    "department": "Computer Engineering",
+    "experience_years": 3
   }
 }
