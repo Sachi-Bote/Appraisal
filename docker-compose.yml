@@ -1,12 +1,12 @@
+version: "3.9"
+
 services:
 
   backend:
-    build: ./appraisal_dp/appraisal_backend
+    image: vineety/appraisal:backend
     container_name: appraisal_backend
     expose:
       - "8000"
-    env_file:
-      - ./appraisal_dp/appraisal_backend/.env
     environment:
       DB_ENGINE: django.db.backends.postgresql
       DB_NAME: appraisal
@@ -14,26 +14,21 @@ services:
       DB_PASSWORD: appraisal_pass
       DB_HOST: db
       DB_PORT: 5432
-      DJANGO_SECURE_SSL_REDIRECT: "False"
-      DJANGO_SESSION_COOKIE_SECURE: "False"
-      DJANGO_CSRF_COOKIE_SECURE: "False"
     depends_on:
       db:
         condition: service_healthy
 
   frontend:
-    build: ./appraisal-form
+    image: vineety/appraisal:frontend
     container_name: appraisal_frontend
     expose:
       - "80"
 
   nginx:
-    image: nginx:alpine
+    image: vineety/appraisal:nginx
     container_name: appraisal_nginx
     ports:
       - "80:80"
-    volumes:
-      - ./nginx/defaultt.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - backend
       - frontend
