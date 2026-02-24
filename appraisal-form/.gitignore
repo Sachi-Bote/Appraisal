@@ -1,0 +1,28 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+1. SPPU Format Yearly Apprisal 2024-25.pdf
+2. PBAS Form_C - AICTE Engineering Teaching Staff Appraisal.pdf
+generated_pdfs/AICTE_PBAS_appraisal_15.pdf
+generated_pdfs/SPPU_PBAS_appraisal_15.pdf

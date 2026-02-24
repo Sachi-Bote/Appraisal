@@ -1,0 +1,307 @@
+/* Faculty Dashboard Styles - Uniform with HOD Dashboard */
+
+.dashboard-page {
+  padding: 24px;
+  background-color: #f9fafb;
+  min-height: 100vh;
+}
+
+/* Header Card */
+.dashboard-header-card {
+  background: white;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 28px 32px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+}
+
+.dashboard-header-card h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: #1f2937;
+}
+
+.dashboard-subtitle {
+  color: #6b7280;
+  margin: 6px 0 0 0;
+  font-size: 0.9375rem;
+}
+
+/* Logout Button */
+.logout-btn {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 11px 22px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9375rem;
+}
+
+.logout-btn:hover {
+  background-color: #b91c1c;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.dashboard-card {
+  background: white;
+  padding: 28px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #e5e7eb;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: #2563eb;
+  transform: scaleY(0);
+  transition: transform 0.2s ease;
+}
+
+.dashboard-card:hover::before {
+  transform: scaleY(1);
+}
+
+.dashboard-card h3 {
+  margin-bottom: 12px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.dashboard-card p {
+  font-size: 0.9375rem;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.dashboard-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.dashboard-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dashboard-card.disabled:hover {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transform: translateY(0);
+}
+
+.dashboard-card.disabled::before {
+  display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-page {
+    padding: 16px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 24px;
+  }
+
+  .dashboard-header h2 {
+    font-size: 1.75rem;
+  }
+
+  .logout-btn {
+    width: 100%;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .dashboard-card {
+    padding: 24px;
+  }
+}
+
+/* ===== Appraisal Status Card Extras ===== */
+
+.status-text {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Status label text */
+.dashboard-card p strong {
+  color: #111827;
+}
+
+/* Remarks text */
+.remarks-text {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #92400e;
+  background: #fff7ed;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #fed7aa;
+}
+
+/* Info text (approved / under review) */
+.info-text {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+/* Edit & Resubmit button */
+.primary-btn {
+  margin-top: 14px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in;
+}
+
+.primary-btn:hover {
+  background-color: #1d4ed8;
+}
+
+/* Disabled dashboard card */
+.dashboard-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dashboard-card.disabled:hover {
+  box-shadow: none;
+}
+
+/* ===== Submission History Section ===== */
+.dashboard-history-section {
+  max-width: 1280px;
+  margin: 40px auto 0;
+  background: white;
+  padding: 32px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.dashboard-history-section h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 20px;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #f3f4f6;
+}
+
+.history-info {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.history-year {
+  font-weight: 600;
+  color: #374151;
+}
+
+.history-status {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  text-transform: capitalize;
+}
+
+.history-status.under-review {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.history-status.approved {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.history-status.changes-requested {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.history-status.draft {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.view-btn {
+  background: white;
+  color: #2563eb;
+  border: 1px solid #2563eb;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-btn:hover {
+  background: #2563eb;
+  color: white;
+}
+
+.empty-state-text {
+  color: #6b7280;
+  font-style: italic;
+}

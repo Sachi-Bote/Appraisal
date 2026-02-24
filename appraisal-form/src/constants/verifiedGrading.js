@@ -1,0 +1,46 @@
+import { formatKeyLabel } from "../utils/textFormatters";
+
+export const TABLE2_VERIFIED_LABELS = {
+  peer_reviewed_journals: "1. Research papers (Peer-reviewed/UGC)",
+  books_international: "2(a) Books - International publishers",
+  books_national: "2(a) Books - National publishers",
+  chapter_edited_book: "2(a) Chapter in edited book",
+  editor_book_international: "2(a) Editor - International publisher",
+  editor_book_national: "2(a) Editor - National publisher",
+  translation_chapter_or_paper: "2(b) Translation - Chapter/Paper",
+  translation_book: "2(b) Translation - Book",
+  pedagogy_development: "3(a) Innovative pedagogy",
+  curriculum_design: "3(b) Curriculum/course design",
+  moocs_4quadrant: "3(c) MOOCs 4 quadrant",
+  moocs_single_lecture: "3(c) MOOCs per module/lecture",
+  moocs_content_writer: "3(c) MOOCs content writer/SME",
+  moocs_coordinator: "3(c) MOOCs course coordinator",
+  econtent_4quadrant_complete: "3(d) e-Content complete course/e-book",
+  econtent_4quadrant_per_module: "3(d) e-Content per module",
+  econtent_module_contribution: "3(d) e-Content module contribution",
+  econtent_editor: "3(d) e-Content editor",
+  phd_awarded: "4(a) Ph.D. awarded",
+  phd_submitted: "4(a) Ph.D. submitted",
+  mphil_pg_dissertation: "4(a) M.Phil./P.G. dissertation",
+  research_project_above_10l: "4(b) Completed project >10 lakhs",
+  research_project_below_10l: "4(b) Completed project <10 lakhs",
+  research_project_ongoing_above_10l: "4(c) Ongoing project >10 lakhs",
+  research_project_ongoing_below_10l: "4(c) Ongoing project <10 lakhs",
+  consultancy: "4(d) Consultancy",
+  patent_international: "5(a) Patent - International",
+  patent_national: "5(a) Patent - National",
+  policy_international: "6(b) Policy document - International",
+  policy_national: "6(b) Policy document - National",
+  policy_state: "6(b) Policy document - State",
+  award_international: "7(c) Award/Fellowship - International",
+  award_national: "7(c) Award/Fellowship - National",
+  conference_international_abroad: "8. Conference/Invited - International (Abroad)",
+  conference_international_country: "8. Conference/Invited - International (Within Country)",
+  conference_national: "8. Conference/Invited - National",
+  conference_state_university: "8. Conference/Invited - State/University",
+  total: "Total (Table 2)",
+};
+
+export const DEFAULT_TABLE2_VERIFIED_KEYS = Object.keys(TABLE2_VERIFIED_LABELS);
+
+export const getTable2VerifiedLabel = (key) => TABLE2_VERIFIED_LABELS[key] || formatKeyLabel(key);

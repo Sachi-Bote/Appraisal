@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Performance Appraisal - Part A</title>
+
+<style>
+@page {
+    size: A4;
+    margin: 20mm 15mm 20mm 15mm;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20mm 15mm;
+}
+
+h2, h3, h4 {
+    text-align: center;
+    margin: 5px 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    border: 1px solid black;
+    padding: 2px;
+    font-size: 14px;
+    vertical-align: top;
+}
+
+.center { text-align: center; }
+
+table, tr, td, th {
+    page-break-inside: avoid;
+}
+
+.page-break {
+    page-break-before: always;
+}
+
+.part-b {
+    font-family: "Times New Roman", serif;
+    font-size: 15px;
+}
+
+.part-b p {
+    margin: 6px 0;
+    line-height: 1.35;
+}
+
+.part-b .small {
+    font-size: 12px;
+}
+
+.part-b .ital {
+    font-style: italic;
+}
+
+.part-b-table th,
+.part-b-table td {
+    font-size: 15px;
+    padding: 6px 8px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+
+<h3>Savitribai Phule Pune University, Pune</h3>
+<h3>Modern Education Society’s</h3>
+<h2>Wadia College of Engineering, Pune 01</h2>
+
+<h2>PART ‘A’</h2>
+<h3>YEAR OF PERFORMANCE APPRAISAL : {{ period }}</h3>
+
+<!-- ================= SECTION A ================= -->
+
+<h4>SECTION – A : GENERAL</h4>
+
+<table>
+<colgroup>
+  <col style="width:10mm">
+  <col style="width:60mm">
+  <col style="width:10mm">
+  <col style="width:100mm">
+</colgroup>
+<tr><td>1.</td><td>Name</td><td>:</td><td>{{ faculty.name }}</td></tr>
+<tr><td>2.</td><td>Designation</td><td>:</td><td>{{ faculty.designation }}</td></tr>
+<tr><td>3.</td><td>Name of the Department / Centre</td><td>:</td><td>{{ faculty.department }}</td></tr>
+<tr><td>4.</td><td>Email / Mobile</td><td>:</td><td>{{ faculty.email }} / {{ faculty.mobile }}</td></tr>
+<tr><td>5.</td><td>Year of Performance Appraisal</td><td>:</td><td>{{ period }}</td></tr>
+</table>
+
+<!-- ================= SECTION B – TABLE 1 ================= -->
+
+<h3>TABLE 1</h3>
+
+<table>
+<colgroup>
+  <col style="width:10mm">
+  <col style="width:60mm">
+  <col style="width:55mm">
+  <col style="width:45mm">
+  <col style="width:25mm">
+</colgroup>
+
+<tr>
+    <th>Sr.</th>
+    <th>Activity</th>
+    <th>Grading Criteria</th>
+    <th>Self-appraisal Grading</th>
+    <th>Verified Grading</th>
+</tr>
+
+<!-- Teaching -->
+<tr>
+<td class="center">1</td>
+<td>
+Teaching<br>
+(Number of classes taught / total classes assigned) × 100%<br>
+<b>(Includes tutorials, labs & related activities)</b>
+</td>
+<td>
+80% & above : <b>Good</b><br>
+Below 80% but above 70% : <b>Satisfactory</b><br>
+Less than 70% : <b>Not satisfactory</b>
+</td>
+<td>
+<div>Total Classes Assigned : {{ teaching.total_assigned }}</div>
+<div>No. of Classes Taught : {{ teaching.total_taught }}</div>
+<div>% of Classes Taught : {{ teaching.percentage }}</div>
+<div><b>Grade : {{ teaching.grade }}</b></div>
+</td>
+<td class="center">{{ teaching.verified_grade|default:"-" }}</td>
+</tr>
+
+<!-- Activities -->
+<tr>
+<td class="center">2</td>
+<td>
+Involvement in university / college student related activities /
+research activities
+</td>
+<td>
+Involved in at least 3 activities : <b>Good</b><br>
+1–2 activities : <b>Satisfactory</b><br>
+Not involved : <b>Not satisfactory</b>
+</td>
+<td>
+{% for a in activities.list %}
+{{ forloop.counter }}. {{ a }}<br>
+{% endfor %}
+<br>
+<b>Grade : {{ activities.grade }}</b>
+</td>
+<td class="center">{{ activities.verified_grade|default:"-" }}</td>
+</tr>
+
+</table>
+
+<div class="page-break"></div>
+
+<!-- ================= TABLE 2 ================= -->
+
+<h3>TABLE 2</h3>
+
+<table>
+<colgroup>
+  <col style="width:15mm">
+  <col style="width:90mm">
+  <col style="width:30mm">
+  <col style="width:25mm">
+  <col style="width:25mm">
+</colgroup>
+
+<tr>
+<th>S.N.</th>
+<th>Academic / Research Activity</th>
+<th>Score</th>
+<th>Self-appraisal</th>
+<th>Verified</th>
+</tr>
+
+<tr>
+<td class="center">1</td>
+<td>Research Papers (Journal + Conference)</td>
+<td class="center">8 per paper</td>
+<td class="center">{{ research.total }}</td>
+<td class="center">{{ research.verified|default:"-" }}</td>
+</tr>
+</table>
+
+<br><br>
+
+<!-- ================= SIGNATURES ================= -->
+
+<table style="border:none;">
+<colgroup>
+  <col style="width:90mm">
+  <col style="width:90mm">
+</colgroup>
+<tr>
+<td style="border:none;">
+<b>Signature of HOD</b><br>
+Date : {{ signatures.hod_date|default:"-" }}
+</td>
+<td style="border:none; text-align:right;">
+<b>Signature of the Teacher</b><br>
+Date : {{ signatures.teacher_date|default:"-" }}
+</td>
+</tr>
+</table>
+
+<div class="page-break"></div>
+
+<!-- ================= PART B ================= -->
+
+<div class="part-b">
+  <h2>PART 'B'</h2>
+
+  <p class="small">
+    (Adverse remarks as well as appreciation of any outstanding work shall be brought to the notice of the person concerned by the Vice-Chancellor/Principal or Head of the University Department with a view to make improvement in the work, by the person concerned.)
+  </p>
+
+  <p><b>1. (a) Assessment by the Principal(or Heads/ Head of the Department(for teachers) of the work done under each head of activity :</b></p>
+  <p><b>Overall Grading for TABLE 1</b></p>
+  <p><b>Assessment Criteria and Methodology for University Teachers</b></p>
+
+  <table class="part-b-table">
+    <colgroup>
+      <col style="width:110mm">
+      <col style="width:35mm">
+      <col style="width:35mm">
+    </colgroup>
+    <tr>
+      <th>Assessment Criteria</th>
+      <th class="center">Overall Grading</th>
+      <th class="center">Verified Grade</th>
+    </tr>
+    <tr>
+      <td>Good in teaching and satisfactory or good in activity at Sl. No.2</td>
+      <td class="center"><b>Good</b></td>
+      <td class="center">
+        {% if scores.overall_grade == "Good" %}<b>{{ scores.overall_grade }}</b>{% else %}-{% endif %}
+      </td>
+    </tr>
+    <tr>
+      <td>Satisfactory in teaching and good or satisfactory in activity at Sl.No.2</td>
+      <td class="center"><b>Satisfactory</b></td>
+      <td class="center">
+        {% if scores.overall_grade == "Satisfactory" %}<b>{{ scores.overall_grade }}</b>{% else %}-{% endif %}
+      </td>
+    </tr>
+    <tr>
+      <td>If neither good nor satisfactory in overall grading</td>
+      <td class="center"><b>Not Satisfactory</b></td>
+      <td class="center">
+        {% if scores.overall_grade == "Not Satisfactory" %}<b>{{ scores.overall_grade }}</b>{% else %}-{% endif %}
+      </td>
+    </tr>
+  </table>
+
+  <p class="small"><b>Note:</b></p>
+  <p class="small ital">
+    For the purpose of assessing the grading of Activity at Serial No.1 and Serial No.2, all such periods of duration which have been spent by the teacher on official and paid leaves such as Maternity Leave, Child Care Leave, Study Leave, Medical Leave, Extraordinary Leave and Deputation shall be excluded from the grading assessment.
+  </p>
+  <p class="small ital">
+    The teacher shall be assessed for the remaining period of duration and the same be extrapolated for the entire shall not be assessed for the grading of the teacher. The teacher on such leaves or deputation as mentioned above shall not be put to any disadvantage for promotion under CAS due to his/her absence from his/her teaching responsibilities subject to the condition that such leave/deputation was undertaken with the prior approval of the competent authority following all procedures laid down in these regulations and as per the acts, ordinances of the parent institution.
+  </p>
+
+  <p><b>(b) Justification of assessment of work as not satisfactory:</b></p>
+  <p>{{ remarks.justification|default:"-" }}</p>
+
+  <p><b>3. Comments of the Head of the Department on Table 1 and Table 2:</b></p>
+  <p>{{ remarks.hod_comments|default:"-" }}</p>
+
+  <p><b>4. Remarks and suggestions :</b></p>
+  <p>{{ remarks.principal|default:"-" }}</p>
+
+  <table style="border:none; margin-top:35px;">
+    <colgroup>
+      <col style="width:90mm">
+      <col style="width:90mm">
+    </colgroup>
+    <tr>
+      <td style="border:none; text-align:center;">
+        <b>Signature</b><br>
+        <b>(Head of the Department)</b><br>
+        Date : {{ signatures.hod_date|default:"-" }}
+      </td>
+      <td style="border:none; text-align:center;">
+        <b>Signature</b><br>
+        <b>(Principal)</b><br>
+        Date : {{ signatures.principal_date|default:"-" }}
+      </td>
+    </tr>
+  </table>
+
+  <p style="margin-top:18px;"><b>Remarks of the Principal(Adverse remarks as well as remarks of appreciation)</b></p>
+</div>
+
+</body>
+</html>
+
+

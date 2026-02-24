@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>AICTE PBAS – Part A & B</title>
+
+<style>
+@page {
+    size: A4;
+    margin: 18mm 14mm;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+h2, h3, h4 {
+    text-align: center;
+    margin: 4px 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 6px;
+}
+
+th, td {
+    border: 1px solid #000;
+    padding: 2px;
+    vertical-align: top;
+}
+
+.center { text-align: center; }
+
+.page-break {
+    page-break-before: always;
+}
+
+.small {
+    font-size: 11px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+
+<h3>Savitribai Phule Pune University, Pune</h3>
+<h3>Modern Education Society’s</h3>
+<h2>Wadia College of Engineering, Pune – 01</h2>
+
+<h3>PART ‘A’</h3>
+<h3>YEAR OF PERFORMANCE APPRAISAL : {{ period }}</h3>
+
+<!-- ================= SECTION A ================= -->
+
+<h4>SECTION – A : GENERAL</h4>
+
+<table>
+<colgroup>
+  <col style="width:18mm">   <!-- Sr No -->
+  <col style="width:50mm">   <!-- Activity / Semester -->
+  <col style="width:40mm">   <!-- Criteria / Course -->
+  <col style="width:40mm">   <!-- Self -->
+  <col style="width:32mm">   <!-- Verified -->
+</colgroup>
+
+<tr><td>1</td><td>Name</td><td>:</td><td>{{ faculty.name }}</td></tr>
+<tr><td>2</td><td>Designation</td><td>:</td><td>{{ faculty.designation }}</td></tr>
+<tr><td>3</td><td>Department / Centre</td><td>:</td><td>{{ faculty.department }}</td></tr>
+<tr><td>4</td><td>Email / Mobile</td><td>:</td><td>{{ faculty.email }} / {{ faculty.mobile }}</td></tr>
+<tr><td>5</td><td>Assessment Year</td><td>:</td><td>{{ period }}</td></tr>
+</table>
+
+<!-- ================= SECTION B ================= -->
+
+<h4>SECTION – B : TABLE 1</h4>
+
+<table>
+<colgroup>
+  <col style="width:18mm">   <!-- Sr No -->
+  <col style="width:50mm">   <!-- Activity / Semester -->
+  <col style="width:40mm">   <!-- Criteria / Course -->
+  <col style="width:40mm">   <!-- Self -->
+  <col style="width:32mm">   <!-- Verified -->
+</colgroup>
+
+<tr>
+<th>Sr</th>
+<th>Activity</th>
+<th>Grading Criteria</th>
+<th>Self Appraisal</th>
+<th>Verified</th>
+</tr>
+
+{% for row in pbas_teaching.rows %}
+<tr>
+  <td>{{ forloop.counter }}</td>
+  <td>{{ row.semester }}</td>
+  <td>{{ row.course }}</td>
+  <td class="center">{{ row.scheduled }}</td>
+  <td class="center">{{ row.held }}</td>
+  <td class="center">{{ row.points }}</td>
+  <td>{{ row.enclosure }}</td>
+</tr>
+{% endfor %}
+
+<tr>
+  <td colspan="3"><b>Total</b></td>
+  <td class="center"><b>{{ pbas_teaching.total_scheduled }}</b></td>
+  <td class="center"><b>{{ pbas_teaching.total_held }}</b></td>
+  <td class="center"><b>{{ pbas_teaching.total_points }}</b></td>
+  <td></td>
+</tr>
+
+
+
+<!--Student Feedback-->
+{% for row in pbas_feedback.rows %}
+<tr>
+  <td>{{ forloop.counter }}</td>
+  <td>{{ row.semester }}</td>
+  <td>{{ row.course }}</td>
+  <td class="center">{{ row.average }}</td>
+  <td>{{ row.enclosure }}</td>
+</tr>
+{% endfor %}
+
+<tr>
+  <td colspan="3"><b>Total</b></td>
+  <td class="center"><b>{{ pbas_feedback.total }}</b></td>
+  <td></td>
+</tr>
+
+
+<!--Other Activities-->
+{% for row in pbas_activities.rows %}
+<tr>
+  <td>{{ forloop.counter }}</td>
+  <td>{{ row.semester }}</td>
+  <td>{{ row.activity }}</td>
+  <td class="center">{{ row.credit }}</td>
+  <td>{{ row.criteria }}</td>
+  <td>{{ row.enclosure }}</td>
+</tr>
+{% endfor %}
+
+
+<!-- ================= TABLE 2 ================= -->
+
+<h4>TABLE 2 – Academic / Research Score</h4>
+
+<table>
+<colgroup>
+  <col style="width:18mm">   <!-- Sr No -->
+  <col style="width:50mm">   <!-- Activity / Semester -->
+  <col style="width:40mm">   <!-- Criteria / Course -->
+  <col style="width:40mm">   <!-- Self -->
+  <col style="width:32mm">   <!-- Verified -->
+</colgroup>
+
+<tr>
+<th>SN</th>
+<th>Activity</th>
+<th>Score</th>
+<th>Self</th>
+<th>Verified</th>
+</tr>
+
+<tr>
+<td class="center">1</td>
+<td>
+Research Papers (Journal + Conference)
+</td>
+<td class="center">8 / paper</td>
+<td class="center">
+Journals : {{ research.journal_count }}<br>
+Conferences : {{ research.conference_count }}<br>
+<b>Total : {{ research.total }}</b>
+</td>
+<td class="center">{{ research.verified|default:"-" }}</td>
+</tr>
+</table>
+
+<!-- ================= SIGNATURES ================= -->
+
+<br>
+
+<table style="border:none;">
+<tr>
+<td style="border:none; width:50%;">
+<b>Signature of Teacher</b><br><br>
+Date : {{ signatures.teacher_date|default:"-" }}
+</td>
+<td style="border:none; text-align:right;">
+<b>Signature of HOD</b><br><br>
+Date : {{ signatures.hod_date|default:"-" }}
+</td>
+</tr>
+</table>
+
+<div class="page-break"></div>
+
+<!-- PART B Removed as per requirement to generate only upto page 3 -->
+
+</body>
+</html>

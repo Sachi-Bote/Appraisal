@@ -1,0 +1,735 @@
+/* HOD Dashboard Styles */
+
+.hod-container {
+  min-height: 100vh;
+  background-color: #f9fafb;
+  padding: 24px;
+}
+
+/* Header Card */
+.hod-header-card {
+  background: white;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 20px 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hod-header-card h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.hod-header-card .subtitle {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 4px 0 0 0;
+}
+
+/* Logout Button */
+.logout-btn {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.875rem;
+}
+
+.logout-btn:hover {
+  background-color: #b91c1c;
+}
+
+/* ========== 🆕 OWN APPRAISAL CARD STYLES ========== */
+.own-appraisal-card {
+  background: white;
+  max-width: 1280px;
+  margin: 0 auto 24px;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 2px solid #3b82f6;
+}
+
+.own-appraisal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.own-appraisal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.own-appraisal-subtitle {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 4px 0 0 0;
+}
+
+.own-appraisal-content {
+  margin-top: 16px;
+}
+
+/* Helper & Message Text */
+.helper-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.success-text {
+  color: #065f46;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.warning-text {
+  color: #92400e;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+/* Remarks Box */
+.remarks-box {
+  background-color: #f3f4f6;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+
+.remarks-box b {
+  color: #1f2937;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.remarks-box p {
+  color: #374151;
+  font-size: 0.875rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Fill Form Button */
+.fill-form-btn {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  transition: background-color 0.2s;
+}
+
+.fill-form-btn:hover {
+  background-color: #1d4ed8;
+}
+
+/* Continue Button */
+.continue-btn {
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  width: 100%;
+  transition: background-color 0.2s;
+}
+
+.continue-btn:hover {
+  background-color: #4b5563;
+}
+
+/* Submit Button */
+.submit-btn {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  width: 100%;
+  transition: background-color 0.2s;
+}
+
+.submit-btn:hover {
+  background-color: #1d4ed8;
+}
+
+/* Revise Button */
+.revise-btn {
+  background-color: #f59e0b;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  transition: background-color 0.2s;
+}
+
+.revise-btn:hover {
+  background-color: #d97706;
+}
+
+/* Status Badges for Own Appraisal */
+.status-not-started {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.status-in-progress {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.status-submitted {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-approved {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-changes {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: #fed7aa;
+  color: #9a3412;
+}
+
+/* ========== END OWN APPRAISAL STYLES ========== */
+
+/* Back Button */
+.back-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  margin-bottom: 16px;
+  padding: 8px 0;
+  max-width: 1280px;
+  display: block;
+}
+
+.back-btn:hover {
+  color: #1d4ed8;
+}
+
+/* Card Component */
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  padding: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.card h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 24px;
+}
+
+.card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+/* Info Grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  background-color: #eff6ff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.info-grid div {
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.info-grid b {
+  color: #1f2937;
+  margin-right: 4px;
+}
+
+/* Tab Row */
+.tab-row {
+  display: flex;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  overflow: hidden;
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 16px 32px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #6b7280;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  flex: 1;
+  outline: none;
+}
+
+.tab:hover {
+  color: #1f2937;
+  background-color: #f9fafb;
+}
+
+.tab.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+  background-color: #eff6ff;
+}
+
+/* View Forms Row - SIDE BY SIDE BUTTONS */
+.view-forms-row {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  margin-bottom: 24px;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.view-form-btn {
+  background-color: #1e40af;
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-sizing: border-box;
+  height: 52px;
+  font-size: 1rem;
+  text-align: center;
+  flex: 1;
+  white-space: nowrap;
+  margin-right: 16px;
+}
+
+.view-form-btn:last-child {
+  margin-right: 0;
+}
+
+.view-form-btn:hover {
+  background-color: #1e3a8a;
+}
+
+/* Action Button Row - For Approve/Reject */
+.action-btn-row {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  margin-bottom: 24px;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.action-btn-row button {
+  flex: 1;
+  margin-right: 16px;
+}
+
+.action-btn-row button:last-child {
+  margin-right: 0;
+}
+
+/* Primary Button */
+.primary-btn {
+  background-color: #1e40af;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-sizing: border-box;
+  height: 48px;
+  font-size: 0.9375rem;
+  text-align: center;
+  line-height: 1.2;
+  gap: 16px;
+}
+
+.primary-btn:hover {
+  background-color: #1e3a8a;
+}
+
+/* Secondary Button */
+.secondary-btn {
+  background-color: #1e40af;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-sizing: border-box;
+  height: 48px;
+  font-size: 0.9375rem;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.secondary-btn:hover {
+  background-color: #1e3a8a;
+}
+
+/* Approve Button */
+.approve-btn {
+  background-color: #047857;
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-sizing: border-box;
+  height: 52px;
+  font-size: 1rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.approve-btn:hover {
+  background-color: #065f46;
+}
+
+/* Reject Button */
+.reject-btn {
+  background-color: #b91c1c;
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-sizing: border-box;
+  height: 52px;
+  font-size: 1rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.reject-btn:hover {
+  background-color: #991b1b;
+}
+
+/* Textarea */
+textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 120px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  margin-bottom: 24px;
+  resize: vertical;
+  background: #f9fafb;
+  box-sizing: border-box;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+textarea::placeholder {
+  color: #9ca3af;
+}
+
+/* List Container */
+.list {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* Empty State */
+.empty {
+  text-align: center;
+  color: #6b7280;
+  padding: 64px 0;
+}
+
+/* List Card */
+.list-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: box-shadow 0.2s;
+}
+
+.list-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.list-card h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.list-card p {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 4px 0;
+}
+
+.list-card .remarks {
+  margin-top: 8px;
+}
+
+.list-card .remarks b {
+  color: #1f2937;
+}
+
+/* Status Badge */
+.status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+.status.pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status.approved {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status.changes_requested {
+  background-color: #fed7aa;
+  color: #9a3412;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hod-container {
+    padding: 16px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-row {
+    grid-template-columns: 1fr;
+  }
+
+  .list-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .list-card .primary-btn {
+    width: 100%;
+  }
+
+  .tab-row {
+    margin-bottom: 16px;
+  }
+
+  .tab {
+    padding: 12px 16px;
+    font-size: 0.875rem;
+  }
+
+  .own-appraisal-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+/* ================= SUBMISSION HISTORY SECTION ================= */
+.dashboard-history-section {
+  max-width: 1280px;
+  margin: 32px auto 0;
+  background: white;
+  padding: 32px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.dashboard-history-section h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 20px;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #f3f4f6;
+}
+
+.history-info {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.history-year {
+  font-weight: 600;
+  color: #374151;
+}
+
+.history-status {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  text-transform: capitalize;
+}
+
+/* Status colors - reused from dashboard.css */
+.history-status.under-review {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.history-status.approved {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.history-status.changes-requested {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.history-status.draft {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.view-btn {
+  background: white;
+  color: #2563eb;
+  border: 1px solid #2563eb;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-btn:hover {
+  background: #2563eb;
+  color: white;
+}
+
+.empty-state-text {
+  color: #6b7280;
+  font-style: italic;
+}

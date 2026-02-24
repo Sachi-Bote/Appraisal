@@ -1,0 +1,363 @@
+
+from core.services.pdf.data_mapper import get_common_pdf_data
+from core.services.pdf.sppu_mapper import get_sppu_pdf_data
+from core.services.pdf.pbas_mapper import get_pbas_pdf_data
+from core.services.pdf.html_pdf import generate_pdf_from_html
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
+from api.permissions import IsPrincipal
+from core.models import Appraisal, AppraisalScore
+from workflow.states import States
+from workflow.engine import perform_action
+from core.models import ApprovalHistory
+from core.services.pdf.save import save_pdf
+from core.utils.audit import log_action
+from django.db import transaction
+from django.utils import timezone
+from core.services.sppu_verified import (
+    ALLOWED_VERIFIED_GRADES,
+    merge_verified_grading,
+    derive_overall_grade,
+)
+
+
+class PrincipalApproveAPI(APIView):
+    permission_classes = [IsAuthenticated, IsPrincipal]
+
+    def post(self, request, appraisal_id):
+        payload_remarks = request.data.get("principal_remarks")
+        if payload_remarks is None and "remarks" in request.data:
+            payload_remarks = request.data.get("remarks")
+        principal_remarks = str(payload_remarks).strip() if payload_remarks is not None else None
+
+        try:
+            appraisal = Appraisal.objects.get(appraisal_id=appraisal_id)
+        except Appraisal.DoesNotExist:
+            return Response({"error": "Appraisal not found"}, status=404)
+
+        if appraisal.status != States.REVIEWED_BY_PRINCIPAL:
+            return Response(
+                {"error": "Appraisal not in principal review state"},
+                status=400
+            )
+
+        appraisal_data = appraisal.appraisal_data if isinstance(appraisal.appraisal_data, dict) else {}
+
+        # Verified-grade enforcement is only for HOD submissions.
+        if appraisal.is_hod_appraisal is True:
+            appraisal_data, grading = merge_verified_grading(appraisal_data, True, request.data)
+            table1_teaching = grading.get("table1_verified_teaching", "")
+            table1_activities = grading.get("table1_verified_activities", "")
+            if not table1_teaching or not table1_activities:
+                return Response(
+                    {"error": "Set Table 1 verified grading (Teaching and Activities) before approval"},
+                    status=400
+                )
+
+            overall_verified_grade = derive_overall_grade(table1_teaching, table1_activities)
+            AppraisalScore.objects.update_or_create(
+                appraisal=appraisal,
+                defaults={"verified_grade": overall_verified_grade}
+            )
+
+        new_state = perform_action(
+            current_state=appraisal.status,
+            next_state=States.PRINCIPAL_APPROVED
+        )
+
+        appraisal.status = new_state
+        appraisal.principal = request.user
+        appraisal.appraisal_data = appraisal_data
+        if principal_remarks is not None:
+            appraisal.remarks = principal_remarks
+
+            principal_review = appraisal_data.get("principal_review", {})
+            if not isinstance(principal_review, dict):
+                principal_review = {}
+            principal_review["remarks"] = principal_remarks
+            appraisal_data["principal_review"] = principal_review
+            appraisal.appraisal_data = appraisal_data
+        appraisal.save()
+
+        ApprovalHistory.objects.update_or_create(
+            appraisal=appraisal,
+            role="PRINCIPAL",
+            defaults={
+                "approved_by": request.user,
+                "action": "APPROVED",
+                "from_state": States.REVIEWED_BY_PRINCIPAL,
+                "to_state": new_state,
+                "remarks": appraisal.remarks
+            }
+        )
+
+        return Response({
+            "message": "Approved by Principal",
+            "new_state": new_state,
+            "remarks": appraisal.remarks or "",
+        })
+
+
+class PrincipalVerifyGradeAPI(APIView):
+    permission_classes = [IsAuthenticated, IsPrincipal]
+
+    def post(self, request, appraisal_id):
+        try:
+            appraisal = Appraisal.objects.get(appraisal_id=appraisal_id)
+        except Appraisal.DoesNotExist:
+            return Response({"error": "Appraisal not found"}, status=404)
+
+        if appraisal.is_hod_appraisal is not True:
+            return Response(
+                {"error": "Principal can verify grade for HOD appraisals only"},
+                status=400
+            )
+
+        if appraisal.status != States.REVIEWED_BY_PRINCIPAL:
+            return Response(
+                {"error": "Verified grade can be updated after Principal starts review"},
+                status=400
+            )
+
+        appraisal_data = appraisal.appraisal_data if isinstance(appraisal.appraisal_data, dict) else {}
+        payload = request.data if isinstance(request.data, dict) else {}
+        legacy_grade = payload.get("verified_grade")
+        if legacy_grade and legacy_grade not in ALLOWED_VERIFIED_GRADES:
+            return Response(
+                {"error": "verified_grade must be one of: Good, Satisfactory, Not Satisfactory"},
+                status=400
+            )
+
+        appraisal_data, grading = merge_verified_grading(appraisal_data, True, payload)
+        table1_teaching = grading.get("table1_verified_teaching")
+        table1_activities = grading.get("table1_verified_activities")
+        if not table1_teaching or not table1_activities:
+            return Response(
+                {"error": "Both table1_verified_teaching and table1_verified_activities are required"},
+                status=400
+            )
+
+        principal_review = appraisal_data.get("principal_review", {})
+        if not isinstance(principal_review, dict):
+            principal_review = {}
+        if "principal_remarks" in payload:
+            principal_review["remarks"] = str(payload.get("principal_remarks") or "").strip()
+        saved_at = timezone.now().isoformat()
+        principal_review["verification_saved_at"] = saved_at
+        principal_review["verification_saved_by"] = request.user.id
+        appraisal_data["principal_review"] = principal_review
+        appraisal.appraisal_data = appraisal_data
+        appraisal.save(update_fields=["appraisal_data"])
+
+        overall_verified_grade = derive_overall_grade(
+            table1_teaching,
+            table1_activities,
+        )
+        AppraisalScore.objects.update_or_create(
+            appraisal=appraisal,
+            defaults={"verified_grade": overall_verified_grade}
+        )
+
+        return Response(
+            {
+                "message": "Verified grading saved by Principal",
+                "saved": True,
+                "saved_at": saved_at,
+                "verified_grade": overall_verified_grade,
+                "table1_verified_teaching": table1_teaching,
+                "table1_verified_activities": table1_activities,
+                "table2_verified_scores": grading.get("table2_verified_scores", {}),
+            },
+            status=200
+        )
+
+    
+class PrincipalAppraisalList(APIView):
+    permission_classes = [IsAuthenticated, IsPrincipal]
+
+    def get(self, request):
+        from django.db.models import Q
+        
+        appraisals = (
+            Appraisal.objects
+            .filter(
+                Q(status__in=[
+                    States.HOD_APPROVED,
+                    States.REVIEWED_BY_PRINCIPAL,
+                    States.PRINCIPAL_APPROVED,
+                    States.FINALIZED,
+                ]) |
+                Q(status=States.SUBMITTED, is_hod_appraisal=True)
+            )
+            .select_related("faculty__user")
+            .order_by("-updated_at")
+        )
+
+        response_data = []
+
+        for a in appraisals:
+            faculty = a.faculty
+            user = faculty.user if faculty else None
+
+            response_data.append({
+                "id": a.appraisal_id,
+
+                # ✅ FACULTY DETAILS
+                "faculty_name": faculty.full_name if faculty else None,
+                "designation": faculty.designation if faculty else None,
+                "department": user.department if user else None,
+
+                # ✅ APPRAISAL DETAILS
+                "academic_year": a.academic_year,
+                "semester": a.semester,
+                "status": a.status,
+                "remarks": a.remarks,
+                "is_hod_appraisal": a.is_hod_appraisal,
+            })
+
+
+        return Response(response_data)
+
+
+class PrincipalStartReviewAPI(APIView):
+    permission_classes = [IsAuthenticated, IsPrincipal]
+
+    def post(self, request, appraisal_id):
+        try:
+            appraisal = Appraisal.objects.get(appraisal_id=appraisal_id)
+        except Appraisal.DoesNotExist:
+            return Response({"error": "Appraisal not found"}, status=404)
+        
+
+        if appraisal.status == States.FINALIZED:
+            return Response({"error": "Finalized appraisal cannot be modified"},
+            status=403
+        )
+
+
+        try:
+            new_state = perform_action(
+                current_state=appraisal.status,
+                next_state=States.REVIEWED_BY_PRINCIPAL
+            )
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+
+        appraisal.status = new_state
+        appraisal.principal = request.user
+        appraisal.save()
+
+        return Response({
+            "message": "Moved to principal review",
+            "current_state": new_state
+        })
+    
+class PrincipalReturnAPI(APIView):
+    permission_classes = [IsAuthenticated, IsPrincipal]
+
+    def post(self, request, appraisal_id):
+        remarks = request.data.get("remarks", "")
+
+        try:
+            appraisal = Appraisal.objects.get(appraisal_id=appraisal_id)
+        except Appraisal.DoesNotExist:
+            return Response({"error": "Appraisal not found"}, status=404)
+
+        if appraisal.status not in [States.SUBMITTED, States.HOD_APPROVED, States.REVIEWED_BY_PRINCIPAL]:
+            return Response(
+                {"error": "Appraisal not in a state that can be returned by Principal"},
+                status=400
+            )
+        
+        if appraisal.status == States.FINALIZED:
+            return Response({"error": "Finalized appraisal cannot be modified"},
+            status=403
+        )
+
+        new_state = perform_action(
+            current_state=appraisal.status,
+            next_state=States.RETURNED_BY_PRINCIPAL
+        )
+
+
+        appraisal.status = new_state
+        appraisal.principal = request.user
+        appraisal.remarks = remarks
+        appraisal.save()
+
+        ApprovalHistory.objects.update_or_create(
+            appraisal=appraisal,
+            role="PRINCIPAL",
+            defaults={
+                "approved_by": request.user,
+                "action": "SENT_BACK",
+                "from_state": appraisal.status, # Use dynamic state
+                "to_state": new_state,
+                "remarks": remarks
+            }
+        )
+
+        return Response({
+            "message": "Returned to faculty",
+            "new_state": new_state
+        })
+
+class PrincipalFinalizeAPI(APIView):
+    permission_classes = [IsAuthenticated, IsPrincipal]
+
+    @transaction.atomic
+    def post(self, request, appraisal_id):
+        try:
+            appraisal = Appraisal.objects.get(appraisal_id=appraisal_id)
+        except Appraisal.DoesNotExist:
+            return Response({"error": "Appraisal not found"}, status=404)
+
+        if appraisal.status != States.PRINCIPAL_APPROVED:
+            return Response(
+                {"error": "Only principal-approved appraisals can be finalized"},
+                status=400
+            )
+        old_state = {
+            "status": appraisal.status
+        }
+
+        # 1️⃣ Finalize workflow state
+        new_state = perform_action(
+            current_state=appraisal.status,
+            next_state=States.FINALIZED
+        )
+
+        appraisal.status = new_state
+        appraisal.save()
+
+        # 2️⃣ Generate SPPU PDF (Full)
+        sppu_data = get_sppu_pdf_data(appraisal)
+        sppu_pdf = generate_pdf_from_html("pdf/sppu_pbas_form.html", sppu_data)
+        save_pdf(appraisal, sppu_pdf, "SPPU_PBAS")
+
+        # 3️⃣ Generate AICTE PBAS PDF (Truncated/Partial)
+        pbas_data = get_pbas_pdf_data(appraisal)
+        aicte_pdf = generate_pdf_from_html("pdf/aicte_pbas_form.html", pbas_data)
+        save_pdf(appraisal, aicte_pdf, "AICTE_PBAS")
+
+        # 4️⃣ Audit log
+        log_action(
+                request=request,
+                action="SUBMIT_APPRAISAL",
+                entity="Appraisal",
+                entity_id=appraisal.appraisal_id,
+                old_value=old_state,
+                new_value={
+                    "status": appraisal.status,
+                    "faculty_id": appraisal.faculty.pk
+
+                }
+            )
+
+        # 5️⃣ Return response LAST
+        return Response({
+            "message": "Appraisal finalized successfully",
+            "final_state": new_state
+        })

@@ -1,0 +1,1020 @@
+/* =====================================================
+   GLOBAL DESIGN SYSTEM
+===================================================== */
+
+:root {
+  /* Typography */
+  --app-font: "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --font-body: 15px;
+  --font-label: 14px;
+  --font-helper: 13px;
+  --font-h3: 20px;
+  --font-h4: 17px;
+  --font-button: 14px;
+  
+  /* Colors - Professional Blue Palette */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #eff6ff;
+  --primary-border: #bfdbfe;
+  
+  /* Neutrals */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #94a3b8;
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --surface: #ffffff;
+  --background: #f8fafc;
+  
+  /* Semantic Colors */
+  --error: #dc2626;
+  --error-light: #fee2e2;
+  --success: #059669;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  
+  /* Spacing */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+/* =====================================================
+   BASE RESET
+===================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  font-family: var(--app-font);
+  font-size: var(--font-body);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+*,
+*::before,
+*::after,
+input,
+select,
+textarea,
+button,
+option,
+label {
+  font-family: inherit;
+  font-weight: 400;
+}
+
+/* =====================================================
+   HEADINGS
+===================================================== */
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.form-title,
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  position: relative;
+  padding-bottom: 8px;
+}
+
+.form-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(to right, var(--primary), var(--primary-light));
+  border-radius: 2px;
+}
+
+.form-section h3 {
+  font-size: var(--font-h3);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border-light);
+  position: relative;
+}
+
+.form-section h3::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 80px;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+.form-section h4 {
+  font-size: var(--font-h4);
+  font-weight: 600;
+  margin-top: 32px;
+  margin-bottom: 14px;
+  color: var(--text-primary);
+}
+
+/* =====================================================
+   LABELS & HELPER TEXT
+===================================================== */
+
+label,
+.form-group label,
+.sppu-label {
+  font-size: var(--font-label);
+  font-weight: 500;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 6px;
+  transition: color 0.2s ease;
+}
+
+.form-group:focus-within label {
+  color: var(--primary);
+}
+
+.section-note {
+  font-size: var(--font-helper);
+  color: var(--text-tertiary);
+  margin-bottom: 18px;
+  line-height: 1.5;
+  padding: 12px 16px;
+  background: var(--primary-light);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-sm);
+}
+
+.field-error {
+  color: var(--error);
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.required {
+  color: var(--error);
+  margin-left: 2px;
+}
+
+/* =====================================================
+   INPUTS / SELECT / TEXTAREA - UNIFIED STYLE
+===================================================== */
+
+input,
+textarea,
+select {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: var(--font-body);
+  font-weight: 400;
+  background: var(--surface);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+input::placeholder,
+textarea::placeholder {
+  font-size: var(--font-body);
+  color: var(--text-tertiary);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: var(--primary-border);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+  transform: translateY(-1px);
+}
+
+input:disabled {
+  background: var(--border-light);
+  color: var(--text-tertiary);
+  cursor: not-allowed;
+}
+
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+/* =====================================================
+   CONTAINER & LAYOUT
+===================================================== */
+
+.form-container {
+  max-width: 1100px;
+  margin: 32px auto 80px;
+  padding: 0 20px;
+  color: var(--text-primary);
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =====================================================
+   PAGE HEADER
+===================================================== */
+
+.page-header,
+.form-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+  gap: 16px;
+  background: var(--surface);
+  padding: 20px 28px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+}
+
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+}
+
+/* =====================================================
+   FORM SECTIONS (CARDS) - ENHANCED
+===================================================== */
+
+.form-section {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  overflow: visible;
+  position: relative;
+}
+
+.form-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right, var(--primary), var(--primary-light));
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.form-section hr {
+  margin: 28px 0;
+  border: none;
+  border-top: 1px solid var(--border-light);
+}
+
+/* =====================================================
+   FORM GRID & GROUPS
+===================================================== */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 24px;
+  row-gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 7px;
+}
+
+/* =====================================================
+   FORM ROWS - UNIFIED STYLE
+===================================================== */
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1.2fr 2fr 1.5fr auto;
+  gap: 16px;
+  padding: 18px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  margin-bottom: 14px;
+  align-items: center;
+}
+
+.form-row.three {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.form-row.full {
+  grid-template-columns: 1fr;
+}
+
+.form-row input,
+.form-row select {
+  height: 42px;
+  padding: 10px 14px;
+}
+
+/* =====================================================
+   ENTRY CARDS
+===================================================== */
+
+.entry-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  margin-top: 16px;
+  font-size: var(--font-body);
+}
+
+.entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.entry-header h4 {
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+/* =====================================================
+   INLINE CARDS - UNIFIED STYLE
+===================================================== */
+
+.inline-card {
+  display: grid;
+  grid-template-columns: 1.2fr 2.2fr 1fr 1.4fr auto;
+  gap: 16px;
+  padding: 18px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  margin-bottom: 14px;
+  align-items: center;
+}
+
+.inline-card input,
+.inline-card select {
+  height: 42px;
+  padding: 10px 14px;
+}
+
+/* =====================================================
+   ACTIVITY CARDS - UNIFIED STYLE
+===================================================== */
+
+.activity-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  margin-bottom: 14px;
+  font-size: var(--font-body);
+}
+
+.activity-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr auto;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: var(--font-body);
+}
+
+.activity-row:last-child {
+  margin-bottom: 0;
+}
+
+.activity-card input,
+.activity-card select {
+  height: 42px;
+  padding: 10px 14px;
+  font-size: var(--font-body);
+  font-weight: 400;
+}
+
+.activity-card input[type="number"] {
+  text-align: center;
+}
+
+/* =====================================================
+   🔒 FINAL FONT LOCK — STEP 3 NORMALIZATION
+===================================================== */
+
+.activity-card,
+.activity-row,
+.activity-card input,
+.activity-card select,
+.activity-card textarea,
+.activity-row input,
+.activity-row select,
+.activity-row textarea {
+  font-size: var(--font-body);
+  font-weight: 400;
+  color: var(--text-primary);
+}
+
+.activity-card label,
+.activity-row label {
+  font-size: var(--font-label);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.activity-card input::placeholder,
+.activity-row input::placeholder {
+  font-size: var(--font-body);
+  color: var(--text-tertiary);
+}
+
+/* =====================================================
+   RESEARCH CARDS - UNIFIED STYLE
+===================================================== */
+
+.research-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  margin-bottom: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  font-size: var(--font-body);
+}
+
+.research-card input,
+.research-card select {
+  padding: 10px 14px;
+  font-size: var(--font-body);
+  font-weight: 400;
+  height: 42px;
+}
+
+/* =====================================================
+   TABLES
+===================================================== */
+
+.teaching-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 12px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.teaching-table th {
+  background: var(--border-light);
+  font-size: var(--font-label);
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 2px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.teaching-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: top;
+  background: var(--surface);
+  transition: background 0.2s ease;
+}
+
+.teaching-table tr:hover td {
+  background: var(--border-light);
+}
+
+.teaching-table tr:last-child td {
+  border-bottom: none;
+}
+
+.teaching-table input,
+.teaching-table textarea {
+  width: 100%;
+  font-size: var(--font-body);
+  padding: 8px 10px;
+}
+
+/* =====================================================
+   SPPU INVOLVEMENT (RADIO BUTTONS)
+===================================================== */
+
+.sppu-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+}
+
+.sppu-label {
+  width: 65%;
+  font-size: var(--font-body);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.sppu-options {
+  display: flex;
+  gap: 20px;
+}
+
+.sppu-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-body);
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.sppu-options label:hover {
+  color: var(--primary);
+}
+
+.sppu-options input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* =====================================================
+   DECLARATION
+===================================================== */
+
+.declaration-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: var(--font-body);
+  padding: 16px;
+  background: var(--primary-light);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--primary-border);
+}
+
+.declaration-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* =====================================================
+   BUTTONS - UNIFIED SYSTEM
+===================================================== */
+
+button {
+  font-size: var(--font-button);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-remove {
+  background: var(--error-light);
+  color: var(--error);
+  border: 1.5px solid transparent;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 12px;
+  font-size: var(--font-button);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.btn-remove:hover {
+  background: var(--error);
+  color: white;
+  transform: scale(1.04);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-remove-small {
+  grid-column: span 3;
+  justify-self: end;
+  background: var(--error-light);
+  color: var(--error);
+  border: 1.5px solid var(--error-light);
+  border-radius: var(--radius-md);
+  padding: 7px 14px;
+  font-size: var(--font-button);
+}
+
+.btn-remove-small:hover {
+  background: var(--error);
+  color: white;
+  border-color: var(--error);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.add-row-btn,
+.btn-outline,
+.btn-add {
+  background: var(--surface);
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+  padding: 11px 20px;
+  font-size: var(--font-button);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  width: 100%;
+  margin-top: 12px;
+}
+
+.add-row-btn:hover,
+.btn-outline:hover,
+.btn-add:hover {
+  background: var(--primary);
+  color: white;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border: 1.5px solid var(--primary);
+  padding: 11px 24px;
+  font-size: var(--font-button);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.btn-primary:disabled {
+  background: var(--border);
+  color: var(--text-tertiary);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-back {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-size: var(--font-button);
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 4px;
+}
+
+.btn-back:hover {
+  text-decoration: underline;
+  color: var(--primary-hover);
+  transform: translateX(-3px);
+}
+
+.btn-logout {
+  background: var(--error);
+  color: white;
+  border: 1.5px solid var(--error);
+  padding: 9px 18px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-button);
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-logout:hover {
+  background: #b91c1c;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* =====================================================
+   UNIVERSAL STEP-3 STYLE LAYOUT
+===================================================== */
+
+.activity-card {
+  padding: 24px;
+}
+
+.activity-row {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 20px !important;
+  margin-bottom: 18px;
+  align-items: center;
+}
+
+.activity-row input,
+.activity-row select {
+  width: 100%;
+  height: 44px;
+  font-size: var(--font-body);
+}
+
+.activity-row:last-child {
+  margin-bottom: 0;
+}
+
+.activity-row .btn-remove {
+  width: 38px;
+  padding: 0;
+  font-size: 18px;
+  justify-self: start;
+  align-self: center;
+}
+
+.activity-row .btn-remove:hover {
+  transform: scale(1.08) rotate(90deg);
+}
+
+.activity-card input,
+.activity-card select {
+  width: 100%;
+}
+
+.btn-outline {
+  margin-top: 18px;
+}
+
+/* =====================================================
+   FORM ACTIONS (BOTTOM BAR)
+===================================================== */
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 28px;
+  margin-top: 32px;
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  bottom: 20px;
+  z-index: 10;
+}
+
+.actions-left {
+  display: flex;
+  align-items: center;
+}
+
+.actions-right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* =====================================================
+   SUCCESS TEXT
+===================================================== */
+
+.success-text {
+  color: var(--success);
+  font-weight: 500;
+  font-size: var(--font-body);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* =====================================================
+   PROGRESS INDICATOR (BONUS)
+===================================================== */
+
+.progress-indicator {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding: 20px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.progress-step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  padding: 10px;
+  transition: all 0.3s ease;
+}
+
+.progress-step::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  z-index: -1;
+}
+
+.progress-step:last-child::after {
+  display: none;
+}
+
+.progress-step.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 900px) {
+  .activity-row,
+  .inline-card,
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-remove {
+  background: var(--error-light);
+  color: var(--error);
+  border: 1.5px solid transparent;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 12px;
+  font-size: var(--font-button);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+  .activity-card .activity-row {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-container {
+    padding: 0 16px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-section {
+    padding: 20px 18px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;}}
+
+/* Step 2B dropdown flow */
+.sppu-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+
+.sppu-chip-list {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sppu-chip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  background: var(--surface);
+}
+
+.sppu-summary {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+
+

@@ -1,0 +1,513 @@
+/* RESET */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #eef2ff;
+}
+
+/* MAIN LAYOUT */
+.dashboard {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 320px;
+  background: linear-gradient(180deg, #1e40af, #7d9ce1);
+  padding: 30px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.avatar {
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 20px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  display: block;
+}
+
+/* PHOTO ACTIONS */
+.photo-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.photo-btn {
+  background: #3b82f6;
+  padding: 14px;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.photo-btn:hover {
+  background: #2563eb;
+}
+
+.photo-btn input {
+  display: none;
+}
+
+.delete-btn {
+  background: #ef4444;
+  padding: 14px;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
+
+/* SIDEBAR BUTTONS */
+.sidebar-button {
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  transition: all 0.2s;
+}
+
+.sidebar-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-button.active {
+  background: white;
+  color: #1e40af;
+}
+
+/* CONTENT AREA */
+.content {
+  flex: 1;
+  padding: 50px 70px;
+  background: #f8fafc;
+  overflow-y: auto;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.header-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.edit-btn {
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background: #2563eb;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.edit-btn:hover {
+  background: #1d4ed8;
+}
+
+.save-btn {
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background: #22c55e;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.save-btn:hover {
+  background: #16a34a;
+}
+
+.cancel-header-btn {
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  background: white;
+  color: #64748b;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.cancel-header-btn:hover {
+  background: #f1f5f9;
+}
+
+/* FORM */
+.form {
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 14px;
+  color: #475569;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: capitalize;
+}
+
+.input {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 15px;
+  background: white;
+  width: 100%;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.input:focus:not(.disabled) {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.input.disabled {
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.select {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 15px;
+  background: white;
+  width: 100%;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* PASSWORD BOX */
+.password-box {
+  width: 500px;
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin: 0 auto;
+}
+
+.password-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 30px 0;
+}
+
+.password-field {
+  margin-bottom: 24px;
+}
+
+.password-label {
+  display: block;
+  font-size: 14px;
+  color: #475569;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.password-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.password-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.forgot {
+  font-size: 13px;
+  color: #2563eb;
+  cursor: pointer;
+  margin-top: 6px;
+  display: inline-block;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.forgot:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.error {
+  color: #ef4444;
+  font-size: 13px;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.update-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+
+.update-btn:hover:not(.disabled) {
+  background: #1d4ed8;
+}
+
+.update-btn.disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* LOGOUT BOX */
+.logout-box {
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.logout-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 12px 0;
+}
+
+.logout-text {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0 0 30px 0;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.logout-yes-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: #ef4444;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.logout-yes-btn:hover {
+  background: #dc2626;
+}
+
+.modal-cancel-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #64748b;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-cancel-btn:hover {
+  background: #f1f5f9;
+}
+
+/* CROP BOX */
+.crop-box {
+  background: white;
+  padding: 24px;
+  border-radius: 18px;
+  width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.image-preview-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  user-select: none;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+}
+
+.crop-overlay {
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.crop-border {
+  position: absolute;
+  inset: 0;
+  border: 3px solid #fff;
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.resize-handle {
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #2563eb;
+  cursor: nwse-resize;
+}
+
+.crop-save-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: #22c55e;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.crop-save-btn:hover {
+  background: #16a34a;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .form {
+    grid-template-columns: 1fr;
+  }
+  
+  .content {
+    padding: 30px 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+  }
+  
+  .password-box {
+    width: 100%;
+  }
+  
+  .crop-box {
+    width: 90%;
+    max-width: 480px;
+  }
+}

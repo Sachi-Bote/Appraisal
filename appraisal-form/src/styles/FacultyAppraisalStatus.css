@@ -1,0 +1,353 @@
+/* 
+ * Faculty Appraisal Status Page Styles - Mahadbt Inspired 
+ * File: appraisal-status.css
+ */
+
+.status-page {
+  min-height: 100vh;
+  background-color: #f9fafb;
+  padding: 24px;
+}
+
+/* Header Card */
+.status-header-card {
+  background: white;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 24px 28px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-header-card h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: #1f2937;
+}
+
+.status-header-card .subtitle {
+  color: #6b7280;
+  margin: 6px 0 0 0;
+  font-size: 0.9375rem;
+}
+
+/* Back Button */
+.back-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  margin-bottom: 16px;
+  padding: 8px 0;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.back-btn:hover {
+  color: #1d4ed8;
+}
+
+/* Status Tabs - Mahadbt Style */
+.status-tabs {
+  display: flex;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  overflow: hidden;
+}
+
+.status-tab {
+  flex: 1;
+  background: #f3f4f6;
+  border: none;
+  padding: 16px 24px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #4b5563;
+  cursor: pointer;
+  border-right: 1px solid #e5e7eb;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.status-tab:last-child {
+  border-right: none;
+}
+
+.status-tab.under-review {
+  color: #92400e;
+}
+
+.status-tab.under-review.active {
+  background: #d97706;
+  color: white;
+}
+
+.status-tab.approved {
+  color: #065f46;
+}
+
+.status-tab.approved.active {
+  background: #047857;
+  color: white;
+}
+
+.status-tab.changes-requested {
+  color: #991b1b;
+}
+
+.status-tab.changes-requested.active {
+  background: #b91c1c;
+  color: white;
+}
+
+.status-tab:hover:not(.active) {
+  background: #e5e7eb;
+}
+
+/* Content Container */
+.status-content {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* Empty State */
+.empty-state {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.empty-state p {
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+/* Status Card - Table-like */
+.status-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.status-card-header {
+  background: #f9fafb;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.status-card-header h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.status-card-body {
+  padding: 24px;
+}
+
+.status-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.status-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.status-info-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.status-info-value {
+  font-size: 1rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.status-badge.under-review {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.approved {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.changes-requested {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* Remarks Section */
+.remarks-section {
+  background: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  padding: 16px;
+  border-radius: 6px;
+  margin-top: 16px;
+}
+
+.remarks-section.changes {
+  background: #fee2e2;
+  border-left-color: #dc2626;
+}
+
+.remarks-section h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.remarks-section p {
+  font-size: 0.9375rem;
+  color: #374151;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.download-btn {
+  background-color: #1e40af;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9375rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.download-btn:hover {
+  background-color: #1e3a8a;
+}
+
+.edit-btn {
+  background-color: #d97706;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9375rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-btn:hover {
+  background-color: #b45309;
+}
+
+.resubmit-btn {
+  background-color: #047857;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9375rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resubmit-btn:hover {
+  background-color: #065f46;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .status-page {
+    padding: 16px;
+  }
+
+  .status-header-card {
+    padding: 20px 24px;
+  }
+
+  .status-header-card h1 {
+    font-size: 1.75rem;
+  }
+
+  .status-tabs {
+    flex-direction: column;
+  }
+
+  .status-tab {
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .status-tab:last-child {
+    border-bottom: none;
+  }
+
+  .status-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .download-btn,
+  .edit-btn,
+  .resubmit-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
