@@ -1,10 +1,12 @@
 const normalizeBaseUrl = (url) => (url.endsWith("/") ? url : `${url}/`);
 
 const API_BASE_URL = normalizeBaseUrl(
-  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api/"
+  import.meta.env.VITE_API_BASE_URL || "/api/"
 );
 
-const BACKEND_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, "");
+const BACKEND_ORIGIN = API_BASE_URL.startsWith("/")
+  ? (typeof window !== "undefined" ? window.location.origin : "")
+  : API_BASE_URL.replace(/\/api\/?$/, "");
 
 export { API_BASE_URL, BACKEND_ORIGIN };
 
