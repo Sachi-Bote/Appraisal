@@ -50,6 +50,14 @@ class LoginSerializer(TokenObtainPairSerializer):
         return token
 
     def validate(self, attrs):
+        identifier = (attrs.get("username") or "").strip()
+        if identifier:
+            user = User.objects.filter(username__iexact=identifier).first()
+            if not user:
+                user = User.objects.filter(email__iexact=identifier).first()
+            if user:
+                attrs["username"] = user.username
+
         started = perf_counter()
         db_auth_started = perf_counter()
         data = super().validate(attrs)

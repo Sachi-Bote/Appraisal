@@ -22,6 +22,9 @@ const clearAuthStorage = () => {
 };
 
 const normalizeRole = (role) => String(role || "").trim().toUpperCase();
+const goToAdminPortal = () => {
+  window.location.assign("/admin/");
+};
 
 const saveAuth = ({ access, refresh, user, remember }) => {
   const target = remember ? localStorage : sessionStorage;
@@ -55,7 +58,7 @@ const routeByRole = (navigate, role, fallback = true) => {
       navigate("/principal/dashboard", { replace: true });
       return true;
     case "ADMIN":
-      navigate("/admin/dashboard", { replace: true });
+      goToAdminPortal();
       return true;
     default:
       if (fallback) navigate("/login", { replace: true });
@@ -77,7 +80,7 @@ export default function Login() {
     if (normalized === "FACULTY") return "/faculty/dashboard";
     if (normalized === "HOD") return "/hod/dashboard";
     if (normalized === "PRINCIPAL") return "/principal/dashboard";
-    if (normalized === "ADMIN") return "/admin/dashboard";
+    if (normalized === "ADMIN") return "/admin/";
     return null;
   };
 
@@ -121,7 +124,11 @@ export default function Login() {
         sessionStorage.removeItem("lastRoute");
         const defaultRoute = getDefaultRouteForRole(normalizedRole);
         if (defaultRoute) {
-          navigate(defaultRoute, { replace: true });
+          if (normalizedRole === "ADMIN") {
+            goToAdminPortal();
+          } else {
+            navigate(defaultRoute, { replace: true });
+          }
         }
       } catch {
         clearAuthStorage();
@@ -199,11 +206,11 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="login-form">
           <div className="form-group">
-            <label htmlFor="email">Official Email</label>
+            <label htmlFor="email">Username or Email</label>
             <input
               id="email"
-              type="email"
-              placeholder="name@institution.ac.in"
+              type="text"
+              placeholder="username or name@institution.ac.in"
               value={email}
               onChange={(e) => setEmail(e.target.value.trim())}
               className="form-control"

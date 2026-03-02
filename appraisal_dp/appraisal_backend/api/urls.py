@@ -9,7 +9,6 @@ from api.views.auth import (
 )
 from api.views.test import WhoAmI
 from api.views.faculty import FacultyAppraisalListAPI, FacultySubmitAPI, FacultyResubmitAPI
-from api.views.principal import PrincipalApproveAPI, PrincipalReturnAPI
 from api.views.scoring_api import ScoringAPI
 from api.views.workflow_api import WorkflowAPI
 from api.views.hod import (
@@ -33,7 +32,6 @@ from api.views.principal import(
 from api.views.me import MeView 
 from api.views.appraisal_views import (
     CurrentFacultyAppraisalAPIView, 
-    FacultyAppraisalStatusAPI,
     FacultyAppraisalStatusAPI,
     AppraisalDetailAPI,
     DownloadAppraisalPDF

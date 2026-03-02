@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import identify_hasher
+from django.contrib.auth.hashers import is_password_usable
 
 from .models import (
     Appraisal,
@@ -26,10 +27,13 @@ class UserAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         password_value = form.cleaned_data.get("password")
         if password_value and (not change or "password" in form.changed_data):
-            try:
-                identify_hasher(password_value)
-            except Exception:
+            if not is_password_usable(password_value):
                 obj.set_password(password_value)
+            else:
+                try:
+                    identify_hasher(password_value)
+                except Exception:
+                    obj.set_password(password_value)
 
         if obj.role in ["FACULTY", "HOD"] and not obj.department:
             raise ValidationError("Department is required for Faculty/HOD users.")

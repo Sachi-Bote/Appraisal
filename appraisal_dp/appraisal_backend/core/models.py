@@ -399,11 +399,6 @@ class AuditLog(models.Model):
         super().save(*args, **kwargs)
 
 
-    def save(self, *args, **kwargs):
-        if self.pk:
-            raise RuntimeError("Audit logs are immutable")
-
-
 class GeneratedPDF(models.Model):
     pdf_id = models.AutoField(primary_key=True)
 
