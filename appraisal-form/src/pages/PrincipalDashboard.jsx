@@ -6,6 +6,7 @@ import AppraisalSummary from "../components/AppraisalSummary";
 import useSessionState from "../hooks/useSessionState";
 import { downloadWithAuth, getAccessToken } from "../utils/downloadFile";
 import { buildApiUrl } from "../utils/apiUrl";
+import { notifyAppraisalStatusChanged } from "../utils/appraisalStatusCache";
 import {
   DEFAULT_TABLE2_VERIFIED_KEYS,
   getTable2VerifiedLabel,
@@ -91,6 +92,8 @@ export default function PrincipalDashboard() {
       await API.post(`principal/appraisal/${selected.id}/start-review/`);
 
       alert("Moved to Principal Review");
+      notifyAppraisalStatusChanged();
+      await refreshPrincipalAppraisals();
 
       setSelected((prev) => ({
         ...prev,
@@ -149,6 +152,8 @@ export default function PrincipalDashboard() {
       );
 
       alert("Approved by Principal. Now finalize.");
+      notifyAppraisalStatusChanged();
+      await refreshPrincipalAppraisals();
 
       // Update UI state
       setSelected((prev) => ({
@@ -173,6 +178,8 @@ export default function PrincipalDashboard() {
       await API.post(`principal/appraisal/${selected.id}/finalize/`);
 
       alert("Appraisal finalized & PDFs generated");
+      notifyAppraisalStatusChanged();
+      await refreshPrincipalAppraisals();
 
       setSelected(null); // go back to list
     } catch (err) {
@@ -190,6 +197,38 @@ export default function PrincipalDashboard() {
     pending: [],
     processed: [],
   });
+
+  const refreshPrincipalAppraisals = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await API.get("principal/appraisals/");
+      const data = res.data || [];
+
+      const pending = [];
+      const processed = [];
+
+      data.forEach((a) => {
+        if (
+          a.status === "REVIEWED_BY_PRINCIPAL" ||
+          a.status === "HOD_APPROVED" ||
+          a.status === "SUBMITTED"
+        ) {
+          pending.push(a);
+        } else {
+          processed.push(a);
+        }
+      });
+
+      setSubmissions({ pending, processed });
+    } catch (err) {
+      console.error(err);
+      setError("Unable to load appraisals");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const downloadPdf = async (url, filename) => {
     try {
@@ -235,40 +274,16 @@ export default function PrincipalDashboard() {
 
   /* ================= FETCH PRINCIPAL APPRAISALS ================= */
   useEffect(() => {
-    const fetchAppraisals = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    refreshPrincipalAppraisals();
+  }, []);
 
-        const res = await API.get("principal/appraisals/");
-        const data = res.data || [];
-
-        // Split pending vs processed
-        const pending = [];
-        const processed = [];
-
-        data.forEach((a) => {
-          if (
-            a.status === "REVIEWED_BY_PRINCIPAL" ||
-            a.status === "HOD_APPROVED" ||
-            a.status === "SUBMITTED"
-          ) {
-            pending.push(a);
-          } else {
-            processed.push(a);
-          }
-        });
-
-        setSubmissions({ pending, processed });
-      } catch (err) {
-        console.error(err);
-        setError("Unable to load appraisals");
-      } finally {
-        setLoading(false);
-      }
+  useEffect(() => {
+    const handleFocus = () => {
+      refreshPrincipalAppraisals();
     };
 
-    fetchAppraisals();
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
   }, []);
 
   /* ================= FETCH DETAILS WHEN SELECTED ================= */
@@ -355,6 +370,8 @@ export default function PrincipalDashboard() {
         processed: [...prev.processed, { ...selected, status: "APPROVED" }],
       }));
 
+      notifyAppraisalStatusChanged();
+      await refreshPrincipalAppraisals();
       setSelected(null);
       setRemarks("");
       alert("Final approval completed");
@@ -382,6 +399,8 @@ export default function PrincipalDashboard() {
         ],
       }));
 
+      notifyAppraisalStatusChanged();
+      await refreshPrincipalAppraisals();
       setSelected(null);
       setRemarks("");
       alert("Sent back to faculty");
@@ -609,7 +628,7 @@ export default function PrincipalDashboard() {
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <button
             className="primary-btn"
-            onClick={() => navigate("/faculty/profile")}
+            onClick={() => navigate("/principal/dashboard")}
           >
             My Profile
           </button>

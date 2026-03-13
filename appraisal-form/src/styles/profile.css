@@ -6,7 +6,7 @@
 }
 
 body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--ui-font);
   background: #eef2ff;
 }
 
@@ -124,6 +124,7 @@ body {
   font-weight: 700;
   color: #1e293b;
   margin: 0;
+  letter-spacing: -0.03em;
 }
 
 .header-actions {

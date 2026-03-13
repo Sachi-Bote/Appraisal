@@ -5,14 +5,18 @@ import "../../styles/dashboard.css";
 import { formatStatus } from "../../utils/textFormatters";
 import { downloadWithAuth } from "../../utils/downloadFile";
 import {
+  clearStatusCache,
   fetchAndCacheFacultyStatus,
+  getStatusEventKey,
   getLatestAppraisal,
+  notifyAppraisalStatusChanged,
   readStatusCache,
 } from "../../utils/appraisalStatusCache";
 
 export default function FacultyDashboard() {
   const navigate = useNavigate();
 
+  const editableStatuses = ["DRAFT", "CHANGES_REQUESTED", "RETURNED_BY_HOD", "RETURNED_BY_PRINCIPAL"];
   const [appraisal, setAppraisal] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -39,15 +43,31 @@ export default function FacultyDashboard() {
 
     fetchCurrentAppraisal();
 
+    const refreshFromLatest = () => {
+      clearStatusCache();
+      fetchCurrentAppraisal();
+    };
+
+    const handleStorage = (event) => {
+      if (event.key === getStatusEventKey()) {
+        refreshFromLatest();
+      }
+    };
+
+    window.addEventListener("focus", refreshFromLatest);
+    window.addEventListener("storage", handleStorage);
+
     return () => {
       alive = false;
+      window.removeEventListener("focus", refreshFromLatest);
+      window.removeEventListener("storage", handleStorage);
     };
   }, []);
 
   const disableNewForm =
     appraisal &&
     appraisal.status &&
-    !["DRAFT", "Changes Requested"].includes(appraisal.status);
+    !editableStatuses.includes(String(appraisal.status).trim().toUpperCase());
 
   const statusClassName = appraisal?.status
     ? formatStatus(appraisal.status).toLowerCase().replace(/\s+/g, "-")
@@ -139,7 +159,8 @@ export default function FacultyDashboard() {
                 ? "Checking appraisal status..."
                 : !appraisal || !appraisal.status
                   ? "Fill and submit your annual faculty appraisal"
-                  : appraisal.status === "Changes Requested"
+                  : editableStatuses.includes(String(appraisal.status).trim().toUpperCase()) &&
+                    String(appraisal.status).trim().toUpperCase() !== "DRAFT"
                     ? "Edit and re-submit appraisal"
                     : "Appraisal already submitted"}
             </p>
@@ -171,12 +192,13 @@ export default function FacultyDashboard() {
                       <button
                         className="view-btn"
                         style={{ background: "#059669" }}
-                        onClick={async () => {
-                          try {
-                            await downloadWithAuth(`/api/appraisal/${appraisal.id}/pdf/sppu-enhanced/`, `SPPU_${appraisal.academic_year}.pdf`);
-                          } catch {
-                            alert("Failed to download PDF. It might not be generated yet.");
-                          }
+                      onClick={async () => {
+                        try {
+                          await downloadWithAuth(`/api/appraisal/${appraisal.id}/pdf/sppu-enhanced/`, `SPPU_${appraisal.academic_year}.pdf`);
+                          notifyAppraisalStatusChanged();
+                        } catch {
+                          alert("Failed to download PDF. It might not be generated yet.");
+                        }
                         }}
                       >
                         Download PDF

@@ -15,10 +15,29 @@ const AUTH_KEYS = [
   "role",
 ];
 
+const TRANSIENT_SESSION_PREFIXES = [
+  "hod.",
+  "principal.",
+  "faculty.",
+];
+
+const TRANSIENT_SESSION_KEYS = [
+  "lastRoute",
+  "selectedSubmission",
+  "remarks",
+  "verificationSavedAt",
+];
+
 const clearAuthStorage = () => {
   AUTH_KEYS.forEach((key) => {
     localStorage.removeItem(key);
     sessionStorage.removeItem(key);
+  });
+  TRANSIENT_SESSION_KEYS.forEach((key) => sessionStorage.removeItem(key));
+  Object.keys(sessionStorage).forEach((key) => {
+    if (TRANSIENT_SESSION_PREFIXES.some((prefix) => key.startsWith(prefix))) {
+      sessionStorage.removeItem(key);
+    }
   });
 };
 
@@ -179,10 +198,11 @@ export default function Login() {
         return;
       }
 
-      if (lastRoute && !["/login", "/forgot-password", "/reset-password"].includes(lastRoute)) {
+      if (isRouteAllowedForRole(lastRoute, user?.role)) {
         navigate(lastRoute, { replace: true });
         return;
       }
+      sessionStorage.removeItem("lastRoute");
 
       if (!routeByRole(navigate, user?.role, false)) {
         setError(`Unauthorized role: ${user?.role || "missing"}`);

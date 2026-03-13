@@ -1,0 +1,36 @@
+:root {
+  --ui-font: "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --ui-heading: "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --ui-text: #132238;
+  --ui-muted: #526075;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  font-family: var(--ui-font);
+  color: var(--ui-text);
+  background: #edf2f7;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--ui-heading);
+  letter-spacing: -0.02em;
+}

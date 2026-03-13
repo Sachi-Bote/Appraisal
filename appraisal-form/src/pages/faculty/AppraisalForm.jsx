@@ -164,6 +164,18 @@ const SECTION_TO_LEGACY = {
   g_sponsored_project: "sponsored_project",
 };
 
+const EDITABLE_APPRAISAL_STATES = new Set([
+  "DRAFT",
+  "RETURNED_BY_HOD",
+  "RETURNED_BY_PRINCIPAL",
+  "CHANGES_REQUESTED",
+]);
+
+function normalizeFormStatus(workflowState) {
+  const normalized = String(workflowState || "").trim().toUpperCase();
+  return EDITABLE_APPRAISAL_STATES.has(normalized) ? "draft" : "submitted";
+}
+
 
 export default function FacultyAppraisalForm() {
   const CURRENT_ACADEMIC_YEAR = getCurrentAcademicYear();
@@ -746,6 +758,7 @@ export default function FacultyAppraisalForm() {
           const aid = res.data.id || res.data.appraisal_id;
           setAppraisalId(aid);
           setAppraisalStatus(res.data.status);
+          setFormStatus(normalizeFormStatus(res.data.status));
           setRemarks(res.data.remarks || "");
           const draft = res.data.appraisal_data;
           const ui = draft._ui_state;
@@ -1030,6 +1043,7 @@ export default function FacultyAppraisalForm() {
   const [formStatus, setFormStatus] = useState("draft");
   const [processingNotice, setProcessingNotice] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const isFormLocked = formStatus === "submitted";
 
   useEffect(() => {
     try {
@@ -1052,7 +1066,9 @@ export default function FacultyAppraisalForm() {
       if (typeof cached.justification === "string") setJustification(cached.justification);
       if (Array.isArray(cached.categoryTwo)) setCategoryTwo(cached.categoryTwo);
       if (typeof cached.declarationAccepted === "boolean") setDeclarationAccepted(cached.declarationAccepted);
-      if (typeof cached.formStatus === "string") setFormStatus(cached.formStatus);
+      if (typeof cached.formStatus === "string") {
+        setFormStatus(normalizeFormStatus(cached.formStatus));
+      }
     } catch (error) {
       console.error("Failed to restore refresh state", error);
     }
@@ -1287,7 +1303,10 @@ export default function FacultyAppraisalForm() {
       const savedAppraisalId = response?.data?.appraisal_id || appraisalId;
       const currentState = response?.data?.current_state;
       if (savedAppraisalId) setAppraisalId(savedAppraisalId);
-      if (currentState) setAppraisalStatus(currentState);
+      if (currentState) {
+        setAppraisalStatus(currentState);
+        setFormStatus(normalizeFormStatus(currentState));
+      }
 
       if (!silent) alert("Saved successfully");
       return savedAppraisalId;
@@ -2061,7 +2080,7 @@ export default function FacultyAppraisalForm() {
         <div className="form-section">
           <h3>Step 1: General Information</h3>
           <fieldset
-            disabled={formStatus === "submitted"}
+            disabled={isFormLocked}
             style={{ border: "none", padding: 0 }}
           >
             <p className="section-note">
@@ -2264,7 +2283,7 @@ export default function FacultyAppraisalForm() {
             </h3>
 
             <fieldset
-              disabled={formStatus === "submitted"}
+              disabled={isFormLocked}
               style={{ border: "none", padding: 0 }}
             >
               <p className="section-note">
@@ -2687,7 +2706,7 @@ export default function FacultyAppraisalForm() {
 
           <div className="form-section">
             <fieldset
-              disabled={formStatus === "submitted"}
+              disabled={isFormLocked}
               style={{ border: "none", padding: 0 }}
             >
               <h4>A. ACR Details</h4>
@@ -2843,7 +2862,7 @@ export default function FacultyAppraisalForm() {
 
             <h3>Step 4: Research & Academic Contributions</h3>
             <fieldset
-              disabled={formStatus === "submitted"}
+              disabled={isFormLocked}
               style={{ border: "none", padding: 0 }}
             >
               {/* ========== 1. RESEARCH PAPERS ========== */}
@@ -3493,7 +3512,7 @@ export default function FacultyAppraisalForm() {
             {/* ================= DECLARATION ================= */}
 
             <fieldset
-              disabled={formStatus === "submitted"}
+              disabled={isFormLocked}
               style={{ border: "none", padding: 0 }}
             >
               <div className="form-group" style={{ marginTop: "16px" }}>
@@ -3534,9 +3553,9 @@ export default function FacultyAppraisalForm() {
                 type="button"
                 className="btn-primary"
                 onClick={handleSubmitForm}
-                disabled={formStatus === "submitted"}
+                disabled={isFormLocked}
               >
-                {formStatus === "submitted" ? "Submitted" : "Final Submit"}
+                {isFormLocked ? "Submitted" : "Final Submit"}
               </button>
 
             </div>
@@ -3560,7 +3579,7 @@ export default function FacultyAppraisalForm() {
         </div>
 
         <div className="actions-right">
-          {formStatus !== "submitted" && currentStep < 5 && (
+          {!isFormLocked && currentStep < 5 && (
             <button
               type="button"
               className="btn-outline"

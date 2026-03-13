@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import "../../styles/FacultyAppraisalStatus.css";
 import { downloadWithAuth } from "../../utils/downloadFile";
 import {
+  clearStatusCache,
   fetchAndCacheFacultyStatus,
+  getStatusEventKey,
   readStatusCache,
 } from "../../utils/appraisalStatusCache";
 
@@ -65,8 +67,24 @@ export default function FacultyAppraisalStatus() {
 
     fetchStatus();
 
+    const refreshStatus = () => {
+      clearStatusCache();
+      fetchStatus();
+    };
+
+    const handleStorage = (event) => {
+      if (event.key === getStatusEventKey()) {
+        refreshStatus();
+      }
+    };
+
+    window.addEventListener("focus", refreshStatus);
+    window.addEventListener("storage", handleStorage);
+
     return () => {
       alive = false;
+      window.removeEventListener("focus", refreshStatus);
+      window.removeEventListener("storage", handleStorage);
     };
   }, []);
 
@@ -166,7 +184,7 @@ export default function FacultyAppraisalStatus() {
     });
   };
 
-  const role = localStorage.getItem("role") || sessionStorage.getItem("role");
+  const role = String(localStorage.getItem("role") || sessionStorage.getItem("role") || "").trim().toUpperCase();
   const isHOD = role === "HOD";
   const backPath = isHOD ? "/hod/dashboard" : "/faculty/dashboard";
   const editPath = isHOD ? "/hod/appraisal-form" : "/faculty/appraisal";

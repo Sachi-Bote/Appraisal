@@ -136,9 +136,10 @@
 .dashboard-header-card h2 {
   margin: 0;
   color: #132238;
-  font-family: Cambria, Georgia, "Times New Roman", serif;
+  font-family: var(--ui-heading);
   font-size: 2.05rem;
   font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .dashboard-subtitle {
@@ -212,9 +213,10 @@
 .dashboard-card h3 {
   margin: 0 0 12px;
   color: #132238;
-  font-family: Cambria, Georgia, "Times New Roman", serif;
+  font-family: var(--ui-heading);
   font-size: 1.35rem;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .dashboard-card p {
@@ -295,9 +297,17 @@
 .dashboard-history-section h3 {
   margin: 0 0 20px;
   color: #132238;
-  font-family: Cambria, Georgia, "Times New Roman", serif;
+  font-family: var(--ui-heading);
   font-size: 1.6rem;
   font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.dashboard-card p,
+.dashboard-subtitle,
+.history-info,
+.empty-state-text {
+  color: #5b6b7f;
 }
 
 .history-list {

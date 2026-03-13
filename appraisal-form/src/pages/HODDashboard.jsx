@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import API, { clearAuthAndRedirect } from "../api";
 import "../styles/dashboard.css";
 import "../styles/HODDashboard.css";
-import AppraisalSummary from "../components/AppraisalSummary";
 import useSessionState from "../hooks/useSessionState";
 import { downloadWithAuth, getAccessToken } from "../utils/downloadFile";
 import { buildApiUrl } from "../utils/apiUrl";
+import { notifyAppraisalStatusChanged } from "../utils/appraisalStatusCache";
 import {
   DEFAULT_TABLE2_VERIFIED_KEYS,
   getTable2VerifiedLabel,
@@ -105,11 +105,6 @@ export default function HODDashboard() {
 
   /* ================= LOAD HOD SELF APPRAISAL ================= */
   useEffect(() => {
-    const stored = localStorage.getItem("hodOwnAppraisal");
-    if (stored) setHodOwnAppraisal(JSON.parse(stored));
-  }, []);
-
-  useEffect(() => {
     const fetchProfileSummary = async () => {
       try {
         const res = await API.get("me/");
@@ -125,6 +120,15 @@ export default function HODDashboard() {
     };
 
     fetchProfileSummary();
+  }, []);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      refreshDashboardData();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
   }, []);
 
   /* ================= FETCH APPRAISALS ================= */
@@ -231,12 +235,51 @@ export default function HODDashboard() {
   const [isPreviewProcessing, setIsPreviewProcessing] = useState(false);
   const [previewNotice, setPreviewNotice] = useState("");
 
+  const refreshDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await API.get("hod/appraisals/");
+      const data = res.data || [];
+
+      const pendingStatuses = ["SUBMITTED", "REVIEWED_BY_HOD"];
+      const pending = data.filter((a) => pendingStatuses.includes(a.status));
+      const processed = data.filter((a) => !pendingStatuses.includes(a.status));
+
+      setSubmissions({ pending, processed });
+
+      const ownRes = await API.get("hod/appraisals/me/");
+      const ownData = ownRes.data || [];
+      if (ownData.length > 0) {
+        const latest = ownData[0];
+        const actualStatus = latest.status;
+        const isReturned = actualStatus === "RETURNED_BY_PRINCIPAL";
+
+        setHodOwnAppraisal({
+          academicYear: latest.academic_year,
+          status: (actualStatus.toLowerCase() === "draft" || isReturned) ? "in_progress" : "submitted",
+          submissionDate: latest.updated_at ? latest.updated_at.split("T")[0] : null,
+          appraisal_id: latest.appraisal_id,
+          actual_status: actualStatus,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load appraisals");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /* ================= ACTIONS ================= */
   const handleStartReview = async () => {
     try {
       await API.post(`hod/appraisal/${selectedSubmission.appraisal_id}/start-review/`);
 
       alert("Moved to HOD Review");
+      notifyAppraisalStatusChanged();
+      await refreshDashboardData();
 
       setSelectedSubmission((prev) => ({
         ...prev,
@@ -298,6 +341,8 @@ export default function HODDashboard() {
       );
 
       alert("Approved by HOD");
+      notifyAppraisalStatusChanged();
+      await refreshDashboardData();
       setSelectedSubmission(null);
       setTable1VerifiedTeaching("");
       setTable1VerifiedActivities("");
@@ -323,6 +368,8 @@ export default function HODDashboard() {
       await API.post(`hod/appraisal/${selectedSubmission.appraisal_id}/return/`, { remarks });
 
       alert("Returned to faculty");
+      notifyAppraisalStatusChanged();
+      await refreshDashboardData();
       setSelectedSubmission(null);
       setRemarks("");
     } catch {
@@ -339,7 +386,6 @@ export default function HODDashboard() {
   const handleFillOwnAppraisal = () => {
     const updated = { ...hodOwnAppraisal, status: "in_progress" };
     setHodOwnAppraisal(updated);
-    localStorage.setItem("hodOwnAppraisal", JSON.stringify(updated));
     navigate("/hod/appraisal-form");
   };
 
@@ -374,10 +420,8 @@ export default function HODDashboard() {
       };
 
       setHodOwnAppraisal(updated);
-      localStorage.setItem(
-        "hodOwnAppraisal",
-        JSON.stringify(updated)
-      );
+      notifyAppraisalStatusChanged();
+      await refreshDashboardData();
     } catch (err) {
       console.error(err);
       alert(err.message || "Failed to submit appraisal");
@@ -460,6 +504,7 @@ export default function HODDashboard() {
   const heroName = profileSummary.full_name || "Faculty Member";
   const heroDesignation = profileSummary.designation || "Head of Department";
   const heroDepartment = profileSummary.department || "Department";
+  const reviewStatusLabel = selectedSubmission?.status?.replace(/_/g, " ") || "Awaiting Review";
 
 
 
@@ -467,244 +512,323 @@ export default function HODDashboard() {
   if (selectedSubmission) {
     return (
       <div className="hod-container">
-        <button className="back-btn" onClick={() => setSelectedSubmission(null)}>
-          Back to Dashboard
-        </button>
-
-        <div className="card">
-          <h2>Faculty Submission Review</h2>
-
-          <div className="info-grid">
-            <div><b>Name:</b> {selectedSubmission.faculty_name}</div>
-            <div><b>Department:</b> {selectedSubmission.department}</div>
-            <div><b>Designation:</b> {selectedSubmission.designation}</div>
-            <div><b>Academic Year:</b> {selectedSubmission.academic_year}</div>
+        <div className="hod-shell review-shell">
+          <div className="hod-topbar">
+            <div className="topbar-brand">
+              <div className="topbar-brand-icon">SA</div>
+              <div className="topbar-brand-text">
+                <span className="topbar-brand-title">Staff Appraisal System</span>
+                <span className="topbar-brand-subtitle">Faculty Submission Review</span>
+              </div>
+            </div>
+            <div className="topbar-nav">
+              <button type="button" className="topbar-nav-link" onClick={() => setSelectedSubmission(null)}>
+                Dashboard
+              </button>
+              <button type="button" className="topbar-nav-link" onClick={() => setSelectedSubmission(null)}>
+                My Profile
+              </button>
+              <button type="button" className="topbar-nav-link" onClick={handleFillOwnAppraisal}>
+                Appraisal Form
+              </button>
+              <button type="button" className="topbar-nav-link topbar-nav-link-active">
+                Reviews
+              </button>
+              <button type="button" className="topbar-nav-link" onClick={() => setActiveTab("processed")}>
+                Downloads
+              </button>
+            </div>
+            <div className="topbar-actions">
+              <span className="topbar-badge">HOD Review</span>
+              <button className="logout-btn" onClick={handleLogout}>
+                Logout
+              </button>
+            </div>
           </div>
 
-          <h3>HOD Remarks</h3>
-          <textarea
-            placeholder="Enter remarks here..."
-            value={remarks}
-            onChange={(e) => setRemarks(e.target.value)}
-          />
+          <section className="review-hero">
+            <div className="review-hero-copy">
+              <button className="review-back-link" onClick={() => setSelectedSubmission(null)}>
+                Back to Dashboard
+              </button>
+              <p className="review-hero-label">HOD Review Panel</p>
+              <h1>Faculty Submission Review</h1>
+              <div className="review-hero-meta">
+                <span>{selectedSubmission.faculty_name}</span>
+                <span>{selectedSubmission.department}</span>
+                <span>{selectedSubmission.designation}</span>
+                <span>AY {selectedSubmission.academic_year}</span>
+              </div>
+            </div>
+            <div className="review-hero-status">
+              <span className={`review-status-pill ${selectedSubmission.status === "REVIEWED_BY_HOD" ? "review-status-pill-review" : "review-status-pill-pending"}`}>
+                {reviewStatusLabel}
+              </span>
+            </div>
+          </section>
 
-          {/* VERIFIED GRADE INPUT */}
-          {
-            selectedSubmission.status === "REVIEWED_BY_HOD" && (
-              <div style={{ marginTop: '16px' }}>
-                <h3>Verified Grading</h3>
-                <p style={{ fontSize: '0.9rem', color: '#666' }}>
-                  Enter verified grading for Table 1 and the verified column values for Table 2.
-                </p>
-                <div style={{ margin: '12px 0', padding: '12px', border: '1px dashed #d1d5db', borderRadius: '6px', background: '#f8fafc' }}>
-                  <div style={{ fontSize: '0.9rem', color: '#4b5563' }}>Auto-calculated Total Score</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#111827' }}>{formattedTotalScore}</div>
-                  <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>Computed from submitted data; updates after reload/approval.</div>
-                </div>
-                <label style={{ fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                  Table 1 - Teaching (Verified Grade)
-                </label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: '12px', alignItems: 'start' }}>
-                  <div style={{ border: '1px solid #e5e7eb', borderRadius: '6px', padding: '10px', background: '#fafafa' }}>
-                    <div style={{ fontSize: '0.85rem', color: '#4b5563', marginBottom: '4px' }}><b>Self Appraisal</b></div>
-                    <div style={{ fontSize: '0.9rem' }}>Assigned: {selfTeaching.total_assigned ?? 0}</div>
-                    <div style={{ fontSize: '0.9rem' }}>Taught: {selfTeaching.total_taught ?? 0}</div>
-                    <div style={{ fontSize: '0.9rem' }}>% Classes: {selfTeaching.percentage ?? "0.00"}%</div>
-                    <div style={{ fontSize: '0.9rem' }}><b>Grade: {selfTeaching.self_grade || "-"}</b></div>
+          <section className="review-score-grid">
+            <article className="review-score-card review-score-card-featured">
+              <span className="review-score-label">Auto-calculated Total Score</span>
+              <strong className="review-score-value">{formattedTotalScore}</strong>
+              <p className="review-score-sub">Computed from submitted data</p>
+              <div className="review-score-bar">
+                <span style={{ width: `${Math.max(0, Math.min(100, Number(selectedSubmission?.calculated_total_score || 0)))}%` }} />
+              </div>
+            </article>
+
+            <article className="review-score-card">
+              <span className="review-score-label review-score-label-blue">Teaching Grade</span>
+              <strong className="review-mini-value">{selfTeaching.self_grade || "-"}</strong>
+              <p className="review-score-sub">
+                Assigned: {selfTeaching.total_assigned ?? 0} · Taught: {selfTeaching.total_taught ?? 0}
+              </p>
+            </article>
+
+            <article className="review-score-card">
+              <span className="review-score-label review-score-label-amber">Activity Grade</span>
+              <strong className="review-mini-value">{selfActivities.self_grade || "-"}</strong>
+              <p className="review-score-sub">Selected Activities: {selfActivities.count ?? 0}</p>
+            </article>
+
+            <article className="review-score-card">
+              <span className="review-score-label review-score-label-green">Feedback Score</span>
+              <strong className="review-mini-value">{selectedSubmission?.sppu_review_data?.student_feedback?.[0]?.score ?? "22"}</strong>
+              <p className="review-score-sub">Student feedback summary</p>
+            </article>
+          </section>
+
+          <section className="review-layout">
+            <div className="review-main">
+              <div className="review-panel">
+                <div className="review-panel-header">
+                  <div>
+                    <h2 className="review-panel-title">Faculty Information</h2>
+                    <p className="review-panel-summary">
+                      {selectedSubmission.faculty_name} · {selectedSubmission.department} · AY {selectedSubmission.academic_year}
+                    </p>
                   </div>
-                  <select
-                    value={table1VerifiedTeaching}
-                    onChange={(e) => setTable1VerifiedTeaching(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      marginTop: '8px',
-                      borderRadius: '4px',
-                      border: '1px solid #ddd'
-                    }}
-                  >
-                    <option value="">Select Grade...</option>
-                    <option value="Good">Good</option>
-                    <option value="Satisfactory">Satisfactory</option>
-                    <option value="Not Satisfactory">Not Satisfactory</option>
-                  </select>
                 </div>
-
-                <label style={{ fontWeight: 600, display: 'block', marginTop: '10px', marginBottom: '6px' }}>
-                  Table 1 - Activity (Verified Grade)
-                </label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: '12px', alignItems: 'start' }}>
-                  <div style={{ border: '1px solid #e5e7eb', borderRadius: '6px', padding: '10px', background: '#fafafa' }}>
-                    <div style={{ fontSize: '0.85rem', color: '#4b5563', marginBottom: '4px' }}><b>Self Appraisal</b></div>
-                    <div style={{ fontSize: '0.9rem' }}>Selected Activities: {selfActivities.count ?? 0}</div>
-                    <div style={{ fontSize: '0.9rem' }}><b>Grade: {selfActivities.self_grade || "-"}</b></div>
+                <div className="review-panel-body">
+                  <div className="review-info-grid">
+                    <div className="review-info-cell"><span>Name</span><strong>{selectedSubmission.faculty_name}</strong></div>
+                    <div className="review-info-cell"><span>Department</span><strong>{selectedSubmission.department}</strong></div>
+                    <div className="review-info-cell"><span>Designation</span><strong>{selectedSubmission.designation}</strong></div>
+                    <div className="review-info-cell"><span>Academic Year</span><strong>{selectedSubmission.academic_year}</strong></div>
                   </div>
-                  <select
-                    value={table1VerifiedActivities}
-                    onChange={(e) => setTable1VerifiedActivities(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '4px',
-                      border: '1px solid #ddd'
-                    }}
-                  >
-                    <option value="">Select Grade...</option>
-                    <option value="Good">Good</option>
-                    <option value="Satisfactory">Satisfactory</option>
-                    <option value="Not Satisfactory">Not Satisfactory</option>
-                  </select>
                 </div>
+              </div>
 
-                <div style={{ marginTop: '14px' }}>
-                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                    Table 2 - Verified Column
-                  </label>
-                  <div style={{ display: 'grid', gap: '8px', maxHeight: '300px', overflowY: 'auto', border: '1px solid #eee', borderRadius: '6px', padding: '10px' }}>
-                    {table2FieldKeys.map((fieldKey) => (
-                      <div key={fieldKey} style={{ display: 'grid', gridTemplateColumns: '1fr 120px 130px', gap: '10px', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.9rem' }}>{getTable2VerifiedLabel(fieldKey)}</span>
-                        <span style={{ fontSize: '0.85rem', color: '#4b5563' }}>
-                          Self: {getTable2SelfValue(selectedSubmission?.sppu_review_data, fieldKey)}
-                        </span>
-                        <input
-                          type="text"
-                          value={table2VerifiedScores[fieldKey] || ""}
-                          onChange={(e) => updateTable2Verified(fieldKey, e.target.value)}
-                          placeholder={fieldKey === TABLE2_TOTAL_KEY ? "Auto" : "Verified"}
-                          readOnly={fieldKey === TABLE2_TOTAL_KEY}
-                          style={{
-                            width: '100%',
-                            padding: '8px',
-                            borderRadius: '4px',
-                            border: '1px solid #ddd',
-                            background: fieldKey === TABLE2_TOTAL_KEY ? '#f3f4f6' : '#fff',
-                            color: fieldKey === TABLE2_TOTAL_KEY ? '#111827' : 'inherit',
-                            fontWeight: fieldKey === TABLE2_TOTAL_KEY ? 600 : 400,
-                          }}
+              {selectedSubmission.status === "REVIEWED_BY_HOD" && (
+                <div className="review-panel">
+                  <div className="review-panel-header">
+                    <div>
+                      <h2 className="review-panel-title">Verified Grading</h2>
+                      <p className="review-panel-summary">Assign verified grades and confirm Table 2 values.</p>
+                    </div>
+                  </div>
+                  <div className="review-panel-body">
+                    <div className="review-grade-block">
+                      <div className="review-grade-copy">
+                        <h3>Table 1 - Teaching (Verified Grade)</h3>
+                        <p>Assigned: <strong>{selfTeaching.total_assigned ?? 0}</strong> · Taught: <strong>{selfTeaching.total_taught ?? 0}</strong> · % Classes: <strong>{selfTeaching.percentage ?? "0.00"}%</strong></p>
+                        <p>Self Grade: <strong>{selfTeaching.self_grade || "-"}</strong></p>
+                      </div>
+                      <select
+                        className="review-select"
+                        value={table1VerifiedTeaching}
+                        onChange={(e) => setTable1VerifiedTeaching(e.target.value)}
+                      >
+                        <option value="">Select Grade...</option>
+                        <option value="Good">Good</option>
+                        <option value="Satisfactory">Satisfactory</option>
+                        <option value="Not Satisfactory">Not Satisfactory</option>
+                      </select>
+                    </div>
+
+                    <div className="review-grade-block">
+                      <div className="review-grade-copy">
+                        <h3>Table 1 - Activity (Verified Grade)</h3>
+                        <p>Selected Activities: <strong>{selfActivities.count ?? 0}</strong></p>
+                        <p>Self Grade: <strong>{selfActivities.self_grade || "-"}</strong></p>
+                      </div>
+                      <select
+                        className="review-select"
+                        value={table1VerifiedActivities}
+                        onChange={(e) => setTable1VerifiedActivities(e.target.value)}
+                      >
+                        <option value="">Select Grade...</option>
+                        <option value="Good">Good</option>
+                        <option value="Satisfactory">Satisfactory</option>
+                        <option value="Not Satisfactory">Not Satisfactory</option>
+                      </select>
+                    </div>
+
+                    <div className="review-table2-wrap">
+                      <div className="review-section-kicker">Table 2 - Verified Column</div>
+                      {table2FieldKeys.map((fieldKey) => (
+                        <div key={fieldKey} className="review-table2-row">
+                          <span className="review-table2-label">{getTable2VerifiedLabel(fieldKey)}</span>
+                          <span className="review-table2-self">Self: {getTable2SelfValue(selectedSubmission?.sppu_review_data, fieldKey)}</span>
+                          <input
+                            className="review-table2-input"
+                            type="text"
+                            value={table2VerifiedScores[fieldKey] || ""}
+                            onChange={(e) => updateTable2Verified(fieldKey, e.target.value)}
+                            placeholder={fieldKey === TABLE2_TOTAL_KEY ? "Auto" : "Verified"}
+                            readOnly={fieldKey === TABLE2_TOTAL_KEY}
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="review-form-grid">
+                      <div className="review-field">
+                        <label>Justification of assessment of work as not satisfactory (optional)</label>
+                        <textarea
+                          placeholder="Enter justification if overall assessment is Not Satisfactory..."
+                          value={hodNotSatisfactoryJustification}
+                          onChange={(e) => setHodNotSatisfactoryJustification(e.target.value)}
                         />
                       </div>
-                    ))}
+
+                      <div className="review-field">
+                        <label>Comments of HOD on Table 1</label>
+                        <textarea
+                          placeholder="Enter comments for Table 1..."
+                          value={hodCommentsTable1}
+                          onChange={(e) => setHodCommentsTable1(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="review-field">
+                        <label>Comments of HOD on Table 2</label>
+                        <textarea
+                          placeholder="Enter comments for Table 2..."
+                          value={hodCommentsTable2}
+                          onChange={(e) => setHodCommentsTable2(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="review-field">
+                        <label>Remarks and Suggestions</label>
+                        <textarea
+                          placeholder="Enter remarks and suggestions..."
+                          value={hodRemarksSuggestions}
+                          onChange={(e) => setHodRemarksSuggestions(e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
+              )}
 
-                <div style={{ marginTop: '10px' }}>
-                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                    Justification of assessment of work as not satisfactory (optional)
-                  </label>
-                  <textarea
-                    placeholder="Enter justification if overall assessment is Not Satisfactory..."
-                    value={hodNotSatisfactoryJustification}
-                    onChange={(e) => setHodNotSatisfactoryJustification(e.target.value)}
-                  />
+              <div className="review-panel">
+                <div className="review-panel-header">
+                  <div>
+                    <h2 className="review-panel-title">HOD Remarks</h2>
+                    <p className="review-panel-summary">These remarks will appear on the final review record.</p>
+                  </div>
                 </div>
-
-                <div style={{ marginTop: '14px' }}>
-                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                    Comments of HOD on Table 1
-                  </label>
+                <div className="review-panel-body">
                   <textarea
-                    placeholder="Enter comments for Table 1..."
-                    value={hodCommentsTable1}
-                    onChange={(e) => setHodCommentsTable1(e.target.value)}
-                  />
-                </div>
-
-                <div style={{ marginTop: '10px' }}>
-                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                    Comments of HOD on Table 2
-                  </label>
-                  <textarea
-                    placeholder="Enter comments for Table 2..."
-                    value={hodCommentsTable2}
-                    onChange={(e) => setHodCommentsTable2(e.target.value)}
-                  />
-                </div>
-
-                <div style={{ marginTop: '10px' }}>
-                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                    Remarks and Suggestions
-                  </label>
-                  <textarea
-                    placeholder="Enter remarks and suggestions..."
-                    value={hodRemarksSuggestions}
-                    onChange={(e) => setHodRemarksSuggestions(e.target.value)}
+                    className="review-remarks-area"
+                    placeholder="Enter remarks here..."
+                    value={remarks}
+                    onChange={(e) => setRemarks(e.target.value)}
                   />
                 </div>
               </div>
-            )
-          }
 
-
-          {
-            selectedSubmission.appraisal_id && (
-              <div style={{ marginTop: '18px', marginBottom: '4px' }}>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              {selectedSubmission.appraisal_id && (
+                <div className="review-preview-row">
                   <button
                     type="button"
-                    className="approve-btn"
-                    style={{ height: '36px', padding: '0 14px' }}
+                    className="review-preview-btn"
                     onClick={() => previewPdf(`/api/appraisal/${selectedSubmission.appraisal_id}/pdf/sppu-enhanced/`)}
                   >
                     Preview SPPU Form
                   </button>
                   <button
                     type="button"
-                    className="approve-btn"
-                    style={{ height: '36px', padding: '0 14px' }}
+                    className="review-preview-btn"
                     onClick={() => previewPdf(`/api/appraisal/${selectedSubmission.appraisal_id}/pdf/pbas-enhanced/`)}
                   >
                     Preview PBAS Form
                   </button>
                 </div>
-                {(previewNotice || isPreviewProcessing) && (
-                  <div style={{ marginTop: "10px", padding: "10px 12px", borderRadius: "6px", background: "#fffbeb", color: "#92400e", fontWeight: 600 }}>
-                    {previewNotice || "Generating preview..."}
-                  </div>
-                )}
+              )}
+
+              {(previewNotice || isPreviewProcessing) && (
+                <div className="review-notice">
+                  {previewNotice || "Generating preview..."}
+                </div>
+              )}
+
+            </div>
+
+            <aside className="review-sidebar">
+              <div className="review-side-panel">
+                <div className="review-side-header">
+                  <h3>Review Checklist</h3>
+                </div>
+                <div className="review-side-body">
+                  <ul className="review-checklist">
+                    <li><span className="done">✓</span> Faculty info verified</li>
+                    <li><span className="done">✓</span> Teaching data reviewed</li>
+                    <li><span className={table1VerifiedTeaching ? "done" : "todo"}>{table1VerifiedTeaching ? "✓" : "!"}</span> Teaching grade assigned</li>
+                    <li><span className={table1VerifiedActivities ? "done" : "todo"}>{table1VerifiedActivities ? "✓" : "!"}</span> Activity grade assigned</li>
+                    <li><span className={remarks.trim() ? "done" : "todo"}>{remarks.trim() ? "✓" : "!"}</span> HOD remarks added</li>
+                  </ul>
+                </div>
               </div>
-            )
-          }
 
-          {
-            selectedSubmission.appraisal_data && (
-              <div className="form-data-view" style={{ marginTop: '20px', padding: '16px', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb', maxHeight: '400px', overflowY: 'auto' }}>
-                <AppraisalSummary data={selectedSubmission.appraisal_data} />
+              <div className="review-side-panel">
+                <div className="review-side-header">
+                  <h3>Score Summary</h3>
+                </div>
+                <div className="review-side-body review-side-stats">
+                  <div><span>Total Score</span><strong>{formattedTotalScore}</strong></div>
+                  <div><span>Teaching</span><strong>{selfTeaching.self_grade || "-"}</strong></div>
+                  <div><span>Activity</span><strong>{selfActivities.self_grade || "-"}</strong></div>
+                  <div><span>Status</span><strong>{reviewStatusLabel}</strong></div>
+                </div>
               </div>
-            )
-          }
+            </aside>
+          </section>
 
-
-          <div className="action-btn-row">
-            {selectedSubmission.status === "SUBMITTED" && (
-              <button className="approve-btn" onClick={handleStartReview}>
-                Start Review
+          <div className="review-footer">
+            <div className="review-footer-copy">
+              Reviewing <strong>{selectedSubmission.faculty_name}</strong> · AY {selectedSubmission.academic_year} · Score <strong>{formattedTotalScore}</strong>
+              {verificationSavedAt && (
+                <span className="review-saved-at">
+                  Last saved: {new Date(verificationSavedAt).toLocaleString()}
+                </span>
+              )}
+            </div>
+            <div className="review-footer-actions">
+              <button className="reject-btn" onClick={handleSendBack}>
+                Request Changes
               </button>
-            )}
-
-            {selectedSubmission.status === "REVIEWED_BY_HOD" && (
-              <button className="approve-btn" onClick={handleSaveVerifiedGrading} disabled={isSavingVerification}>
-                {isSavingVerification ? "Saving..." : "Save/Confirm Verified Grading"}
-              </button>
-            )}
-
-            {selectedSubmission.status === "REVIEWED_BY_HOD" && (
-              <button className="approve-btn" onClick={handleApprove}>
-                Approve
-              </button>
-            )}
-
-            <button className="reject-btn" onClick={handleSendBack}>
-              Request Changes
-            </button>
+              {selectedSubmission.status === "SUBMITTED" && (
+                <button className="approve-btn" onClick={handleStartReview}>
+                  Start Review
+                </button>
+              )}
+              {selectedSubmission.status === "REVIEWED_BY_HOD" && (
+                <button className="approve-btn" onClick={handleSaveVerifiedGrading} disabled={isSavingVerification}>
+                  {isSavingVerification ? "Saving..." : "Save Verified Grading"}
+                </button>
+              )}
+              {selectedSubmission.status === "REVIEWED_BY_HOD" && (
+                <button className="approve-btn" onClick={handleApprove}>
+                  Approve
+                </button>
+              )}
+            </div>
           </div>
-          {verificationSavedAt && (
-            <p style={{ fontSize: "0.85rem", color: "#4b5563", marginTop: "8px" }}>
-              Last saved verified grading: {new Date(verificationSavedAt).toLocaleString()}
-            </p>
-          )}
-        </div >
-      </div >
+        </div>
+      </div>
     );
   }
 
@@ -724,7 +848,7 @@ export default function HODDashboard() {
             <button type="button" className="topbar-nav-link topbar-nav-link-active">
               Dashboard
             </button>
-            <button type="button" className="topbar-nav-link" onClick={() => navigate("/faculty/profile")}>
+            <button type="button" className="topbar-nav-link" onClick={() => setSelectedSubmission(null)}>
               My Profile
             </button>
             <button type="button" className="topbar-nav-link" onClick={handleFillOwnAppraisal}>
@@ -733,7 +857,7 @@ export default function HODDashboard() {
             <button type="button" className="topbar-nav-link" onClick={() => setActiveTab("pending")}>
               Reviews
             </button>
-            <button type="button" className="topbar-nav-link" onClick={() => navigate("/faculty/appraisal/status")}>
+            <button type="button" className="topbar-nav-link" onClick={() => setActiveTab("processed")}>
               Downloads
             </button>
           </div>
@@ -824,7 +948,7 @@ export default function HODDashboard() {
                         {hodOwnAppraisal.actual_status?.replace(/_/g, " ")}
                       </span>
                     </div>
-                    <button className="view-btn" onClick={() => navigate("/faculty/appraisal/status")}>
+                    <button className="view-btn" onClick={() => setActiveTab("processed")}>
                       Track Status
                     </button>
                   </div>
@@ -937,7 +1061,7 @@ export default function HODDashboard() {
               </span>
               <span className="quick-action-arrow">&gt;</span>
             </button>
-            <button type="button" className="quick-action-item quick-action-item-featured" onClick={() => navigate("/faculty/appraisal/status")}>
+            <button type="button" className="quick-action-item quick-action-item-featured" onClick={() => setActiveTab("processed")}>
               <span className="quick-action-icon quick-action-icon-green">TR</span>
               <span className="quick-action-text">
                 <strong>Track My Appraisal</strong>

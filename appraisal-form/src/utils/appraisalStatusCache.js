@@ -2,6 +2,7 @@ import API from "../api";
 
 const CACHE_KEY = "faculty.appraisalStatus.cache.v1";
 const CACHE_TTL_MS = 30_000;
+const STATUS_EVENT_KEY = "appraisal.status.updatedAt";
 
 export function normalizeStatusPayload(data) {
   return {
@@ -34,6 +35,14 @@ export function writeStatusCache(statusData) {
   }
 }
 
+export function clearStatusCache() {
+  try {
+    sessionStorage.removeItem(CACHE_KEY);
+  } catch {
+    // ignore storage failures
+  }
+}
+
 export function readStatusCache(maxAgeMs = CACHE_TTL_MS) {
   try {
     const raw = sessionStorage.getItem(CACHE_KEY);
@@ -54,4 +63,17 @@ export async function fetchAndCacheFacultyStatus() {
   const normalized = normalizeStatusPayload(response.data || {});
   writeStatusCache(normalized);
   return normalized;
+}
+
+export function notifyAppraisalStatusChanged() {
+  clearStatusCache();
+  try {
+    localStorage.setItem(STATUS_EVENT_KEY, String(Date.now()));
+  } catch {
+    // ignore storage failures
+  }
+}
+
+export function getStatusEventKey() {
+  return STATUS_EVENT_KEY;
 }

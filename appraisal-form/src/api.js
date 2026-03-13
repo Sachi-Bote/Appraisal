@@ -78,6 +78,17 @@ const clearAuthAndRedirect = () => {
   sessionStorage.removeItem("loggedInUser");
   sessionStorage.removeItem("userProfile");
   sessionStorage.removeItem("role");
+  sessionStorage.removeItem("lastRoute");
+
+  Object.keys(sessionStorage).forEach((key) => {
+    if (
+      key.startsWith("hod.") ||
+      key.startsWith("faculty.") ||
+      key.startsWith("principal.")
+    ) {
+      sessionStorage.removeItem(key);
+    }
+  });
 
   window.location.replace("/login");
 };

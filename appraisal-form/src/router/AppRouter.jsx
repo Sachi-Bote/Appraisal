@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
 import { lazy, Suspense, useEffect } from "react";
 
 const Login = lazy(() => import("../pages/Login"));
@@ -21,6 +21,43 @@ function RouteFallback() {
   );
 }
 
+function getStoredRole() {
+  try {
+    const rawUser =
+      localStorage.getItem("loggedInUser") || sessionStorage.getItem("loggedInUser");
+    const parsedUser = rawUser ? JSON.parse(rawUser) : null;
+    return String(
+      parsedUser?.role ||
+      localStorage.getItem("role") ||
+      sessionStorage.getItem("role") ||
+      ""
+    )
+      .trim()
+      .toUpperCase();
+  } catch {
+    return "";
+  }
+}
+
+function ProtectedRoute({ allowedRoles }) {
+  const role = getStoredRole();
+  const accessToken =
+    localStorage.getItem("access") ||
+    sessionStorage.getItem("access") ||
+    localStorage.getItem("access_token") ||
+    sessionStorage.getItem("access_token");
+
+  if (!accessToken) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!allowedRoles.includes(role)) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
+}
+
 export default function AppRouter() {
   const location = useLocation();
 
@@ -41,15 +78,21 @@ export default function AppRouter() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
-        <Route path="/faculty/dashboard" element={<FacultyDashboard />} />
-        <Route path="/faculty/profile" element={<FacultyProfile />} />
-        <Route path="/faculty/appraisal" element={<AppraisalForm />} />
-        <Route path="/faculty/appraisal/status" element={<FacultyAppraisalStatus />} />
+        <Route element={<ProtectedRoute allowedRoles={["FACULTY"]} />}>
+          <Route path="/faculty/dashboard" element={<FacultyDashboard />} />
+          <Route path="/faculty/profile" element={<FacultyProfile />} />
+          <Route path="/faculty/appraisal" element={<AppraisalForm />} />
+          <Route path="/faculty/appraisal/status" element={<FacultyAppraisalStatus />} />
+        </Route>
 
-        <Route path="/hod/dashboard" element={<HODDashboard />} />
-        <Route path="/hod/appraisal-form" element={<AppraisalForm />} />
+        <Route element={<ProtectedRoute allowedRoles={["HOD"]} />}>
+          <Route path="/hod/dashboard" element={<HODDashboard />} />
+          <Route path="/hod/appraisal-form" element={<AppraisalForm />} />
+        </Route>
 
-        <Route path="/principal/dashboard" element={<PrincipalDashboard />} />
+        <Route element={<ProtectedRoute allowedRoles={["PRINCIPAL"]} />}>
+          <Route path="/principal/dashboard" element={<PrincipalDashboard />} />
+        </Route>
       </Routes>
     </Suspense>
   );
