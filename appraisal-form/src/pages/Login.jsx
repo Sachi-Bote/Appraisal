@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import API from "../api";
 import "../styles/Login.css";
 import useSessionState from "../hooks/useSessionState";
+import collegeLogo from "../assets/college-logo.png";
 
 const AUTH_KEYS = [
   "access",
@@ -196,65 +197,83 @@ export default function Login() {
 
   return (
     <div className="login-container">
-      <div className="login-card">
-        <div className="header-section">
-          <h1 className="app-title">Staff Appraisal System</h1>
-          <p className="app-subtitle">Login to continue</p>
+      <section className="login-showcase" aria-label="College login page">
+        <div className="branding-panel">
+          <div className="branding-content">
+            <img
+              src={collegeLogo}
+              alt="MES Wadia College of Engineering logo"
+              className="college-logo"
+            />
+            <p className="brand-kicker">Modern Education Society&apos;s</p>
+            <h1 className="college-name">
+              Wadia College of Engineering
+            </h1>
+          </div>
         </div>
 
-        {error && <div className="error-message">{error}</div>}
+        <div className="form-panel">
+          <div className="login-card">
+            <div className="header-section">
+              <p className="system-name">STAFF APPRAISAL SYSTEM</p>
+              <h2 className="app-title">Sign in to get started</h2>
+            </div>
 
-        <form onSubmit={handleLogin} className="login-form">
-          <div className="form-group">
-            <label htmlFor="email">Username or Email</label>
-            <input
-              id="email"
-              type="text"
-              placeholder="username or name@institution.ac.in"
-              value={email}
-              onChange={(e) => setEmail(e.target.value.trim())}
-              className="form-control"
-              required
-              autoFocus
-            />
+            {error && <div className="error-message">{error}</div>}
+
+            <form onSubmit={handleLogin} className="login-form">
+              <div className="form-group">
+                <label htmlFor="email">Username or Email</label>
+                <input
+                  id="email"
+                  type="text"
+                  placeholder="username or name@institution.ac.in"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value.trim())}
+                  className="form-control"
+                  required
+                  autoFocus
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="form-control"
+                  required
+                />
+              </div>
+
+              <div className="form-options">
+                <label className="remember-label">
+                  <input
+                    type="checkbox"
+                    checked={remember}
+                    onChange={() => setRemember(!remember)}
+                  />
+                  <span>Remember me</span>
+                </label>
+
+                <button
+                  type="button"
+                  className="forgot-link"
+                  onClick={() => navigate("/forgot-password")}
+                >
+                  Forgot password?
+                </button>
+              </div>
+
+              <button type="submit" className="btn btn-primary">
+                Login
+              </button>
+            </form>
           </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="form-control"
-              required
-            />
-          </div>
-
-          <div className="form-options">
-            <label className="remember-label">
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={() => setRemember(!remember)}
-              />
-              <span>Remember me</span>
-            </label>
-
-            <button
-              type="button"
-              className="forgot-link"
-              onClick={() => navigate("/forgot-password")}
-            >
-              Forgot password?
-            </button>
-          </div>
-
-          <button type="submit" className="btn btn-primary">
-            Sign In
-          </button>
-        </form>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }

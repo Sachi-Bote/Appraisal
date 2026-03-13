@@ -17,7 +17,9 @@ export function buildApiUrl(pathOrUrl = "") {
   if (/^https?:\/\//i.test(raw)) {
     return raw
       .replace("http://127.0.0.1:8000", BACKEND_ORIGIN)
-      .replace("http://localhost:8000", BACKEND_ORIGIN);
+      .replace("http://localhost:8000", BACKEND_ORIGIN)
+      .replace("http://backend:8000", BACKEND_ORIGIN)
+      .replace("http://appraisal_backend:8000", BACKEND_ORIGIN);
   }
 
   if (raw.startsWith("/api/")) return `${BACKEND_ORIGIN}${raw}`;

@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     gcc \
     pkg-config \
+    libxfixes3 \
     libcairo2-dev \
     libpango1.0-dev \
     libgdk-pixbuf-xlib-2.0-dev \

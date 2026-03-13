@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../api";
+import API, { clearAuthAndRedirect } from "../api";
 import "../styles/HODDashboard.css";
 import AppraisalSummary from "../components/AppraisalSummary";
 import useSessionState from "../hooks/useSessionState";
@@ -616,9 +616,7 @@ export default function PrincipalDashboard() {
           <button
             className="logout-btn"
             onClick={() => {
-              localStorage.clear();
-            sessionStorage.clear();
-            navigate("/login");
+              clearAuthAndRedirect();
             }}
           >
             Logout

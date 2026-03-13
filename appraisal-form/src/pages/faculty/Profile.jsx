@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../styles/profile.css";
-import API from "../../api";
+import API, { clearAuthAndRedirect } from "../../api";
 import useSessionState from "../../hooks/useSessionState";
+import { buildApiUrl } from "../../utils/apiUrl";
 
 const DEFAULT_AVATAR = "https://i.pravatar.cc/300?img=12";
+const resolveProfileImageUrl = (url) => {
+  const raw = String(url || "").trim();
+  if (!raw) return DEFAULT_AVATAR;
+  return buildApiUrl(raw);
+};
 const withCacheBust = (url) => (url && url !== DEFAULT_AVATAR ? `${url}${url.includes("?") ? "&" : "?"}v=${Date.now()}` : (url || DEFAULT_AVATAR));
 const formatDateDisplay = (value) => {
   const text = String(value || "").trim();
@@ -90,7 +96,7 @@ export default function Profile() {
       const normalizedFields = normalizeProfileFields(profileFields);
       setProfileData(normalizedFields);
       setEditData(normalizedFields);
-      const imageUrl = withCacheBust(profile_image || DEFAULT_AVATAR);
+      const imageUrl = withCacheBust(resolveProfileImageUrl(profile_image));
       setProfileImage(imageUrl);
       setSavedProfileImage(imageUrl);
       setProfileImageFile(null);
@@ -291,7 +297,7 @@ export default function Profile() {
       const normalizedFields = normalizeProfileFields(profileFields);
       setProfileData(normalizedFields);
       setEditData(normalizedFields);
-      const imageUrl = withCacheBust(profile_image || DEFAULT_AVATAR);
+      const imageUrl = withCacheBust(resolveProfileImageUrl(profile_image));
       setProfileImage(imageUrl);
       setSavedProfileImage(imageUrl);
       setProfileImageFile(null);
@@ -348,7 +354,7 @@ export default function Profile() {
       setProfileData(normalizedFields);
       setEditData(normalizedFields);
       if (profile_image) {
-        const imageUrl = withCacheBust(profile_image);
+        const imageUrl = withCacheBust(resolveProfileImageUrl(profile_image));
         setProfileImage(imageUrl);
         setSavedProfileImage(imageUrl);
       }
@@ -584,9 +590,7 @@ export default function Profile() {
               <button
                 className="logout-yes-btn"
                 onClick={() => {
-                  localStorage.removeItem("loggedInUser");
-                  localStorage.removeItem("userProfile");
-                  navigate("/login");
+                  clearAuthAndRedirect();
                 }}
               >
                 Log Out

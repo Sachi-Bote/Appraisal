@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../api";
-import "../styles/HODDashboard.css";
+import API, { clearAuthAndRedirect } from "../api";
 import "../styles/dashboard.css";
+import "../styles/HODDashboard.css";
 import AppraisalSummary from "../components/AppraisalSummary";
 import useSessionState from "../hooks/useSessionState";
 import { downloadWithAuth, getAccessToken } from "../utils/downloadFile";
@@ -84,6 +84,11 @@ export default function HODDashboard() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [profileSummary, setProfileSummary] = useState({
+    full_name: "",
+    designation: "",
+    department: "",
+  });
 
   /* ================= HOD SELF APPRAISAL ================= */
   const [hodOwnAppraisal, setHodOwnAppraisal] = useState({
@@ -104,6 +109,24 @@ export default function HODDashboard() {
     if (stored) setHodOwnAppraisal(JSON.parse(stored));
   }, []);
 
+  useEffect(() => {
+    const fetchProfileSummary = async () => {
+      try {
+        const res = await API.get("me/");
+        const data = res?.data || {};
+        setProfileSummary({
+          full_name: data.full_name || data.name || data.username || "Faculty Member",
+          designation: data.designation || "Head of Department",
+          department: data.department || "Department",
+        });
+      } catch (err) {
+        console.error("Failed to load profile summary", err);
+      }
+    };
+
+    fetchProfileSummary();
+  }, []);
+
   /* ================= FETCH APPRAISALS ================= */
   useEffect(() => {
     const fetchAppraisals = async () => {
@@ -111,7 +134,7 @@ export default function HODDashboard() {
         setLoading(true);
         setError("");
 
-        // 1️⃣ Fetch Faculty submissions to review
+        // 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£ Fetch Faculty submissions to review
         const res = await API.get("hod/appraisals/");
         const data = res.data || [];
 
@@ -121,7 +144,7 @@ export default function HODDashboard() {
 
         setSubmissions({ pending, processed });
 
-        // 2️⃣ Fetch HOD's OWN appraisals
+        // 2ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£ Fetch HOD's OWN appraisals
         const ownRes = await API.get("hod/appraisals/me/");
         const ownData = ownRes.data || [];
         if (ownData.length > 0) {
@@ -309,9 +332,7 @@ export default function HODDashboard() {
 
   /* ================= AUTH ================= */
   const handleLogout = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    navigate("/login");
+    clearAuthAndRedirect();
   };
 
   /* ================= HOD SELF APPRAISAL ================= */
@@ -426,6 +447,20 @@ export default function HODDashboard() {
     }
   };
 
+  const pendingCount = submissions.pending.length;
+  const processedCount = submissions.processed.length;
+  const downloadCount = hodOwnAppraisal.actual_status === "FINALIZED" ? 2 : 0;
+  const ownStatusLabel =
+    hodOwnAppraisal.actual_status?.replace(/_/g, " ") ||
+    (hodOwnAppraisal.status === "submitted"
+      ? "Submitted"
+      : hodOwnAppraisal.status === "in_progress"
+        ? "In Progress"
+        : "Not Started");
+  const heroName = profileSummary.full_name || "Faculty Member";
+  const heroDesignation = profileSummary.designation || "Head of Department";
+  const heroDepartment = profileSummary.department || "Department";
+
 
 
   /* ================= REVIEW SCREEN ================= */
@@ -433,7 +468,7 @@ export default function HODDashboard() {
     return (
       <div className="hod-container">
         <button className="back-btn" onClick={() => setSelectedSubmission(null)}>
-          ← Back to Dashboard
+          Back to Dashboard
         </button>
 
         <div className="card">
@@ -676,159 +711,243 @@ export default function HODDashboard() {
   /* ================= MAIN DASHBOARD ================= */
   return (
     <div className="hod-container">
-      <div className="hod-header-card">
-        <div>
-          <h1>HOD Dashboard</h1>
-          <p className="subtitle">Faculty Review & Self Appraisal</p>
-        </div>
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
-
-      <div className="dashboard-grid">
-        {/* PROFILE */}
-        <div
-          className="dashboard-card"
-          onClick={() => navigate("/faculty/profile")}
-        >
-          <h3>My Profile</h3>
-          <p>View official details and update personal information</p>
-        </div>
-
-        {/* APPRAISAL FORM */}
-        <div
-          className={`dashboard-card ${hodOwnAppraisal.status === "submitted" ? "disabled" : ""}`}
-          onClick={() => {
-            if (hodOwnAppraisal.status !== "submitted") handleFillOwnAppraisal();
-          }}
-        >
-          <h3>My Appraisal Form</h3>
-          <p>
-            {hodOwnAppraisal.actual_status === "RETURNED_BY_PRINCIPAL"
-              ? "Returned for Changes - Please edit and resubmit"
-              : hodOwnAppraisal.status === "not_started"
-                ? "Fill and submit your annual faculty appraisal"
-                : hodOwnAppraisal.status === "in_progress"
-                  ? "Continue filling your appraisal form"
-                  : "Appraisal already submitted"}
-          </p>
-
-          {(hodOwnAppraisal.status === "in_progress" || hodOwnAppraisal.actual_status === "RETURNED_BY_PRINCIPAL") && (
-            <button className="approve-btn" style={{ marginTop: '12px', height: '40px', padding: '0 16px', fontSize: '14px' }} onClick={(e) => { e.stopPropagation(); navigate("/hod/appraisal-form"); }}>
-              {hodOwnAppraisal.actual_status === "RETURNED_BY_PRINCIPAL" ? "✍️ Edit & Resubmit" : "📤 Submit to Principal"}
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="tab-row" style={{ marginTop: '32px' }}>
-        <button
-          className={activeTab === "pending" ? "tab active" : "tab"}
-          onClick={() => setActiveTab("pending")}
-        >
-          Pending
-        </button>
-        <button
-          className={activeTab === "processed" ? "tab active" : "tab"}
-          onClick={() => setActiveTab("processed")}
-        >
-          Processed
-        </button>
-      </div>
-
-      {/* SUBMISSION HISTORY (HOD OWN) moved down */}
-      {hodOwnAppraisal.appraisal_id && (
-        <div className="dashboard-history-section" style={{ marginBottom: '32px' }}>
-          <h3>My Submission History</h3>
-          <div className="history-list">
-            <div className="history-item">
-              <div className="history-info">
-                <span className="history-year">AY {hodOwnAppraisal.academicYear}</span>
-                <span className={`history-status ${hodOwnAppraisal.actual_status?.toLowerCase().replace(/_/g, "-")}`}>
-                  {hodOwnAppraisal.actual_status?.replace(/_/g, " ")}
-                </span>
-              </div>
-              <button
-                className="view-btn"
-                onClick={() => navigate("/faculty/appraisal/status")}
-              >
-                Track Status
-              </button>
+      <div className="hod-shell">
+        <div className="hod-topbar">
+          <div className="topbar-brand">
+            <div className="topbar-brand-icon">SA</div>
+            <div className="topbar-brand-text">
+              <span className="topbar-brand-title">Staff Appraisal System</span>
+              <span className="topbar-brand-subtitle">HOD Review Console</span>
             </div>
-
-            {/* PDF Download Buttons for HOD's Own Finalized Appraisal */}
-            {hodOwnAppraisal.actual_status === "FINALIZED" && (
-              <div style={{ marginTop: '12px', padding: '12px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #86efac' }}>
-                <p style={{ fontWeight: 'bold', marginBottom: '8px', color: '#166534', fontSize: '14px' }}>📄 Download Your Appraisal PDFs:</p>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <button type="button" onClick={() => downloadPdf(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/sppu-enhanced/`, `SPPU_${hodOwnAppraisal.academicYear}.pdf`)} style={{ padding: '8px 16px', background: '#3b82f6', color: 'white', borderRadius: '6px', border: 'none', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }}>SPPU PDF</button>
-                  <button type="button" onClick={() => downloadPdf(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/pbas-enhanced/`, `PBAS_${hodOwnAppraisal.academicYear}.pdf`)} style={{ padding: '8px 16px', background: '#8b5cf6', color: 'white', borderRadius: '6px', border: 'none', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }}>PBAS PDF</button>
-                </div>
-              </div>
-            )}
+          </div>
+          <div className="topbar-nav">
+            <button type="button" className="topbar-nav-link topbar-nav-link-active">
+              Dashboard
+            </button>
+            <button type="button" className="topbar-nav-link" onClick={() => navigate("/faculty/profile")}>
+              My Profile
+            </button>
+            <button type="button" className="topbar-nav-link" onClick={handleFillOwnAppraisal}>
+              Appraisal Form
+            </button>
+            <button type="button" className="topbar-nav-link" onClick={() => setActiveTab("pending")}>
+              Reviews
+            </button>
+            <button type="button" className="topbar-nav-link" onClick={() => navigate("/faculty/appraisal/status")}>
+              Downloads
+            </button>
+          </div>
+          <div className="topbar-actions">
+            <span className="topbar-badge">AY {hodOwnAppraisal.academicYear || "2024-25"}</span>
+            <button className="logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
           </div>
         </div>
-      )}
 
-      {activeTab === "pending" && (
-        <div className="list">
-          {loading && <p>Loading appraisals...</p>}
-          {error && <p className="error">{error}</p>}
+        <section className="hod-hero">
+          <div className="hod-hero-copy">
+            <p className="hero-greeting">Good morning,</p>
+            <h1>{heroName}</h1>
+            <p className="subtitle">
+              {heroDesignation} <span>&middot;</span> {heroDepartment} <span>&middot;</span> SPPU
+            </p>
+          </div>
+          <div className="hod-hero-status">
+            <span className="hero-status-pill">AY {hodOwnAppraisal.academicYear || "2024-25"} Active</span>
+          </div>
+        </section>
 
-          {!loading && submissions.pending.length === 0 && (
-            <p>No pending appraisals.</p>
-          )}
-
-          {submissions.pending.map((sub) => (
-            <div className="list-card" key={sub.appraisal_id}>
-              <div>
-                <h3>{sub.faculty_name}</h3>
-                <p>{sub.department} | {sub.academic_year}</p>
-              </div>
-              <button
-                className="primary-btn"
-                onClick={() => setSelectedSubmission(sub)}
-              >
-                👁 View
-              </button>
+        <section className="hod-stat-grid">
+          <article className="hod-stat-card hod-stat-card-green">
+            <div className="hod-stat-head">
+              <span className="hod-stat-label">My Appraisal</span>
             </div>
-          ))}
-        </div>
-      )}
+            <strong className="hod-stat-value">{ownStatusLabel}</strong>
+            <p className="hod-stat-meta">
+              {hodOwnAppraisal.actual_status === "RETURNED_BY_PRINCIPAL"
+                ? "Returned for correction and resubmission"
+                : hodOwnAppraisal.status === "in_progress"
+                  ? "Continue and submit your self-appraisal"
+                  : hodOwnAppraisal.status === "not_started"
+                    ? "Self-appraisal not started yet"
+                    : "Current self-appraisal status"}
+            </p>
+          </article>
 
-      {activeTab === "processed" && (
-        <div className="list">
-          {submissions.processed.length === 0 && (
-            <p>No processed appraisals.</p>
-          )}
+          <article className="hod-stat-card hod-stat-card-amber">
+            <div className="hod-stat-head">
+              <span className="hod-stat-label">Pending Reviews</span>
+            </div>
+            <strong className="hod-stat-value">{pendingCount}</strong>
+            <p className="hod-stat-meta">Faculty forms awaiting HOD action</p>
+          </article>
 
-          {submissions.processed.map((sub) => (
-            <div className="list-card" key={sub.appraisal_id}>
-              <div>
-                <h3>{sub.faculty_name}</h3>
-                <p>{sub.department} | {sub.academic_year}</p>
-                <span className={`status ${sub.status?.toLowerCase().replace(/_/g, "-")}`}>
-                  {sub.status?.replace(/_/g, " ")}
-                </span>
+          <article className="hod-stat-card hod-stat-card-blue">
+            <div className="hod-stat-head">
+              <span className="hod-stat-label">Processed</span>
+            </div>
+            <strong className="hod-stat-value">{processedCount}</strong>
+            <p className="hod-stat-meta">Reviews already handled in this cycle</p>
+          </article>
 
-                {/* PDF Download Buttons for Finalized Faculty Appraisals */}
-                {sub.status === "FINALIZED" && (
-                  <div style={{ marginTop: '10px' }}>
-                    <p style={{ fontWeight: 'bold', marginBottom: '5px', fontSize: '13px' }}>Download PDFs:</p>
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                      <button type="button" onClick={() => downloadPdf(`/api/appraisal/${sub.appraisal_id}/pdf/sppu-enhanced/`, `SPPU_${sub.academic_year}.pdf`)} style={{ padding: '6px 12px', background: '#3b82f6', color: 'white', borderRadius: '4px', border: 'none', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>SPPU</button>
-                      <button type="button" onClick={() => downloadPdf(`/api/appraisal/${sub.appraisal_id}/pdf/pbas-enhanced/`, `PBAS_${sub.academic_year}.pdf`)} style={{ padding: '6px 12px', background: '#8b5cf6', color: 'white', borderRadius: '4px', border: 'none', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>PBAS</button>
+          <article className="hod-stat-card hod-stat-card-violet">
+            <div className="hod-stat-head">
+              <span className="hod-stat-label">My Downloads</span>
+            </div>
+            <strong className="hod-stat-value">{downloadCount}</strong>
+            <p className="hod-stat-meta">SPPU and PBAS files available</p>
+          </article>
+        </section>
+
+        <section className="hod-main-grid">
+          <div className="hod-main-column">
+            <div className="dashboard-history-section dashboard-history-highlight hod-history-shell">
+              <div className="history-header">
+                <h3>My Submission History</h3>
+                <div className="tab-row hod-inline-tabs">
+                  <button className={activeTab === "pending" ? "tab active" : "tab"} onClick={() => setActiveTab("pending")}>
+                    Pending
+                  </button>
+                  <button className={activeTab === "processed" ? "tab active" : "tab"} onClick={() => setActiveTab("processed")}>
+                    Processed
+                  </button>
+                </div>
+              </div>
+
+              {hodOwnAppraisal.appraisal_id && (
+                <div className="history-list hod-own-history">
+                  <div className="history-item">
+                    <div className="history-info">
+                      <span className="history-year">AY {hodOwnAppraisal.academicYear}</span>
+                      <span className={`history-status ${hodOwnAppraisal.actual_status?.toLowerCase().replace(/_/g, "-")}`}>
+                        {hodOwnAppraisal.actual_status?.replace(/_/g, " ")}
+                      </span>
                     </div>
+                    <button className="view-btn" onClick={() => navigate("/faculty/appraisal/status")}>
+                      Track Status
+                    </button>
                   </div>
-                )}
-              </div>
+
+                  {hodOwnAppraisal.actual_status === "FINALIZED" && (
+                    <div className="history-download-panel">
+                      <p className="history-download-title">Download Your Appraisal PDFs</p>
+                      <div className="history-download-actions">
+                        <button type="button" className="history-download-btn history-download-btn-blue" onClick={() => downloadPdf(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/sppu-enhanced/`, `SPPU_${hodOwnAppraisal.academicYear}.pdf`)}>
+                          SPPU PDF
+                        </button>
+                        <button type="button" className="history-download-btn history-download-btn-violet" onClick={() => downloadPdf(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/pbas-enhanced/`, `PBAS_${hodOwnAppraisal.academicYear}.pdf`)}>
+                          PBAS PDF
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "pending" && (
+                <div className="list">
+                  {loading && <p>Loading appraisals...</p>}
+                  {error && <p className="error">{error}</p>}
+                  {!loading && submissions.pending.length === 0 && <p>No pending appraisals.</p>}
+                  {submissions.pending.map((sub) => (
+                    <div className="list-card" key={sub.appraisal_id}>
+                      <div>
+                        <h3>{sub.faculty_name}</h3>
+                        <p>{sub.department} | {sub.academic_year}</p>
+                      </div>
+                      <button className="primary-btn" onClick={() => setSelectedSubmission(sub)}>
+                        View Review
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {activeTab === "processed" && (
+                <div className="list">
+                  {submissions.processed.length === 0 && <p>No processed appraisals.</p>}
+                  {submissions.processed.map((sub) => (
+                    <div className="list-card" key={sub.appraisal_id}>
+                      <div>
+                        <h3>{sub.faculty_name}</h3>
+                        <p>{sub.department} | {sub.academic_year}</p>
+                        <span className={`status ${sub.status?.toLowerCase().replace(/_/g, "-")}`}>
+                          {sub.status?.replace(/_/g, " ")}
+                        </span>
+                        {sub.status === "FINALIZED" && (
+                          <div className="processed-download-row">
+                            <p className="processed-download-title">Downloads</p>
+                            <div className="processed-download-actions">
+                              <button type="button" className="history-download-btn history-download-btn-blue" onClick={() => downloadPdf(`/api/appraisal/${sub.appraisal_id}/pdf/sppu-enhanced/`, `SPPU_${sub.academic_year}.pdf`)}>SPPU</button>
+                              <button type="button" className="history-download-btn history-download-btn-violet" onClick={() => downloadPdf(`/api/appraisal/${sub.appraisal_id}/pdf/pbas-enhanced/`, `PBAS_${sub.academic_year}.pdf`)}>PBAS</button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+
+          <aside className="quick-actions-card">
+            <div className="quick-actions-header">
+              <h3>Quick Actions</h3>
+              <p>Common HOD tasks and shortcuts</p>
+            </div>
+            <button type="button" className="quick-action-item" onClick={() => setActiveTab("pending")}>
+              <span className="quick-action-icon quick-action-icon-amber">RV</span>
+              <span className="quick-action-text">
+                <strong>Review Pending Forms</strong>
+                <small>{pendingCount} forms awaiting review</small>
+              </span>
+              <span className="quick-action-arrow">&gt;</span>
+            </button>
+            <button
+              type="button"
+              className={`quick-action-item ${hodOwnAppraisal.actual_status === "FINALIZED" ? "" : "quick-action-disabled"}`}
+              onClick={() => {
+                if (hodOwnAppraisal.actual_status === "FINALIZED") {
+                  downloadPdf(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/sppu-enhanced/`, `SPPU_${hodOwnAppraisal.academicYear}.pdf`);
+                }
+              }}
+            >
+              <span className="quick-action-icon quick-action-icon-blue">SP</span>
+              <span className="quick-action-text">
+                <strong>Download SPPU PDF</strong>
+                <small>{hodOwnAppraisal.actual_status === "FINALIZED" ? "Ready for download" : "Available after finalization"}</small>
+              </span>
+              <span className="quick-action-arrow">&gt;</span>
+            </button>
+            <button
+              type="button"
+              className={`quick-action-item ${hodOwnAppraisal.actual_status === "FINALIZED" ? "" : "quick-action-disabled"}`}
+              onClick={() => {
+                if (hodOwnAppraisal.actual_status === "FINALIZED") {
+                  downloadPdf(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/pbas-enhanced/`, `PBAS_${hodOwnAppraisal.academicYear}.pdf`);
+                }
+              }}
+            >
+              <span className="quick-action-icon quick-action-icon-violet">PB</span>
+              <span className="quick-action-text">
+                <strong>Download PBAS PDF</strong>
+                <small>{hodOwnAppraisal.actual_status === "FINALIZED" ? "Ready for download" : "Available after finalization"}</small>
+              </span>
+              <span className="quick-action-arrow">&gt;</span>
+            </button>
+            <button type="button" className="quick-action-item quick-action-item-featured" onClick={() => navigate("/faculty/appraisal/status")}>
+              <span className="quick-action-icon quick-action-icon-green">TR</span>
+              <span className="quick-action-text">
+                <strong>Track My Appraisal</strong>
+                <small>Open detailed submission status</small>
+              </span>
+              <span className="quick-action-arrow">&gt;</span>
+            </button>
+          </aside>
+        </section>
+      </div>
     </div>
   );
 }
-
-

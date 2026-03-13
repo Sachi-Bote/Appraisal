@@ -2025,14 +2025,6 @@ export default function FacultyAppraisalForm() {
     <div className="form-container">
       <div className="form-header">
         <h2 className="form-title">Faculty Appraisal Form</h2>
-        <div className="header-actions">
-          <button
-            className="btn-logout"
-            onClick={() => navigate("/login")}
-          >
-            Logout
-          </button>
-        </div>
       </div>
 
       {processingNotice && (

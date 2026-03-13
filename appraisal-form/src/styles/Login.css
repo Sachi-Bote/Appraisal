@@ -1,51 +1,150 @@
-/* PAGE */
+:root {
+  --login-blue: #0d6fd1;
+  --login-blue-dark: #084f9e;
+  --login-gold: #f3cc11;
+  --login-ink: #132238;
+  --login-muted: #526075;
+  --login-surface: #f3f4f6;
+  --login-line: #d5dce5;
+}
+
 .login-container {
   min-height: 100vh;
- 
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(13, 111, 209, 0.08), transparent 28%),
+    linear-gradient(180deg, #edf2f7 0%, #e4ebf3 100%);
 }
 
-/* CARD */
-.login-card {
-  background: white;
-  width: 420px;
-  padding: 40px;
-  border-radius: 18px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
+.login-showcase {
+  width: min(1240px, 100%);
+  min-height: min(760px, calc(100vh - 48px));
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  border-radius: 36px;
+  overflow: hidden;
+  border: 1px solid rgba(19, 34, 56, 0.08);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+  background: #ffffff;
 }
 
-/* HEADER */
-.header-section {
+.branding-panel {
+  display: grid;
+  place-items: center;
+  padding: 48px 56px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(248, 250, 252, 0.98)),
+    linear-gradient(135deg, #edf2f7, #f8fafc);
+  position: relative;
+}
+
+.branding-panel::before,
+.branding-panel::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(13, 111, 209, 0.08);
+  background: rgba(13, 111, 209, 0.03);
+}
+
+.branding-panel::before {
+  width: 240px;
+  height: 240px;
+  top: -90px;
+  left: -70px;
+}
+
+.branding-panel::after {
+  width: 180px;
+  height: 180px;
+  bottom: -60px;
+  right: 36px;
+}
+
+.branding-content {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
   text-align: center;
-  margin-bottom: 30px;
+}
+
+.college-logo {
+  width: min(290px, 66%);
+  height: auto;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 12px 24px rgba(15, 23, 42, 0.08));
+}
+
+.brand-kicker {
+  margin: 8px 0 6px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #44556d;
+}
+
+.college-name {
+  margin: 0;
+  font-family: Cambria, Georgia, "Times New Roman", serif;
+  font-size: clamp(1.45rem, 1.6vw, 1.85rem);
+  line-height: 1.22;
+  letter-spacing: 0.01em;
+  color: var(--login-ink);
+  font-weight: 700;
+}
+
+.system-name {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: #335a86;
+  text-transform: uppercase;
+}
+
+.form-panel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 48px 36px;
+  background:
+    radial-gradient(circle at bottom right, transparent 0 18%, rgba(255, 255, 255, 0.12) 18.2%, transparent 18.8%),
+    radial-gradient(circle at bottom right, transparent 0 28%, rgba(255, 255, 255, 0.14) 28.2%, transparent 28.8%),
+    linear-gradient(180deg, #0d6fd1 0%, #0a5fb8 100%);
+}
+
+.login-card {
+  width: min(460px, 100%);
+  padding: 44px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  background: rgba(248, 250, 252, 0.97);
+  box-shadow: 0 24px 50px rgba(0, 40, 92, 0.18);
+}
+
+.header-section {
+  margin-bottom: 26px;
 }
 
 .app-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1e293b;
-}
-
-.app-subtitle {
-  color: #64748b;
-  margin-top: 6px;
-}
-
-/* ERROR */
-.error-message {
-  background: #fee2e2;
-  color: #b91c1c;
-  padding: 12px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  text-align: center;
+  margin: 0;
+  font-size: 1.15rem;
   font-weight: 500;
+  color: #42546b;
 }
 
-/* FORM */
+.error-message {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fee2e2;
+  color: #b42318;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
 .login-form {
   display: flex;
   flex-direction: column;
@@ -55,54 +154,67 @@
 .form-group {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
 .form-group label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #475569;
-  margin-bottom: 6px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #314156;
 }
 
 .form-control {
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid #cbd5e1;
-  font-size: 15px;
+  width: 100%;
+  min-height: 58px;
+  padding: 0 20px;
+  border: 1.5px solid var(--login-line);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--login-ink);
+  font-size: 1rem;
   outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.form-control::placeholder {
+  color: #9aa6b6;
 }
 
 .form-control:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--login-blue);
+  box-shadow: 0 0 0 5px rgba(15, 120, 224, 0.14);
+  transform: translateY(-1px);
 }
 
-/* OPTIONS */
 .form-options {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
 }
 
+.remember-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  color: var(--login-muted);
+}
 
 .remember-label input {
   width: 16px;
   height: 16px;
   margin: 0;
-  padding: 0;
-  flex: 0 0 16px;
-  accent-color: #2563eb;
-}
-
-.remember-label span {
-  line-height: 1.2;
+  accent-color: var(--login-blue);
 }
 
 .forgot-link {
-  background: none;
+  padding: 0;
   border: none;
-  color: #2563eb;
-  font-size: 14px;
+  background: none;
+  color: var(--login-blue-dark);
+  font-size: 0.94rem;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -110,48 +222,78 @@
   text-decoration: underline;
 }
 
-.remember-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  color: #475569;
-}
-/* BUTTON */
 .btn-primary {
   width: 100%;
-  padding: 14px;
-  border-radius: 12px;
+  min-height: 60px;
   border: none;
-  background: #2563eb;
-  color: white;
-  font-size: 15px;
-  font-weight: 600;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--login-blue) 0%, var(--login-blue-dark) 100%);
+  color: #ffffff;
+  font-size: 1.06rem;
+  font-weight: 700;
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-primary:hover {
-  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(10, 88, 184, 0.28);
 }
 
-/* SIGNUP */
-.signup-prompt {
-  margin-top: 20px;
-  text-align: center;
-  font-size: 14px;
-  color: #475569;
+.btn-primary:active {
+  transform: translateY(0);
 }
 
-.signup-link {
-  background: none;
-  border: none;
-  color: #2563eb;
-  font-weight: 600;
-  cursor: pointer;
+@media (max-width: 980px) {
+  .login-showcase {
+    grid-template-columns: 1fr;
+  }
+
+  .branding-panel {
+    padding: 40px 28px 20px;
+  }
+
+  .form-panel {
+    padding: 20px 20px 32px;
+  }
 }
 
-.signup-link:hover {
-  text-decoration: underline;
+@media (max-width: 640px) {
+  .login-container {
+    padding: 12px;
+  }
+
+  .login-showcase {
+    min-height: auto;
+    border-radius: 24px;
+  }
+
+  .college-logo {
+    width: min(220px, 58%);
+  }
+
+  .college-name {
+    font-size: 1.2rem;
+  }
+
+  .brand-kicker {
+    font-size: 0.9rem;
+  }
+
+  .system-name {
+    font-size: 0.9rem;
+    letter-spacing: 0.18em;
+  }
+
+  .login-card {
+    padding: 28px 22px;
+    border-radius: 20px;
+  }
+
+  .form-options {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 

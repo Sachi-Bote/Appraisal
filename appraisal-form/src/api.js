@@ -13,7 +13,9 @@ if (typeof window !== "undefined" && typeof window.fetch === "function") {
     const rewrite = (url) =>
       url
         .replace("http://127.0.0.1:8000", BACKEND_ORIGIN)
-        .replace("http://localhost:8000", BACKEND_ORIGIN);
+        .replace("http://localhost:8000", BACKEND_ORIGIN)
+        .replace("http://backend:8000", BACKEND_ORIGIN)
+        .replace("http://appraisal_backend:8000", BACKEND_ORIGIN);
 
     if (typeof input === "string") {
       return originalFetch(rewrite(input), init);
@@ -174,5 +176,6 @@ setupResponseInterceptor(axios);
 
 export default API;
 export { API_BASE_URL, BACKEND_ORIGIN, buildApiUrl };
+export { clearAuthAndRedirect };
 
 
