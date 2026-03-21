@@ -688,92 +688,133 @@ export default function PrincipalDashboard() {
           </div>
         </section>
 
-      <div className="tab-row" style={{ marginTop: "16px" }}>
-        <button
-          className={`tab ${activeTab === "pending" ? "active" : ""}`}
-          onClick={() => setActiveTab("pending")}
-        >
-          Pending Approvals ({submissions.pending.length})
-        </button>
-        <button
-          className={`tab ${activeTab === "processed" ? "active" : ""}`}
-          onClick={() => setActiveTab("processed")}
-        >
-          Processed ({submissions.processed.length})
-        </button>
-      </div>
+        <section className="hod-stat-grid" style={{ padding: 0, marginTop: "16px", gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+          <article className="hod-stat-card hod-stat-card-blue">
+            <div className="hod-stat-head"><span className="hod-stat-label">Total Records</span></div>
+            <strong className="hod-stat-value">{submissions.pending.length + submissions.processed.length}</strong>
+            <p className="hod-stat-meta">Faculty appraisals in current view</p>
+          </article>
+          <article className="hod-stat-card hod-stat-card-amber">
+            <div className="hod-stat-head"><span className="hod-stat-label">Pending Approval</span></div>
+            <strong className="hod-stat-value">{submissions.pending.length}</strong>
+            <p className="hod-stat-meta">Requires principal action</p>
+          </article>
+          <article className="hod-stat-card hod-stat-card-green">
+            <div className="hod-stat-head"><span className="hod-stat-label">Processed</span></div>
+            <strong className="hod-stat-value">{submissions.processed.length}</strong>
+            <p className="hod-stat-meta">Reviewed/approved items</p>
+          </article>
+          <article className="hod-stat-card hod-stat-card-violet">
+            <div className="hod-stat-head"><span className="hod-stat-label">HOD Submissions</span></div>
+            <strong className="hod-stat-value">{[...submissions.pending, ...submissions.processed].filter((x) => x.is_hod_appraisal).length}</strong>
+            <p className="hod-stat-meta">HOD self appraisals in list</p>
+          </article>
+        </section>
 
-      {loading && <p className="empty">Loading…</p>}
-      {error && <p className="empty">{error}</p>}
+        <section className="hod-main-grid" style={{ padding: 0, gridTemplateColumns: "1fr 320px", marginTop: "14px" }}>
+          <div className="dashboard-history-section" style={{ marginTop: 0, padding: 0, overflow: "hidden" }}>
+            <div className="tab-row" style={{ margin: 0, borderRadius: 0, boxShadow: "none", borderLeft: "none", borderRight: "none", borderTop: "none" }}>
+              <button
+                className={`tab ${activeTab === "pending" ? "active" : ""}`}
+                onClick={() => setActiveTab("pending")}
+              >
+                Pending ({submissions.pending.length})
+              </button>
+              <button
+                className={`tab ${activeTab === "processed" ? "active" : ""}`}
+                onClick={() => setActiveTab("processed")}
+              >
+                Processed ({submissions.processed.length})
+              </button>
+            </div>
 
-      <div className="list">
-        {activeTab === "pending" &&
-          (submissions.pending.length === 0 ? (
-            <p className="empty">No pending approvals</p>
-          ) : (
-            submissions.pending.map((s) => (
-              <div className="list-card" key={s.id}>
-                <div>
-                  <h3>{s.faculty_name}</h3>
-                  <p>{s.department}</p>
-                  <p>Academic Year: {s.academic_year}</p>
-                  {s.is_hod_appraisal && (
-                    <span className="badge-hod" style={{ background: '#6366f1', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', display: 'inline-block', marginBottom: '8px' }}>
-                      HOD SUBMISSION
-                    </span>
-                  )}
-                  <span className="status pending">
-                    Pending Final Approval
-                  </span>
-                </div>
-                <button className="primary-btn" onClick={() => setSelected(s)}>
-                  View
-                </button>
+            <div style={{ padding: "12px 16px", borderBottom: "1px solid #e5e9f2", background: "#fff" }}>
+              <input
+                type="text"
+                placeholder="Search faculty by name or department"
+                style={{ width: "100%", height: "38px", borderRadius: "10px", border: "1px solid #d5dce5", padding: "0 12px", font: "inherit" }}
+              />
+            </div>
+
+            {loading && <p className="empty">Loading…</p>}
+            {error && <p className="empty">{error}</p>}
+
+            {!loading && !error && (
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr style={{ background: "#f7fafd", borderBottom: "1px solid #e5e9f2" }}>
+                      <th style={{ textAlign: "left", padding: "11px 14px", fontSize: "11px", color: "#6b7280", textTransform: "uppercase" }}>Faculty</th>
+                      <th style={{ textAlign: "left", padding: "11px 14px", fontSize: "11px", color: "#6b7280", textTransform: "uppercase" }}>Department</th>
+                      <th style={{ textAlign: "left", padding: "11px 14px", fontSize: "11px", color: "#6b7280", textTransform: "uppercase" }}>AY</th>
+                      <th style={{ textAlign: "left", padding: "11px 14px", fontSize: "11px", color: "#6b7280", textTransform: "uppercase" }}>Status</th>
+                      <th style={{ textAlign: "left", padding: "11px 14px", fontSize: "11px", color: "#6b7280", textTransform: "uppercase" }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(activeTab === "pending" ? submissions.pending : submissions.processed).map((s) => (
+                      <tr key={`${activeTab}-${s.id}`} style={{ borderBottom: "1px solid #edf1f7" }}>
+                        <td style={{ padding: "12px 14px", fontSize: "13px", fontWeight: 600 }}>{s.faculty_name}</td>
+                        <td style={{ padding: "12px 14px", fontSize: "13px", color: "#6b7280" }}>{s.department}</td>
+                        <td style={{ padding: "12px 14px", fontSize: "13px", color: "#6b7280" }}>{s.academic_year}</td>
+                        <td style={{ padding: "12px 14px" }}>
+                          <span className={`status ${s.status?.toLowerCase()}`}>{s.status?.replace(/_/g, " ")}</span>
+                        </td>
+                        <td style={{ padding: "12px 14px" }}>
+                          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                            {(activeTab === "pending") && (
+                              <button className="primary-btn" style={{ marginTop: 0, height: "34px", padding: "0 14px" }} onClick={() => setSelected(s)}>
+                                Review
+                              </button>
+                            )}
+                            {activeTab === "processed" && s.status === "FINALIZED" && (
+                              <>
+                                <button type="button" className="view-btn" onClick={() => downloadPdf(`/api/appraisal/${s.id}/pdf/sppu-enhanced/`, `SPPU_${s.academic_year}.pdf`)}>
+                                  SPPU
+                                </button>
+                                <button type="button" className="view-btn" onClick={() => downloadPdf(`/api/appraisal/${s.id}/pdf/pbas-enhanced/`, `PBAS_${s.academic_year}.pdf`)}>
+                                  PBAS
+                                </button>
+                              </>
+                            )}
+                            {activeTab === "processed" && s.status !== "FINALIZED" && (
+                              <button className="view-btn" onClick={() => setSelected(s)}>Open</button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {(activeTab === "pending" && submissions.pending.length === 0) && <p className="empty">No pending approvals</p>}
+                {(activeTab === "processed" && submissions.processed.length === 0) && <p className="empty">No processed appraisals</p>}
               </div>
-            ))
-          ))}
+            )}
+          </div>
 
-        {activeTab === "processed" &&
-          (submissions.processed.length === 0 ? (
-            <p className="empty">No processed appraisals</p>
-          ) : (
-            submissions.processed.map((s, i) => (
-              <div className="list-card" key={i}>
-                <div>
-                  <h3>{s.faculty_name}</h3>
-                  <p>{s.department}</p>
-                  {s.is_hod_appraisal && (
-                    <span className="badge-hod" style={{ background: '#6366f1', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', display: 'inline-block', marginBottom: '8px' }}>
-                      HOD SUBMISSION
-                    </span>
-                  )}
-                  {s.remarks && <p><b>Remarks:</b> {s.remarks}</p>}
-                  <span className={`status ${s.status?.toLowerCase()}`}>
-                    {s.status === "FINALIZED"
-                      ? "Finalized"
-                      : s.status === "PRINCIPAL_APPROVED"
-                        ? "Principal Approved"
-                        : s.status === "RETURNED_BY_PRINCIPAL" || s.status === "RETURNED_BY_HOD"
-                          ? "Changes Requested"
-                          : s.status}
-                  </span>
-
-                  {/* PDF Download Buttons for Finalized Appraisals */}
-                  {s.status === "FINALIZED" && (
-                    <div style={{ marginTop: '10px' }}>
-                      <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>Download PDFs:</p>
-                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        <button type="button" onClick={() => downloadPdf(`/api/appraisal/${s.id}/pdf/sppu-enhanced/`, `SPPU_${s.academic_year}.pdf`)} style={{ padding: '6px 12px', background: '#3b82f6', color: 'white', borderRadius: '4px', border: 'none', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>SPPU PDF</button>
-                        <button type="button" onClick={() => downloadPdf(`/api/appraisal/${s.id}/pdf/pbas-enhanced/`, `PBAS_${s.academic_year}.pdf`)} style={{ padding: '6px 12px', background: '#8b5cf6', color: 'white', borderRadius: '4px', border: 'none', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>PBAS PDF</button>
-                      </div>
-                    </div>
-                  )}
-
-                </div>
-              </div>
-            ))
-          ))}
-      </div>
+          <aside className="quick-actions-card">
+            <div className="quick-actions-header">
+              <h3>Principal Actions</h3>
+              <p>Common review controls</p>
+            </div>
+            <button type="button" className="quick-action-item" onClick={() => setActiveTab("pending")}>
+              <span className="quick-action-icon quick-action-icon-amber">PD</span>
+              <span className="quick-action-text"><strong>Open Pending</strong><small>{submissions.pending.length} needing final approval</small></span>
+              <span className="quick-action-arrow">&gt;</span>
+            </button>
+            <button type="button" className="quick-action-item" onClick={() => setActiveTab("processed")}>
+              <span className="quick-action-icon quick-action-icon-green">PR</span>
+              <span className="quick-action-text"><strong>View Processed</strong><small>Approved, returned, and finalized forms</small></span>
+              <span className="quick-action-arrow">&gt;</span>
+            </button>
+            <button type="button" className="quick-action-item quick-action-item-featured" onClick={() => navigate("/principal/profile")}>
+              <span className="quick-action-icon quick-action-icon-blue">MP</span>
+              <span className="quick-action-text"><strong>My Profile</strong><small>Update profile details and password</small></span>
+              <span className="quick-action-arrow">&gt;</span>
+            </button>
+          </aside>
+        </section>
       </div>
     </div>
   );
