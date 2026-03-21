@@ -15,19 +15,19 @@ services:
       DB_ENGINE: django.db.backends.postgresql
       DB_NAME: appraisal
       DB_USER: appraisal_manager
-      DB_PASSWORD: appraisal@123
+      DB_PASSWORD: ${DB_PASSWORD:-change-this-db-password}
       DB_HOST: db
       DB_PORT: 5432
       DJANGO_DEBUG: "0"
-      DJANGO_SECRET_KEY: "REPLACE_WITH_LONG_RANDOM_SECRET"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-change-this-django-secret}
       DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,172.16.0.24,172.16.0.210,172.16.1.113,172.16.0.211,172.16.0.156"
       DJANGO_CORS_ALLOWED_ORIGINS: "http://172.16.0.24,http://172.16.0.210,http://172.16.1.113,http://172.16.0.211,http://172.16.0.156"
       DJANGO_CSRF_TRUSTED_ORIGINS: "http://172.16.0.24,http://172.16.0.210,http://172.16.1.113,http://172.16.0.211,http://172.16.0.156"
       DJANGO_CORS_ALLOW_ALL_ORIGINS: "0 "
       DJANGO_CORS_ALLOWED_ALL_ORIGINS: "0"
-      BOOTSTRAP_ADMIN_USERNAME: "vineetyelleswarapu@gmail.com"
-      BOOTSTRAP_ADMIN_PASSWORD: "admin@12345"
-      BOOTSTRAP_ADMIN_EMAIL: "vineetyelleswarapu@gmail.com"
+      BOOTSTRAP_ADMIN_USERNAME: ${BOOTSTRAP_ADMIN_USERNAME:-admin@example.com}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-change-this-admin-password}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
       DJANGO_SECURE_SSL_REDIRECT: "0"
       DJANGO_SESSION_COOKIE_SECURE: "0"
       DJANGO_CSRF_COOKIE_SECURE: "0"
@@ -68,7 +68,7 @@ services:
     environment:
       POSTGRES_DB: appraisal
       POSTGRES_USER: appraisal_manager
-      POSTGRES_PASSWORD: appraisal@123
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change-this-db-password}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U appraisal_manager -d appraisal"]
       interval: 5s

@@ -87,11 +87,13 @@ export default function AppRouter() {
 
         <Route element={<ProtectedRoute allowedRoles={["HOD"]} />}>
           <Route path="/hod/dashboard" element={<HODDashboard />} />
+          <Route path="/hod/profile" element={<FacultyProfile />} />
           <Route path="/hod/appraisal-form" element={<AppraisalForm />} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={["PRINCIPAL"]} />}>
           <Route path="/principal/dashboard" element={<PrincipalDashboard />} />
+          <Route path="/principal/profile" element={<FacultyProfile />} />
         </Route>
       </Routes>
     </Suspense>

@@ -101,5 +101,22 @@ The system replaces manual paperwork with a structured, role-based workflow that
 
 ---
 
+## Local Docker Run
 
+Use the root `.env` file for local Docker Compose credentials. A sample is included in `.env.example`.
+
+Start the stack:
+
+```powershell
+docker compose up -d --build
+```
+
+If Docker starts but Postgres authentication fails because of an older local volume, reset the local database volume:
+
+```powershell
+docker compose down -v
+docker compose up -d --build
+```
+
+Open the app at `http://localhost`.
 

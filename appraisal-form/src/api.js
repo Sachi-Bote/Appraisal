@@ -53,6 +53,24 @@ const getRefreshToken = () =>
   localStorage.getItem("refresh_token") ||
   sessionStorage.getItem("refresh_token");
 
+const getProfilePasswordRoute = () => {
+  try {
+    const rawUser =
+      localStorage.getItem("loggedInUser") || sessionStorage.getItem("loggedInUser");
+    const parsedUser = rawUser ? JSON.parse(rawUser) : null;
+    const role = String(
+      parsedUser?.role || localStorage.getItem("role") || sessionStorage.getItem("role") || ""
+    )
+      .trim()
+      .toUpperCase();
+    if (role === "HOD") return "/hod/profile?tab=password";
+    if (role === "PRINCIPAL") return "/principal/profile?tab=password";
+    return "/faculty/profile?tab=password";
+  } catch {
+    return "/faculty/profile?tab=password";
+  }
+};
+
 const setAccessToken = (token) => {
   if (localStorage.getItem("access") !== null || localStorage.getItem("refresh") !== null) {
     localStorage.setItem("access", token);
@@ -132,7 +150,7 @@ const setupResponseInterceptor = (client) => {
       const detail = (error?.response?.data?.detail || "").toString().toLowerCase();
 
       if (status === 401 && detail.includes("password change required")) {
-        window.location.replace("/faculty/profile?tab=password");
+        window.location.replace(getProfilePasswordRoute());
         return Promise.reject(error);
       }
 

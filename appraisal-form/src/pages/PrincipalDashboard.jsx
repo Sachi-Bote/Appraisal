@@ -415,7 +415,7 @@ export default function PrincipalDashboard() {
     return (
       <div className="hod-container">
         <button className="back-btn" onClick={() => setSelected(null)}>
-          ← Back
+          ? Back
         </button>
 
         <div className="card">
@@ -658,7 +658,7 @@ export default function PrincipalDashboard() {
         </button>
       </div>
 
-      {loading && <p className="empty">Loading…</p>}
+      {loading && <p className="empty">Loading�</p>}
       {error && <p className="empty">{error}</p>}
 
       <div className="list">

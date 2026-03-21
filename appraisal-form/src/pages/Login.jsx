@@ -4,6 +4,7 @@ import API from "../api";
 import "../styles/Login.css";
 import useSessionState from "../hooks/useSessionState";
 import collegeLogo from "../assets/college-logo.png";
+import { getProfileRouteByRole } from "../utils/profileRoutes";
 
 const AUTH_KEYS = [
   "access",
@@ -194,7 +195,7 @@ export default function Login() {
       saveAuth({ access, refresh, user, remember });
 
       if (user?.must_change_password) {
-        navigate("/faculty/profile?tab=password", { replace: true });
+        navigate(`${getProfileRouteByRole(user?.role)}?tab=password`, { replace: true });
         return;
       }
 

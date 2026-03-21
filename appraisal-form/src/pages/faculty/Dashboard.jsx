@@ -3,13 +3,11 @@ import { useEffect, useState } from "react";
 import API, { clearAuthAndRedirect } from "../../api";
 import "../../styles/dashboard.css";
 import { formatStatus } from "../../utils/textFormatters";
-import { downloadWithAuth } from "../../utils/downloadFile";
 import {
   clearStatusCache,
   fetchAndCacheFacultyStatus,
   getStatusEventKey,
   getLatestAppraisal,
-  notifyAppraisalStatusChanged,
   readStatusCache,
 } from "../../utils/appraisalStatusCache";
 
@@ -73,14 +71,6 @@ export default function FacultyDashboard() {
     ? formatStatus(appraisal.status).toLowerCase().replace(/\s+/g, "-")
     : "draft";
 
-  const downloadPdf = async (url, filename) => {
-    try {
-      await downloadWithAuth(url, filename);
-    } catch {
-      alert("Failed to download PDF.");
-    }
-  };
-
   return (
     <div className="dashboard-page">
       <div className="dashboard-shell">
@@ -99,22 +89,6 @@ export default function FacultyDashboard() {
             </button>
             <button type="button" className="dashboard-nav-link" onClick={() => navigate("/faculty/appraisal")}>
               Appraisal Form
-            </button>
-            <button type="button" className="dashboard-nav-link" onClick={() => navigate("/faculty/appraisal/status")}>
-              Reviews
-            </button>
-            <button
-              type="button"
-              className="dashboard-nav-link"
-              onClick={() => {
-                if (appraisal?.status === "FINALIZED") {
-                  downloadPdf(`/api/appraisal/${appraisal.id}/pdf/sppu-enhanced/`, `SPPU_${appraisal.academic_year}.pdf`);
-                } else {
-                  navigate("/faculty/appraisal/status");
-                }
-              }}
-            >
-              Downloads
             </button>
           </div>
 
@@ -181,55 +155,8 @@ export default function FacultyDashboard() {
                       {formatStatus(appraisal.status)}
                     </span>
                   </div>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <button
-                      className="view-btn"
-                      onClick={() => navigate("/faculty/appraisal/status")}
-                    >
-                      Track Status
-                    </button>
-                    {["FINALIZED", "APPROVED", "PRINCIPAL_APPROVED"].includes(appraisal.status) && (
-                      <button
-                        className="view-btn"
-                        style={{ background: "#059669" }}
-                      onClick={async () => {
-                        try {
-                          await downloadWithAuth(`/api/appraisal/${appraisal.id}/pdf/sppu-enhanced/`, `SPPU_${appraisal.academic_year}.pdf`);
-                          notifyAppraisalStatusChanged();
-                        } catch {
-                          alert("Failed to download PDF. It might not be generated yet.");
-                        }
-                        }}
-                      >
-                        Download PDF
-                      </button>
-                    )}
-                  </div>
+                  <div style={{ display: "flex", gap: "8px" }} />
                 </div>
-
-                {appraisal.status === "FINALIZED" && (
-                  <div style={{ marginTop: "12px", padding: "12px", background: "#f0fdf4", borderRadius: "8px", border: "1px solid #86efac" }}>
-                    <p style={{ fontWeight: "bold", marginBottom: "8px", color: "#166534", fontSize: "14px" }}>
-                      Download Your Appraisal PDFs:
-                    </p>
-                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                      <button
-                        type="button"
-                        onClick={() => downloadPdf(`/api/appraisal/${appraisal.id}/pdf/sppu-enhanced/`, `SPPU_${appraisal.academic_year}.pdf`)}
-                        style={{ padding: "8px 16px", background: "#3b82f6", color: "white", borderRadius: "6px", border: "none", fontSize: "13px", fontWeight: "500", cursor: "pointer" }}
-                      >
-                        SPPU PDF
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => downloadPdf(`/api/appraisal/${appraisal.id}/pdf/pbas-enhanced/`, `PBAS_${appraisal.academic_year}.pdf`)}
-                        style={{ padding: "8px 16px", background: "#8b5cf6", color: "white", borderRadius: "6px", border: "none", fontSize: "13px", fontWeight: "500", cursor: "pointer" }}
-                      >
-                        PBAS PDF
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
           </div>

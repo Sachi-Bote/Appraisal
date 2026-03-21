@@ -612,7 +612,7 @@ export default function FacultyAppraisalForm() {
     return rows;
   };
 
-  const [research, setResearch] = useState({
+  const createDefaultResearchState = () => ({
     papers: [
       {
         title: "",
@@ -701,6 +701,21 @@ export default function FacultyAppraisalForm() {
     ]
   });
 
+  const normalizeResearchState = (value) => {
+    const defaults = createDefaultResearchState();
+    if (!value || typeof value !== "object") return defaults;
+
+    const normalized = { ...defaults };
+    Object.keys(defaults).forEach((key) => {
+      if (Array.isArray(value[key]) && value[key].length > 0) {
+        normalized[key] = value[key];
+      }
+    });
+    return normalized;
+  };
+
+  const [research, setResearch] = useState(createDefaultResearchState);
+
 
 
   /* ================= FORM STATE ================= */
@@ -778,7 +793,7 @@ export default function FacultyAppraisalForm() {
             if (ui.instituteActivities) setInstituteActivities(ui.instituteActivities);
             if (ui.societyActivities) setSocietyActivities(ui.societyActivities);
             if (ui.acrDetails) setAcrDetails(ui.acrDetails);
-            if (ui.research) setResearch(ui.research);
+            if (ui.research) setResearch(normalizeResearchState(ui.research));
             if (ui.pbasScores) setPbasScores(ui.pbasScores);
             if (ui.justification) setJustification(ui.justification);
             return;
@@ -1061,7 +1076,7 @@ export default function FacultyAppraisalForm() {
       if (Array.isArray(cached.instituteActivities) && cached.instituteActivities.length) setInstituteActivities(cached.instituteActivities);
       if (Array.isArray(cached.societyActivities) && cached.societyActivities.length) setSocietyActivities(cached.societyActivities);
       if (cached.acrDetails) setAcrDetails(cached.acrDetails);
-      if (cached.research) setResearch(cached.research);
+      if (cached.research) setResearch(normalizeResearchState(cached.research));
       if (cached.pbasScores) setPbasScores(cached.pbasScores);
       if (typeof cached.justification === "string") setJustification(cached.justification);
       if (Array.isArray(cached.categoryTwo)) setCategoryTwo(cached.categoryTwo);
@@ -1862,11 +1877,7 @@ export default function FacultyAppraisalForm() {
           : `/faculty/appraisal/${appraisalId}/resubmit/`;
       }
 
-      await API.post(url, payload, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access")}`
-        }
-      });
+      await API.post(url, payload);
 
 
 
@@ -1880,7 +1891,7 @@ export default function FacultyAppraisalForm() {
           : "Appraisal submitted and sent to HOD for review."
       );
       setProcessingNotice("Processing complete. You may continue.");
-      navigate(isHOD ? "/HOD/dashboard" : "/faculty/dashboard");
+      navigate(from);
 
 
     } catch (error) {
@@ -2039,38 +2050,196 @@ export default function FacultyAppraisalForm() {
     setAcrDetails(prev => ({ ...prev, [name]: value }));
   };
 
+  const stepDefinitions = [
+    { number: 1, label: "General Info" },
+    { number: 2, label: "Teaching" },
+    { number: 3, label: "Research Support" },
+    { number: 4, label: "Research" },
+    { number: 5, label: "Review & Submit" },
+  ];
+
+  const activeStep = stepDefinitions.find((step) => step.number === currentStep) || stepDefinitions[0];
+  const completionPct = Math.round((currentStep / stepDefinitions.length) * 100);
+  const roleLabel = isHOD ? "HOD" : "Faculty";
+  const heroName = generalInfo.facultyName || user.full_name || user.fullName || user.username || "Staff Member";
+  const heroDepartment = generalInfo.department || user.department || "Department";
+  const heroDesignation = generalInfo.designation || roleLabel;
+  const academicYearLabel = generalInfo.academicYear || CURRENT_ACADEMIC_YEAR;
+  const profilePath = isHOD ? "/hod/profile?tab=account" : "/faculty/profile?tab=account";
+  const stepHeroCopy = {
+    1: {
+      eyebrow: "Self Appraisal · Step 1 of 5",
+      title: "General Information",
+      subtitle: "Personal and professional details used across appraisal forms",
+    },
+    2: {
+      eyebrow: "Self Appraisal · Step 2 of 5",
+      title: "Teaching Activities",
+      subtitle: "Teaching load, SPPU involvement, and activity records",
+    },
+    3: {
+      eyebrow: "Self Appraisal · Step 3 of 5",
+      title: "Feedback & ACR",
+      subtitle: "ACR details and student feedback inputs",
+    },
+    4: {
+      eyebrow: "Self Appraisal · Step 4 of 5",
+      title: "Research Contributions",
+      subtitle: "Publications, projects, patents, guidance, and academic work",
+    },
+    5: {
+      eyebrow: "Self Appraisal · Step 5 of 5",
+      title: "Review & Submit",
+      subtitle: "Preview generated forms and complete final declaration",
+    },
+  };
+
+  const teachingTotals = (teachingActivities || []).reduce((acc, row) => {
+    const assigned = Number(row.totalClassesAssigned || 0);
+    const conducted = Number(row.classesConducted || 0);
+    if (Number.isFinite(assigned)) acc.assigned += assigned;
+    if (Number.isFinite(conducted)) acc.conducted += conducted;
+    return acc;
+  }, { assigned: 0, conducted: 0 });
+  const teachingPct = teachingTotals.assigned > 0
+    ? Math.round((teachingTotals.conducted / teachingTotals.assigned) * 1000) / 10
+    : 0;
+  const step2bFilledCount = (step2bActivities || []).filter((row) => {
+    const activityName = row.otherActivity?.trim() || row.activity || "";
+    return row.section_key && activityName;
+  }).length;
+  const step3FeedbackEntries = (studentFeedback || []).filter((row) =>
+    row.courseCode || row.courseName || row.averageScore || row.semester
+  ).length;
+  const researchEntryCount = Object.values(research || {}).reduce(
+    (sum, list) => sum + (Array.isArray(list) ? list.filter((row) => Object.values(row || {}).some(Boolean)).length : 0),
+    0
+  );
+  const step5Checklist = [
+    { label: "Draft saved", done: true },
+    { label: "SPPU preview ready", done: true },
+    { label: "PBAS preview ready", done: true },
+    { label: "Declaration accepted", done: Boolean(declarationAccepted) },
+  ];
+
+  const stepOneTracker = [
+    { label: "Faculty Name", done: Boolean(generalInfo.facultyName?.trim()) },
+    { label: "Designation", done: Boolean(generalInfo.designation?.trim()) },
+    { label: "Department", done: Boolean(generalInfo.department?.trim()) },
+    { label: "Date of Joining", done: Boolean(generalInfo.dateOfJoining?.trim()) },
+    { label: "Email ID", done: Boolean(generalInfo.email?.trim()) },
+    { label: "Pay Level", done: Boolean(generalInfo.payLevel?.trim()) },
+    { label: "Academic Year", done: Boolean(generalInfo.academicYear?.trim()) },
+    { label: "Current Designation", done: Boolean(generalInfo.currentDesignation?.trim()) },
+  ];
+  const currentHero = stepHeroCopy[currentStep] || stepHeroCopy[1];
+
   /* ================= RENDER ================= */
   return (
-    <div className="form-container">
-      <div className="form-header">
-        <h2 className="form-title">Faculty Appraisal Form</h2>
-      </div>
+    <div className="appraisal-shell">
+      <nav className="appraisal-topnav">
+        <div className="appraisal-nav-brand">
+          <div className="appraisal-nav-icon">
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
+          <div>
+            <div className="appraisal-nav-title">Staff Appraisal System</div>
+          </div>
+        </div>
+
+        <div className="appraisal-nav-links">
+          <button type="button" className="appraisal-nav-link" onClick={() => navigate(from)}>Dashboard</button>
+          <button type="button" className="appraisal-nav-link" onClick={() => navigate(profilePath)}>My Profile</button>
+          <button type="button" className="appraisal-nav-link active">Appraisal Form</button>
+        </div>
+
+        <div className="appraisal-nav-right">
+          <span className="appraisal-nav-badge">{roleLabel} · {heroDepartment}</span>
+        </div>
+      </nav>
+
+      <section className="appraisal-hero">
+        <div className="appraisal-hero-ring" />
+        <div className="appraisal-hero-inner form-container">
+          <div>
+            <button type="button" className="appraisal-back-link" onClick={() => navigate(from)}>
+              ← Back to Dashboard
+            </button>
+            <div className="appraisal-hero-label">{currentHero.eyebrow}</div>
+            <h1 className="appraisal-hero-title">{currentHero.title}</h1>
+            <div className="appraisal-hero-meta">
+              <span>{heroName}</span>
+              <span className="appraisal-meta-sep">·</span>
+              <span>{heroDepartment}</span>
+              <span className="appraisal-meta-sep">·</span>
+              <span>{heroDesignation}</span>
+              <span className="appraisal-meta-sep">·</span>
+              <span>{currentHero.subtitle}</span>
+            </div>
+          </div>
+
+          <div className="appraisal-hero-pill">
+            <span className={`appraisal-pill-dot ${isFormLocked ? "submitted" : ""}`} />
+            AY {academicYearLabel} · {isFormLocked ? "Submitted" : "Draft"}
+          </div>
+        </div>
+      </section>
+
+      <div className="form-container appraisal-content-wrap">
+        <div className="appraisal-progress-card">
+          <div className="appraisal-progress-top">
+            <span className="appraisal-progress-label">Form Completion</span>
+            <span className="appraisal-progress-pct">Step {currentStep} of {stepDefinitions.length} · {completionPct}% complete</span>
+          </div>
+
+          <div className="appraisal-steps">
+            {stepDefinitions.map((step, index) => (
+              <React.Fragment key={step.number}>
+                <div className="appraisal-step-item">
+                  <div className="appraisal-step-col">
+                    <div
+                      className={[
+                        "appraisal-step-circle",
+                        step.number < currentStep ? "done" : "",
+                        step.number === currentStep ? "active" : "",
+                      ].filter(Boolean).join(" ")}
+                    >
+                      {step.number < currentStep ? "✓" : step.number}
+                    </div>
+                    <div
+                      className={[
+                        "appraisal-step-label",
+                        step.number < currentStep ? "done" : "",
+                        step.number === currentStep ? "active" : "",
+                      ].filter(Boolean).join(" ")}
+                    >
+                      {step.label}
+                    </div>
+                  </div>
+                </div>
+                {index < stepDefinitions.length - 1 && (
+                  <div className={`appraisal-step-line ${step.number < currentStep ? "done" : ""}`} />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        <div className="appraisal-main-layout">
+          <div className="appraisal-main-column">
 
       {processingNotice && (
-        <div style={{
-          background: "#fffbeb",
-          border: "1px solid #fde68a",
-          color: "#92400e",
-          padding: "12px",
-          borderRadius: "8px",
-          marginBottom: "12px",
-          marginTop: "12px"
-        }}>
+        <div className="appraisal-inline-alert">
           {processingNotice}
           {isProcessing ? " Please wait..." : ""}
         </div>
       )}
 
       {remarks && (
-        <div style={{
-          background: "#fffbeb",
-          border: "1px solid #fde68a",
-          color: "#92400e",
-          padding: "16px",
-          borderRadius: "8px",
-          marginBottom: "20px",
-          marginTop: "20px"
-        }}>
+        <div className="appraisal-inline-alert">
           <strong style={{ display: "block", marginBottom: "4px" }}>Reviewer Remarks:</strong>
           <p style={{ margin: 0 }}>{remarks}</p>
         </div>
@@ -3594,7 +3763,155 @@ export default function FacultyAppraisalForm() {
 
         </div>
       </div>
-    </div >
+          </div>
+
+          <aside className="appraisal-sidebar">
+            <div className="appraisal-side-card">
+              <div className="appraisal-side-card-hdr">
+                <div className="appraisal-side-card-title">Academic Year</div>
+              </div>
+              <div className="appraisal-side-card-body">
+                <div className="appraisal-ay-badge">
+                  <span className="appraisal-ay-label">Current AY</span>
+                  <span className="appraisal-ay-value">{academicYearLabel}</span>
+                </div>
+                <div className="appraisal-side-note">
+                  Active step: <strong>{activeStep.label}</strong>. This shared form layout is used for both Faculty and HOD self-appraisals.
+                </div>
+              </div>
+            </div>
+
+            {currentStep === 1 && (
+              <div className="appraisal-side-card">
+                <div className="appraisal-side-card-hdr">
+                  <div className="appraisal-side-card-title">Section Progress</div>
+                </div>
+                <div className="appraisal-side-card-body">
+                  <ul className="appraisal-tracker-list">
+                    {stepOneTracker.map((item) => (
+                      <li key={item.label} className="appraisal-tracker-item">
+                        <div className={`appraisal-tracker-icon ${item.done ? "done" : currentStep === 1 ? "active" : "todo"}`}>
+                          {item.done ? "✓" : currentStep === 1 ? "→" : "○"}
+                        </div>
+                        <span>{item.label}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 2 && (
+              <>
+                <div className="appraisal-side-card">
+                  <div className="appraisal-side-card-hdr">
+                    <div className="appraisal-side-card-title">Teaching Score Preview</div>
+                    <span className="appraisal-live-chip">Live</span>
+                  </div>
+                  <div className="appraisal-side-card-body">
+                    <div className="appraisal-live-score">
+                      <div className="appraisal-live-score-val">{teachingTotals.assigned}</div>
+                      <div className="appraisal-live-score-lbl">Assigned class units</div>
+                    </div>
+                    <div className="appraisal-mini-progress">
+                      <div className="appraisal-mini-fill" style={{ width: `${Math.min(teachingPct, 100)}%` }} />
+                    </div>
+                    <div className="appraisal-score-breakdown">
+                      <div className="appraisal-score-row"><span>Attendance</span><strong>{teachingPct}%</strong></div>
+                      <div className="appraisal-score-row"><span>Classes Conducted</span><strong>{teachingTotals.conducted}</strong></div>
+                      <div className="appraisal-score-row"><span>Courses</span><strong>{teachingActivities.length}</strong></div>
+                      <div className="appraisal-score-row"><span>SPPU Activities</span><strong>{step2bFilledCount}</strong></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="appraisal-side-card">
+                  <div className="appraisal-side-card-hdr">
+                    <div className="appraisal-side-card-title">Teaching Checklist</div>
+                  </div>
+                  <div className="appraisal-side-card-body">
+                    <ul className="appraisal-tracker-list">
+                      {[
+                        { label: "Teaching entries added", done: teachingActivities.length > 0 },
+                        { label: "Course details filled", done: Boolean(teachingActivities[0]?.courseCode || teachingActivities[0]?.courseName) },
+                        { label: "Classes captured", done: teachingTotals.assigned > 0 || teachingTotals.conducted > 0 },
+                        { label: "SPPU activities added", done: step2bFilledCount > 0 },
+                      ].map((item) => (
+                        <li key={item.label} className="appraisal-tracker-item">
+                          <div className={`appraisal-tracker-icon ${item.done ? "done" : "active"}`}>{item.done ? "✓" : "→"}</div>
+                          <span>{item.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {currentStep === 3 && (
+              <div className="appraisal-side-card">
+                <div className="appraisal-side-card-hdr">
+                  <div className="appraisal-side-card-title">Feedback Snapshot</div>
+                </div>
+                <div className="appraisal-side-card-body">
+                  <div className="appraisal-score-breakdown">
+                    <div className="appraisal-score-row"><span>ACR Year</span><strong>{acrDetails.year || "-"}</strong></div>
+                    <div className="appraisal-score-row"><span>ACR Available</span><strong>{acrDetails.acrAvailable || "-"}</strong></div>
+                    <div className="appraisal-score-row"><span>Credit Points</span><strong>{acrDetails.creditPoints || "0"}</strong></div>
+                    <div className="appraisal-score-row"><span>Feedback Entries</span><strong>{step3FeedbackEntries}</strong></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 4 && (
+              <div className="appraisal-side-card">
+                <div className="appraisal-side-card-hdr">
+                  <div className="appraisal-side-card-title">Research Overview</div>
+                </div>
+                <div className="appraisal-side-card-body">
+                  <div className="appraisal-score-breakdown">
+                    <div className="appraisal-score-row"><span>Papers</span><strong>{research.papers.length}</strong></div>
+                    <div className="appraisal-score-row"><span>Books / Chapters</span><strong>{research.publications.length}</strong></div>
+                    <div className="appraisal-score-row"><span>Projects</span><strong>{research.projects.length}</strong></div>
+                    <div className="appraisal-score-row"><span>Total research entries</span><strong>{researchEntryCount}</strong></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 5 && (
+              <div className="appraisal-side-card">
+                <div className="appraisal-side-card-hdr">
+                  <div className="appraisal-side-card-title">Submission Checklist</div>
+                </div>
+                <div className="appraisal-side-card-body">
+                  <ul className="appraisal-tracker-list">
+                    {step5Checklist.map((item) => (
+                      <li key={item.label} className="appraisal-tracker-item">
+                        <div className={`appraisal-tracker-icon ${item.done ? "done" : "todo"}`}>{item.done ? "✓" : "○"}</div>
+                        <span>{item.label}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            <div className="appraisal-side-card">
+              <div className="appraisal-side-card-hdr">
+                <div className="appraisal-side-card-title">Form Tips</div>
+              </div>
+              <div className="appraisal-side-card-body">
+                <div className="appraisal-tip-item"><span className="appraisal-tip-num">1</span>Use your official details exactly as they appear in service records.</div>
+                <div className="appraisal-tip-item"><span className="appraisal-tip-num">2</span>Save drafts between steps so the latest data is preserved.</div>
+                <div className="appraisal-tip-item"><span className="appraisal-tip-num">3</span>Keep enclosure references consistent across teaching, feedback, and research entries.</div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
   );
 }
 

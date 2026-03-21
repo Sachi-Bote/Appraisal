@@ -1,10 +1,13 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Lora:wght@500;600&display=swap");
+
 /* =====================================================
    GLOBAL DESIGN SYSTEM
 ===================================================== */
 
 :root {
   /* Typography */
-  --app-font: "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --app-font: "DM Sans", "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --app-serif: "Lora", Georgia, serif;
   --font-body: 15px;
   --font-label: 14px;
   --font-helper: 13px;
@@ -12,20 +15,21 @@
   --font-h4: 17px;
   --font-button: 14px;
   
-  /* Colors - Professional Blue Palette */
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
+  /* Colors - Reference-inspired palette */
+  --primary: #1a6fd4;
+  --primary-hover: #1257b0;
+  --primary-deep: #0b3668;
   --primary-light: #eff6ff;
   --primary-border: #bfdbfe;
   
   /* Neutrals */
-  --text-primary: #0f172a;
+  --text-primary: #1a1f2e;
   --text-secondary: #475569;
-  --text-tertiary: #94a3b8;
-  --border: #e2e8f0;
-  --border-light: #f1f5f9;
+  --text-tertiary: #6b7280;
+  --border: #e5e9f2;
+  --border-light: #f4f6fb;
   --surface: #ffffff;
-  --background: #f8fafc;
+  --background: #f4f6fb;
   
   /* Semantic Colors */
   --error: #dc2626;
@@ -66,6 +70,10 @@ body {
   font-size: var(--font-body);
   color: var(--text-primary);
   line-height: 1.6;
+}
+
+#root {
+  min-height: 100vh;
 }
 
 *,
@@ -260,10 +268,465 @@ select {
 
 .form-container {
   max-width: 1100px;
-  margin: 32px auto 80px;
+  margin: 0 auto 80px;
   padding: 0 20px;
   color: var(--text-primary);
   animation: fadeIn 0.5s ease;
+}
+
+.appraisal-shell {
+  min-height: 100vh;
+  padding-bottom: 110px;
+  background: var(--background);
+}
+
+.appraisal-topnav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  height: 54px;
+  padding: 0 32px;
+  background: var(--primary-deep);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.appraisal-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.appraisal-nav-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--primary);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 6px;
+}
+
+.appraisal-nav-icon span {
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 2px;
+}
+
+.appraisal-nav-title {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.appraisal-nav-links {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  justify-content: center;
+}
+
+.appraisal-nav-link {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.58);
+  padding: 6px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+}
+
+.appraisal-nav-link.active,
+.appraisal-nav-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.appraisal-nav-right {
+  display: flex;
+  align-items: center;
+}
+
+.appraisal-nav-badge {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.appraisal-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--primary) 0%, #2577df 60%, #0f56a8 100%);
+  padding: 28px 0 72px;
+}
+
+.appraisal-hero::before,
+.appraisal-hero::after,
+.appraisal-hero-ring {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+}
+
+.appraisal-hero::before {
+  width: 520px;
+  height: 520px;
+  right: -160px;
+  bottom: -240px;
+}
+
+.appraisal-hero::after {
+  width: 280px;
+  height: 280px;
+  right: -30px;
+  bottom: -100px;
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.appraisal-hero-ring {
+  width: 180px;
+  height: 180px;
+  left: -50px;
+  top: -70px;
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.appraisal-hero-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.appraisal-back-link {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.62);
+  padding: 0;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+
+.appraisal-back-link:hover {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.appraisal-hero-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.66);
+  margin-bottom: 6px;
+}
+
+.appraisal-hero-title {
+  margin: 0 0 10px;
+  font-family: var(--app-serif);
+  font-size: 30px;
+  line-height: 1.2;
+  color: #fff;
+}
+
+.appraisal-hero-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+}
+
+.appraisal-meta-sep {
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.appraisal-hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 6px 14px;
+  color: #fff;
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.appraisal-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #fbbf24;
+}
+
+.appraisal-pill-dot.submitted {
+  background: #22c55e;
+}
+
+.appraisal-content-wrap {
+  margin-top: -44px;
+  position: relative;
+  z-index: 10;
+}
+
+.appraisal-progress-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 28px;
+  box-shadow: 0 4px 24px rgba(10, 30, 80, 0.09);
+  margin-bottom: 20px;
+}
+
+.appraisal-progress-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.appraisal-progress-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.appraisal-progress-pct {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.appraisal-steps {
+  display: flex;
+  align-items: center;
+}
+
+.appraisal-step-item {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.appraisal-step-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.appraisal-step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border);
+  color: var(--text-tertiary);
+  background: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.appraisal-step-circle.done {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.appraisal-step-circle.active {
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(26, 111, 212, 0.12);
+}
+
+.appraisal-step-label {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.appraisal-step-label.done {
+  color: var(--text-primary);
+}
+
+.appraisal-step-label.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.appraisal-step-line {
+  flex: 1;
+  height: 2px;
+  margin: 0 6px 18px;
+  background: var(--border);
+}
+
+.appraisal-step-line.done {
+  background: var(--primary);
+}
+
+.appraisal-main-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 20px;
+  align-items: start;
+}
+
+.appraisal-main-column {
+  min-width: 0;
+}
+
+.appraisal-sidebar {
+  position: sticky;
+  top: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.appraisal-side-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(10, 30, 80, 0.05);
+}
+
+.appraisal-side-card-hdr {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.appraisal-side-card-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.appraisal-side-card-body {
+  padding: 14px 18px;
+}
+
+.appraisal-ay-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 9px;
+  background: var(--primary-light);
+}
+
+.appraisal-ay-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.appraisal-ay-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.appraisal-side-note {
+  margin-top: 10px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-tertiary);
+}
+
+.appraisal-tracker-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.appraisal-tracker-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 6px;
+  border-radius: 7px;
+  font-size: 12px;
+}
+
+.appraisal-tracker-item:hover {
+  background: var(--border-light);
+}
+
+.appraisal-tracker-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  flex-shrink: 0;
+}
+
+.appraisal-tracker-icon.done {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.appraisal-tracker-icon.active {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.appraisal-tracker-icon.todo {
+  background: var(--border-light);
+  color: var(--text-tertiary);
+  border: 1px solid var(--border);
+}
+
+.appraisal-tip-item {
+  display: flex;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-tertiary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.appraisal-tip-item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.appraisal-tip-num {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.appraisal-inline-alert {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  padding: 14px 16px;
+  border-radius: 10px;
+  margin: 0 0 16px;
 }
 
 @keyframes fadeIn {
@@ -306,7 +769,7 @@ select {
 
 .form-section {
   background: var(--surface);
-  border-radius: var(--radius-lg);
+  border-radius: 16px;
   padding: 28px 32px;
   margin-bottom: 24px;
   box-shadow: var(--shadow-sm);
@@ -388,21 +851,39 @@ select {
 
 .entry-card {
   background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
   margin-top: 16px;
   font-size: var(--font-body);
+  box-shadow: 0 2px 12px rgba(10, 30, 80, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.entry-card::before,
+.activity-card::before,
+.research-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--primary), #7bb3ff);
 }
 
 .entry-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
 }
 
 .entry-header h4 {
-  margin-bottom: 16px;
+  margin-bottom: 0;
   font-weight: 600;
 }
 
@@ -415,11 +896,12 @@ select {
   grid-template-columns: 1.2fr 2.2fr 1fr 1.4fr auto;
   gap: 16px;
   padding: 18px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  border-radius: 12px;
   background: var(--surface);
   margin-bottom: 14px;
   align-items: center;
+  box-shadow: 0 2px 10px rgba(10, 30, 80, 0.04);
 }
 
 .inline-card input,
@@ -434,16 +916,19 @@ select {
 
 .activity-card {
   background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
   margin-bottom: 14px;
   font-size: var(--font-body);
+  box-shadow: 0 2px 12px rgba(10, 30, 80, 0.05);
+  position: relative;
+  overflow: hidden;
 }
 
 .activity-row {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr 1fr auto;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
   align-items: center;
   margin-bottom: 12px;
@@ -502,15 +987,17 @@ select {
 
 .research-card {
   background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
   margin-bottom: 14px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 12px rgba(10, 30, 80, 0.05);
   font-size: var(--font-body);
+  position: relative;
+  overflow: hidden;
 }
 
 .research-card input,
@@ -676,9 +1163,9 @@ button:hover::before {
 }
 
 .btn-remove {
-  background: var(--error-light);
+  background: #fff5f5;
   color: var(--error);
-  border: 1.5px solid transparent;
+  border: 1px solid #fecaca;
   min-width: 38px;
   height: 38px;
   padding: 0 12px;
@@ -691,27 +1178,28 @@ button:hover::before {
 }
 
 .btn-remove:hover {
-  background: var(--error);
-  color: white;
+  background: #fee2e2;
+  border-color: #f87171;
+  color: #b91c1c;
   transform: scale(1.04);
   box-shadow: var(--shadow-md);
 }
 
 .btn-remove-small {
-  grid-column: span 3;
+  grid-column: 1 / -1;
   justify-self: end;
-  background: var(--error-light);
+  background: #fff5f5;
   color: var(--error);
-  border: 1.5px solid var(--error-light);
-  border-radius: var(--radius-md);
+  border: 1px solid #fecaca;
+  border-radius: 9px;
   padding: 7px 14px;
   font-size: var(--font-button);
 }
 
 .btn-remove-small:hover {
-  background: var(--error);
-  color: white;
-  border-color: var(--error);
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #f87171;
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
@@ -719,34 +1207,35 @@ button:hover::before {
 .add-row-btn,
 .btn-outline,
 .btn-add {
-  background: var(--surface);
+  background: transparent;
   color: var(--primary);
-  border: 1.5px solid var(--primary);
-  padding: 11px 20px;
+  border: 1.5px dashed var(--border);
+  padding: 10px 18px;
   font-size: var(--font-button);
   font-weight: 500;
   border-radius: var(--radius-md);
-  width: 100%;
+  width: auto;
   margin-top: 12px;
 }
 
 .add-row-btn:hover,
 .btn-outline:hover,
 .btn-add:hover {
-  background: var(--primary);
-  color: white;
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+  box-shadow: none;
+  transform: translateY(-1px);
 }
 
 .btn-primary {
   background: var(--primary);
   color: white;
-  border: 1.5px solid var(--primary);
+  border: 0;
   padding: 11px 24px;
   font-size: var(--font-button);
   font-weight: 500;
-  border-radius: var(--radius-md);
+  border-radius: 9px;
   box-shadow: var(--shadow-sm);
 }
 
@@ -853,8 +1342,8 @@ button:hover::before {
   align-items: center;
   justify-content: space-between;
   background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
   padding: 18px 28px;
   margin-top: 32px;
   box-shadow: var(--shadow-md);
@@ -940,7 +1429,110 @@ button:hover::before {
    RESPONSIVE
 ===================================================== */
 
+.appraisal-live-chip {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  background: var(--border-light);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.appraisal-live-score {
+  text-align: center;
+  padding: 14px 0 8px;
+}
+
+.appraisal-live-score-val {
+  font-size: 40px;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.appraisal-live-score-lbl {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.appraisal-mini-progress {
+  height: 5px;
+  background: var(--border);
+  border-radius: 999px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.appraisal-mini-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.appraisal-score-breakdown {
+  margin-top: 14px;
+}
+
+.appraisal-score-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.appraisal-score-row:last-child {
+  border-bottom: 0;
+}
+
+.appraisal-score-row span {
+  color: var(--text-tertiary);
+}
+
+.appraisal-score-row strong {
+  color: var(--text-primary);
+}
+
+.form-section > h3:first-child {
+  background: #fafbfd;
+  margin: -28px -32px 20px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.form-section > h4 {
+  display: inline-block;
+  font-size: 14px;
+  margin-top: 0;
+  margin-bottom: 14px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.section-note {
+  border-left-width: 4px;
+  border-radius: 9px;
+}
+
+.activity-row .section-note {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
 @media (max-width: 900px) {
+  .appraisal-main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .appraisal-sidebar {
+    position: static;
+  }
+
   .activity-row,
   .inline-card,
   .form-row {
@@ -965,11 +1557,41 @@ button:hover::before {
   .activity-card .activity-row {
     grid-template-columns: 1fr !important;
   }
+
+  .research-card {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 768px) {
   .form-container {
     padding: 0 16px;
+  }
+
+  .appraisal-topnav {
+    padding: 0 16px;
+  }
+
+  .appraisal-nav-links {
+    display: none;
+  }
+
+  .appraisal-hero {
+    padding: 20px 0 60px;
+  }
+
+  .appraisal-hero-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .appraisal-progress-card {
+    padding: 18px 16px;
+  }
+
+  .appraisal-steps {
+    overflow-x: auto;
+    padding-bottom: 6px;
   }
 
   .form-grid {
@@ -983,7 +1605,18 @@ button:hover::before {
   .form-actions {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;}}
+    gap: 12px;
+  }
+
+  .research-card {
+    grid-template-columns: 1fr;
+  }
+
+  .form-section > h3:first-child {
+    margin: -20px -18px 18px;
+    padding: 16px 18px;
+  }
+}
 
 /* Step 2B dropdown flow */
 .sppu-picker {

@@ -4,7 +4,6 @@ import API, { clearAuthAndRedirect } from "../api";
 import "../styles/dashboard.css";
 import "../styles/HODDashboard.css";
 import useSessionState from "../hooks/useSessionState";
-import { downloadWithAuth, getAccessToken } from "../utils/downloadFile";
 import { buildApiUrl } from "../utils/apiUrl";
 import { notifyAppraisalStatusChanged } from "../utils/appraisalStatusCache";
 import {
@@ -76,7 +75,6 @@ const getTable2SelfValue = (reviewData, key) => {
 
 export default function HODDashboard() {
   const navigate = useNavigate();
-  const token = getAccessToken();
 
   const [activeTab, setActiveTab] = useSessionState("hod.activeTab", "pending");
   const [selectedSubmission, setSelectedSubmission] = useSessionState("hod.selectedSubmission", null);
@@ -138,7 +136,7 @@ export default function HODDashboard() {
         setLoading(true);
         setError("");
 
-        // 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£ Fetch Faculty submissions to review
+        // Fetch faculty submissions assigned to the HOD queue.
         const res = await API.get("hod/appraisals/");
         const data = res.data || [];
 
@@ -148,7 +146,7 @@ export default function HODDashboard() {
 
         setSubmissions({ pending, processed });
 
-        // 2ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£ Fetch HOD's OWN appraisals
+        // Fetch the HOD user's own appraisal history.
         const ownRes = await API.get("hod/appraisals/me/");
         const ownData = ownRes.data || [];
         if (ownData.length > 0) {
@@ -389,54 +387,6 @@ export default function HODDashboard() {
     navigate("/hod/appraisal-form");
   };
 
-  const handleSubmitOwnAppraisal = async () => {
-    try {
-      const token =
-        localStorage.getItem("access") ||
-        sessionStorage.getItem("access");
-
-      if (!token) {
-        alert("Not authenticated");
-        return;
-      }
-
-      const payload = JSON.parse(
-        localStorage.getItem("hodAppraisalPayload")
-      );
-
-      if (!payload) {
-        alert("No appraisal data found");
-        return;
-      }
-
-      await API.post("hod/submit/", payload);
-
-      alert("HOD appraisal submitted successfully");
-
-      const updated = {
-        academicYear: payload.academic_year,
-        status: "submitted",
-        submissionDate: new Date().toISOString().split("T")[0],
-      };
-
-      setHodOwnAppraisal(updated);
-      notifyAppraisalStatusChanged();
-      await refreshDashboardData();
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Failed to submit appraisal");
-    }
-  };
-
-  const downloadPdf = async (url, filename) => {
-    try {
-      await downloadWithAuth(url, filename);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to download PDF.");
-    }
-  };
-
   const updateTable2Verified = (key, value) => {
     if (key === TABLE2_TOTAL_KEY) return;
     setTable2VerifiedScores((prev) =>
@@ -493,7 +443,6 @@ export default function HODDashboard() {
 
   const pendingCount = submissions.pending.length;
   const processedCount = submissions.processed.length;
-  const downloadCount = hodOwnAppraisal.actual_status === "FINALIZED" ? 2 : 0;
   const ownStatusLabel =
     hodOwnAppraisal.actual_status?.replace(/_/g, " ") ||
     (hodOwnAppraisal.status === "submitted"
@@ -525,17 +474,11 @@ export default function HODDashboard() {
               <button type="button" className="topbar-nav-link" onClick={() => setSelectedSubmission(null)}>
                 Dashboard
               </button>
-              <button type="button" className="topbar-nav-link" onClick={() => setSelectedSubmission(null)}>
+              <button type="button" className="topbar-nav-link" onClick={() => navigate("/hod/profile")}>
                 My Profile
               </button>
               <button type="button" className="topbar-nav-link" onClick={handleFillOwnAppraisal}>
                 Appraisal Form
-              </button>
-              <button type="button" className="topbar-nav-link topbar-nav-link-active">
-                Reviews
-              </button>
-              <button type="button" className="topbar-nav-link" onClick={() => setActiveTab("processed")}>
-                Downloads
               </button>
             </div>
             <div className="topbar-actions">
@@ -848,17 +791,11 @@ export default function HODDashboard() {
             <button type="button" className="topbar-nav-link topbar-nav-link-active">
               Dashboard
             </button>
-            <button type="button" className="topbar-nav-link" onClick={() => setSelectedSubmission(null)}>
+            <button type="button" className="topbar-nav-link" onClick={() => navigate("/hod/profile")}>
               My Profile
             </button>
             <button type="button" className="topbar-nav-link" onClick={handleFillOwnAppraisal}>
               Appraisal Form
-            </button>
-            <button type="button" className="topbar-nav-link" onClick={() => setActiveTab("pending")}>
-              Reviews
-            </button>
-            <button type="button" className="topbar-nav-link" onClick={() => setActiveTab("processed")}>
-              Downloads
             </button>
           </div>
           <div className="topbar-actions">
@@ -915,13 +852,6 @@ export default function HODDashboard() {
             <p className="hod-stat-meta">Reviews already handled in this cycle</p>
           </article>
 
-          <article className="hod-stat-card hod-stat-card-violet">
-            <div className="hod-stat-head">
-              <span className="hod-stat-label">My Downloads</span>
-            </div>
-            <strong className="hod-stat-value">{downloadCount}</strong>
-            <p className="hod-stat-meta">SPPU and PBAS files available</p>
-          </article>
         </section>
 
         <section className="hod-main-grid">
@@ -953,19 +883,6 @@ export default function HODDashboard() {
                     </button>
                   </div>
 
-                  {hodOwnAppraisal.actual_status === "FINALIZED" && (
-                    <div className="history-download-panel">
-                      <p className="history-download-title">Download Your Appraisal PDFs</p>
-                      <div className="history-download-actions">
-                        <button type="button" className="history-download-btn history-download-btn-blue" onClick={() => downloadPdf(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/sppu-enhanced/`, `SPPU_${hodOwnAppraisal.academicYear}.pdf`)}>
-                          SPPU PDF
-                        </button>
-                        <button type="button" className="history-download-btn history-download-btn-violet" onClick={() => downloadPdf(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/pbas-enhanced/`, `PBAS_${hodOwnAppraisal.academicYear}.pdf`)}>
-                          PBAS PDF
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -981,7 +898,7 @@ export default function HODDashboard() {
                         <p>{sub.department} | {sub.academic_year}</p>
                       </div>
                       <button className="primary-btn" onClick={() => setSelectedSubmission(sub)}>
-                        View Review
+                        Open
                       </button>
                     </div>
                   ))}
@@ -999,15 +916,6 @@ export default function HODDashboard() {
                         <span className={`status ${sub.status?.toLowerCase().replace(/_/g, "-")}`}>
                           {sub.status?.replace(/_/g, " ")}
                         </span>
-                        {sub.status === "FINALIZED" && (
-                          <div className="processed-download-row">
-                            <p className="processed-download-title">Downloads</p>
-                            <div className="processed-download-actions">
-                              <button type="button" className="history-download-btn history-download-btn-blue" onClick={() => downloadPdf(`/api/appraisal/${sub.appraisal_id}/pdf/sppu-enhanced/`, `SPPU_${sub.academic_year}.pdf`)}>SPPU</button>
-                              <button type="button" className="history-download-btn history-download-btn-violet" onClick={() => downloadPdf(`/api/appraisal/${sub.appraisal_id}/pdf/pbas-enhanced/`, `PBAS_${sub.academic_year}.pdf`)}>PBAS</button>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </div>
                   ))}
@@ -1024,48 +932,16 @@ export default function HODDashboard() {
             <button type="button" className="quick-action-item" onClick={() => setActiveTab("pending")}>
               <span className="quick-action-icon quick-action-icon-amber">RV</span>
               <span className="quick-action-text">
-                <strong>Review Pending Forms</strong>
+                <strong>Open Pending Forms</strong>
                 <small>{pendingCount} forms awaiting review</small>
               </span>
               <span className="quick-action-arrow">&gt;</span>
             </button>
-            <button
-              type="button"
-              className={`quick-action-item ${hodOwnAppraisal.actual_status === "FINALIZED" ? "" : "quick-action-disabled"}`}
-              onClick={() => {
-                if (hodOwnAppraisal.actual_status === "FINALIZED") {
-                  downloadPdf(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/sppu-enhanced/`, `SPPU_${hodOwnAppraisal.academicYear}.pdf`);
-                }
-              }}
-            >
-              <span className="quick-action-icon quick-action-icon-blue">SP</span>
-              <span className="quick-action-text">
-                <strong>Download SPPU PDF</strong>
-                <small>{hodOwnAppraisal.actual_status === "FINALIZED" ? "Ready for download" : "Available after finalization"}</small>
-              </span>
-              <span className="quick-action-arrow">&gt;</span>
-            </button>
-            <button
-              type="button"
-              className={`quick-action-item ${hodOwnAppraisal.actual_status === "FINALIZED" ? "" : "quick-action-disabled"}`}
-              onClick={() => {
-                if (hodOwnAppraisal.actual_status === "FINALIZED") {
-                  downloadPdf(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/pbas-enhanced/`, `PBAS_${hodOwnAppraisal.academicYear}.pdf`);
-                }
-              }}
-            >
-              <span className="quick-action-icon quick-action-icon-violet">PB</span>
-              <span className="quick-action-text">
-                <strong>Download PBAS PDF</strong>
-                <small>{hodOwnAppraisal.actual_status === "FINALIZED" ? "Ready for download" : "Available after finalization"}</small>
-              </span>
-              <span className="quick-action-arrow">&gt;</span>
-            </button>
-            <button type="button" className="quick-action-item quick-action-item-featured" onClick={() => setActiveTab("processed")}>
+            <button type="button" className="quick-action-item quick-action-item-featured" onClick={() => navigate("/hod/profile")}>
               <span className="quick-action-icon quick-action-icon-green">TR</span>
               <span className="quick-action-text">
-                <strong>Track My Appraisal</strong>
-                <small>Open detailed submission status</small>
+                <strong>Open My Profile</strong>
+                <small>Manage account and workspace access</small>
               </span>
               <span className="quick-action-arrow">&gt;</span>
             </button>
