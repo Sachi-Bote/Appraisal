@@ -471,57 +471,58 @@ export default function HODDashboard() {
   /* ================= REVIEW SCREEN ================= */
   if (selectedSubmission) {
     return (
-      <div className="hod-container">
-        <div className="hod-shell review-shell">
-          <div className="hod-topbar">
-            <div className="topbar-brand">
-              <div className="topbar-brand-icon">SA</div>
-              <div className="topbar-brand-text">
-                <span className="topbar-brand-title">Staff Appraisal System</span>
-                <span className="topbar-brand-subtitle">Faculty Submission Review</span>
-              </div>
-            </div>
-            <div className="topbar-nav">
-              <button type="button" className="topbar-nav-link" onClick={() => setSelectedSubmission(null)}>
-                Dashboard
-              </button>
-              <button type="button" className="topbar-nav-link" onClick={() => navigate("/hod/profile")}>
-                My Profile
-              </button>
-              <button type="button" className="topbar-nav-link" onClick={handleFillOwnAppraisal}>
-                Appraisal Form
-              </button>
-            </div>
-            <div className="topbar-actions">
-              <span className="topbar-badge">HOD Review</span>
-              <button className="logout-btn" onClick={handleLogout}>
-                Logout
-              </button>
+      <div className="profile-page-shell">
+        <nav className="profile-topnav">
+          <div className="profile-brand">
+            <div className="profile-brand-icon">SA</div>
+            <div className="profile-brand-copy">
+              <span className="profile-brand-title">Staff Appraisal System</span>
+              <span className="profile-brand-subtitle">Faculty Submission Review</span>
             </div>
           </div>
+          <div className="profile-topnav-links">
+            <button type="button" className="profile-topnav-link" onClick={() => setSelectedSubmission(null)}>
+              Dashboard
+            </button>
+            <button type="button" className="profile-topnav-link" onClick={() => navigate("/hod/profile")}>
+              My Profile
+            </button>
+            <button type="button" className="profile-topnav-link" onClick={handleFillOwnAppraisal}>
+              Appraisal Form
+            </button>
+          </div>
+          <div className="profile-topnav-actions">
+            <span className="profile-topnav-badge">HOD Review</span>
+            <button type="button" className="profile-topnav-logout" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
+        </nav>
 
-          <section className="review-hero">
-            <div className="review-hero-copy">
-              <button className="review-back-link" onClick={() => setSelectedSubmission(null)}>
-                Back to Dashboard
-              </button>
-              <p className="review-hero-label">HOD Review Panel</p>
-              <h1>Faculty Submission Review</h1>
-              <div className="review-hero-meta">
-                <span>{selectedSubmission.faculty_name}</span>
-                <span>{selectedSubmission.department}</span>
-                <span>{selectedSubmission.designation}</span>
-                <span>AY {selectedSubmission.academic_year}</span>
-              </div>
+        <section className="profile-hero review-hero">
+          <div className="review-hero-copy">
+            <button className="review-back-link" onClick={() => setSelectedSubmission(null)}>
+              Back to Dashboard
+            </button>
+            <p className="review-hero-label">HOD Review Panel</p>
+            <h1>Faculty Submission Review</h1>
+            <div className="review-hero-meta">
+              <span>{selectedSubmission.faculty_name}</span>
+              <span>{selectedSubmission.department}</span>
+              <span>{selectedSubmission.designation}</span>
+              <span>AY {selectedSubmission.academic_year}</span>
             </div>
-            <div className="review-hero-status">
-              <span className={`review-status-pill ${selectedSubmission.status === "REVIEWED_BY_HOD" ? "review-status-pill-review" : "review-status-pill-pending"}`}>
-                {reviewStatusLabel}
-              </span>
-            </div>
-          </section>
+          </div>
+          <div className="review-hero-status">
+            <span className={`review-status-pill ${selectedSubmission.status === "REVIEWED_BY_HOD" ? "review-status-pill-review" : "review-status-pill-pending"}`}>
+              {reviewStatusLabel}
+            </span>
+          </div>
+        </section>
 
-          <section className="review-score-grid">
+        <main className="profile-content">
+          <div className="hod-shell review-shell">
+            <section className="review-score-grid">
             <article className="review-score-card review-score-card-featured">
               <span className="review-score-label">Auto-calculated Total Score</span>
               <strong className="review-score-value">{formattedTotalScore}</strong>
@@ -781,43 +782,43 @@ export default function HODDashboard() {
               )}
             </div>
           </div>
-        </div>
+          </div>
+        </main>
       </div>
     );
   }
 
   /* ================= MAIN DASHBOARD ================= */
   return (
-    <div className="hod-container">
-      <div className="hod-shell">
-        <div className="hod-topbar">
-          <div className="topbar-brand">
-            <div className="topbar-brand-icon">SA</div>
-            <div className="topbar-brand-text">
-              <span className="topbar-brand-title">Staff Appraisal System</span>
-              <span className="topbar-brand-subtitle">HOD Review Console</span>
-            </div>
-          </div>
-          <div className="topbar-nav">
-            <button type="button" className="topbar-nav-link topbar-nav-link-active">
-              Dashboard
-            </button>
-            <button type="button" className="topbar-nav-link" onClick={() => navigate("/hod/profile")}>
-              My Profile
-            </button>
-            <button type="button" className="topbar-nav-link" onClick={handleFillOwnAppraisal}>
-              Appraisal Form
-            </button>
-          </div>
-          <div className="topbar-actions">
-            <span className="topbar-badge">AY {hodOwnAppraisal.academicYear || "2024-25"}</span>
-            <button className="logout-btn" onClick={handleLogout}>
-              Logout
-            </button>
+    <div className="profile-page-shell">
+      <nav className="profile-topnav">
+        <div className="profile-brand">
+          <div className="profile-brand-icon">SA</div>
+          <div className="profile-brand-copy">
+            <span className="profile-brand-title">Staff Appraisal System</span>
+            <span className="profile-brand-subtitle">HOD Review Console</span>
           </div>
         </div>
+        <div className="profile-topnav-links">
+          <button type="button" className="profile-topnav-link profile-topnav-link-active">
+            Dashboard
+          </button>
+          <button type="button" className="profile-topnav-link" onClick={() => navigate("/hod/profile")}>
+            My Profile
+          </button>
+          <button type="button" className="profile-topnav-link" onClick={handleFillOwnAppraisal}>
+            Appraisal Form
+          </button>
+        </div>
+        <div className="profile-topnav-actions">
+          <span className="profile-topnav-badge">AY {hodOwnAppraisal.academicYear || "2024-25"}</span>
+          <button className="profile-topnav-logout" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
+      </nav>
 
-        <section className="profile-hero" style={{ borderRadius: "0 0 24px 24px", paddingBottom: "54px" }}>
+      <section className="profile-hero">
           <div className="profile-hero-ring profile-hero-ring-left" />
           <div className="profile-hero-ring profile-hero-ring-right" />
           <div className="profile-hero-main">
@@ -846,7 +847,9 @@ export default function HODDashboard() {
           </div>
         </section>
 
-        <section className="hod-stat-grid">
+        <main className="profile-content">
+          <div className="hod-shell">
+            <section className="hod-stat-grid">
           <article className="hod-stat-card hod-stat-card-green">
             <div className="hod-stat-head">
               <span className="hod-stat-label">My Appraisal</span>
@@ -1007,7 +1010,8 @@ export default function HODDashboard() {
             )}
           </aside>
         </section>
-      </div>
+          </div>
+        </main>
     </div>
   );
 }

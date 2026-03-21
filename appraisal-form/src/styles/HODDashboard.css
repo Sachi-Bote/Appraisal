@@ -764,9 +764,8 @@ textarea::placeholder {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
-  padding: 0 28px;
   margin-bottom: 28px;
 }
 
@@ -818,7 +817,6 @@ textarea::placeholder {
   grid-template-columns: minmax(0, 1fr) 360px;
   gap: 22px;
   align-items: start;
-  padding: 0 28px 28px;
 }
 
 .hod-main-column {

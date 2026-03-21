@@ -85,40 +85,43 @@ export default function FacultyDashboard() {
   const profileDepartment = profileSummary.department || "Department";
 
   return (
-    <div className="dashboard-page">
-      <div className="dashboard-shell">
-        <div className="dashboard-topbar">
-          <div className="dashboard-topbar-brand">
-            <div className="dashboard-topbar-icon">SA</div>
-            <span className="dashboard-topbar-title">Staff Appraisal System</span>
-          </div>
-
-          <div className="dashboard-topbar-nav">
-            <button type="button" className="dashboard-nav-link dashboard-nav-link-active">
-              Dashboard
-            </button>
-            <button type="button" className="dashboard-nav-link" onClick={() => navigate("/faculty/profile")}>
-              My Profile
-            </button>
-            <button type="button" className="dashboard-nav-link" onClick={() => navigate("/faculty/appraisal")}>
-              Appraisal Form
-            </button>
-          </div>
-
-          <div className="dashboard-topbar-actions">
-            <span className="dashboard-topbar-badge">Faculty Portal</span>
-            <button
-              className="logout-btn"
-              onClick={() => {
-                clearAuthAndRedirect();
-              }}
-            >
-              Logout
-            </button>
+    <div className="profile-page-shell">
+      <nav className="profile-topnav">
+        <div className="profile-brand">
+          <div className="profile-brand-icon">SA</div>
+          <div className="profile-brand-copy">
+            <span className="profile-brand-title">Staff Appraisal System</span>
+            <span className="profile-brand-subtitle">Faculty Dashboard</span>
           </div>
         </div>
 
-        <section className="profile-hero" style={{ borderRadius: "0 0 24px 24px", paddingBottom: "54px" }}>
+        <div className="profile-topnav-links">
+          <button type="button" className="profile-topnav-link profile-topnav-link-active">
+            Dashboard
+          </button>
+          <button type="button" className="profile-topnav-link" onClick={() => navigate("/faculty/profile")}>
+            My Profile
+          </button>
+          <button type="button" className="profile-topnav-link" onClick={() => navigate("/faculty/appraisal")}>
+            Appraisal Form
+          </button>
+        </div>
+
+        <div className="profile-topnav-actions">
+          <span className="profile-topnav-badge">Faculty Portal</span>
+          <button
+            type="button"
+            className="profile-topnav-logout"
+            onClick={() => {
+              clearAuthAndRedirect();
+            }}
+          >
+            Logout
+          </button>
+        </div>
+      </nav>
+
+      <section className="profile-hero">
           <div className="profile-hero-ring profile-hero-ring-left" />
           <div className="profile-hero-ring profile-hero-ring-right" />
           <div className="profile-hero-main">
@@ -146,7 +149,9 @@ export default function FacultyDashboard() {
           </div>
         </section>
 
-        <div className="dashboard-grid">
+        <main className="profile-content">
+          <div className="dashboard-shell">
+            <div className="dashboard-grid">
           <div className="dashboard-card" onClick={() => navigate("/faculty/profile")}>
             <h3>My Profile</h3>
             <p>View official details and update personal information</p>
@@ -177,8 +182,9 @@ export default function FacultyDashboard() {
               </div>
             )}
           </div>
-        </div>
-      </div>
+            </div>
+          </div>
+        </main>
     </div>
   );
 }
