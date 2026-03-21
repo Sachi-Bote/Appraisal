@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import API, { clearAuthAndRedirect } from "../api";
 import "../styles/dashboard.css";
 import "../styles/HODDashboard.css";
+import "../styles/profile.css";
 import useSessionState from "../hooks/useSessionState";
 import { buildApiUrl } from "../utils/apiUrl";
 import { notifyAppraisalStatusChanged } from "../utils/appraisalStatusCache";
+import { downloadWithAuth } from "../utils/downloadFile";
 import {
   DEFAULT_TABLE2_VERIFIED_KEYS,
   getTable2VerifiedLabel,
@@ -441,6 +443,15 @@ export default function HODDashboard() {
     }
   };
 
+  const downloadPdf = async (url, filename) => {
+    try {
+      await downloadWithAuth(url, filename);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to download PDF.");
+    }
+  };
+
   const pendingCount = submissions.pending.length;
   const processedCount = submissions.processed.length;
   const ownStatusLabel =
@@ -806,16 +817,32 @@ export default function HODDashboard() {
           </div>
         </div>
 
-        <section className="hod-hero">
-          <div className="hod-hero-copy">
-            <p className="hero-greeting">Good morning,</p>
-            <h1>{heroName}</h1>
-            <p className="subtitle">
-              {heroDesignation} <span>&middot;</span> {heroDepartment} <span>&middot;</span> SPPU
-            </p>
-          </div>
-          <div className="hod-hero-status">
-            <span className="hero-status-pill">AY {hodOwnAppraisal.academicYear || "2024-25"} Active</span>
+        <section className="profile-hero" style={{ borderRadius: "0 0 24px 24px", paddingBottom: "54px" }}>
+          <div className="profile-hero-ring profile-hero-ring-left" />
+          <div className="profile-hero-ring profile-hero-ring-right" />
+          <div className="profile-hero-main">
+            <div className="profile-hero-identity">
+              <div className="profile-avatar-wrap">
+                <div className="profile-avatar-frame">
+                  <span className="profile-avatar-fallback">{String(heroName).trim().charAt(0).toUpperCase() || "H"}</span>
+                </div>
+              </div>
+              <div className="profile-hero-copy">
+                <p className="profile-hero-kicker">HOD Dashboard Workspace</p>
+                <h1>{heroName}</h1>
+                <div className="profile-hero-meta">
+                  <span>{heroDesignation}</span>
+                  <span className="profile-meta-dot" />
+                  <span>{heroDepartment}</span>
+                </div>
+              </div>
+            </div>
+            <div className="profile-hero-actions">
+              <span className="profile-year-pill">AY {hodOwnAppraisal.academicYear || "2024-25"}</span>
+              <button type="button" className="profile-primary-action" onClick={() => navigate("/hod/profile")}>
+                Open My Profile
+              </button>
+            </div>
           </div>
         </section>
 
@@ -917,6 +944,9 @@ export default function HODDashboard() {
                           {sub.status?.replace(/_/g, " ")}
                         </span>
                       </div>
+                      <button className="primary-btn" onClick={() => setSelectedSubmission(sub)}>
+                        View
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -945,6 +975,36 @@ export default function HODDashboard() {
               </span>
               <span className="quick-action-arrow">&gt;</span>
             </button>
+            <button type="button" className="quick-action-item" onClick={() => navigate("/hod/appraisal-form")}>
+              <span className="quick-action-icon quick-action-icon-blue">AF</span>
+              <span className="quick-action-text">
+                <strong>Open My Appraisal Form</strong>
+                <small>View or edit your appraisal based on workflow state</small>
+              </span>
+              <span className="quick-action-arrow">&gt;</span>
+            </button>
+            <button type="button" className="quick-action-item" onClick={() => navigate("/hod/appraisal/status")}>
+              <span className="quick-action-icon quick-action-icon-violet">ST</span>
+              <span className="quick-action-text">
+                <strong>Track Submission Status</strong>
+                <small>Open review status and download approved forms</small>
+              </span>
+              <span className="quick-action-arrow">&gt;</span>
+            </button>
+            {hodOwnAppraisal.appraisal_id && (
+              <button
+                type="button"
+                className="quick-action-item"
+                onClick={() => downloadPdf(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/sppu-enhanced/`, `HOD_SPPU_${hodOwnAppraisal.academicYear}.pdf`)}
+              >
+                <span className="quick-action-icon quick-action-icon-amber">DL</span>
+                <span className="quick-action-text">
+                  <strong>Download My Appraisal</strong>
+                  <small>Download latest SPPU form PDF</small>
+                </span>
+                <span className="quick-action-arrow">&gt;</span>
+              </button>
+            )}
           </aside>
         </section>
       </div>

@@ -106,7 +106,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryTab = new URLSearchParams(location.search).get("tab");
-  const normalizedTab = queryTab === "password" || queryTab === "activity" ? queryTab : "account";
+  const normalizedTab = queryTab === "password" ? "password" : "account";
   const [activeTab, setActiveTab] = useSessionState("profile.activeTab", normalizedTab);
   const [isEditing, setIsEditing] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
@@ -185,8 +185,9 @@ export default function Profile() {
   }, [navigate]);
 
   useEffect(() => {
-    if (activeTab !== normalizedTab) setActiveTab(normalizedTab);
-  }, [activeTab, normalizedTab, setActiveTab]);
+    // Apply query tab only when explicitly provided; otherwise preserve user tab selection.
+    if (queryTab && activeTab !== normalizedTab) setActiveTab(normalizedTab);
+  }, [activeTab, normalizedTab, queryTab, setActiveTab]);
 
   useEffect(() => {
     const move = (e) => {
@@ -363,7 +364,6 @@ export default function Profile() {
   const navItems = [
     { id: "account", label: "Account Details", icon: "Ac", color: "blue" },
     { id: "password", label: "Change Password", icon: "Pw", color: "amber" },
-    { id: "activity", label: roleMeta.activityTitle, icon: "Av", color: "green" },
   ];
 
   return (
@@ -618,64 +618,6 @@ export default function Profile() {
               </section>
             )}
 
-            {activeTab === "activity" && (
-              <section className="profile-panel">
-                <header className="profile-panel-header">
-                  <div>
-                    <p className="profile-panel-kicker">{roleMeta.activityTitle}</p>
-                    <h3>Workspace summary</h3>
-                  </div>
-                </header>
-                <div className="profile-panel-body profile-activity-layout">
-                  <article className="profile-activity-card">
-                    <h4>{roleMeta.activityTitle}</h4>
-                    <p>{roleMeta.activityBody}</p>
-                  </article>
-                  <article className="profile-activity-card">
-                    <h4>Quick Facts</h4>
-                    <ul className="profile-activity-list">
-                      <li>Email: {profileData.email || "Not specified"}</li>
-                      <li>Mobile: {profileData.mobile_number || "Not specified"}</li>
-                      <li>Designation: {displayRole}</li>
-                      <li>Date of Joining: {formatDateDisplay(profileData.date_of_joining)}</li>
-                    </ul>
-                  </article>
-                  <article className="profile-activity-card profile-activity-card-highlight">
-                    <h4>Open Workspace</h4>
-                    <p>
-                      Continue to your {normalizeRole(profileData.role) === "PRINCIPAL" ? "dashboard" : "appraisal workspace"} to manage submissions and workflows.
-                    </p>
-                    <button
-                      type="button"
-                      className="profile-filled-btn"
-                      onClick={() => navigate(normalizeRole(profileData.role) === "PRINCIPAL" ? roleMeta.dashboardPath : roleMeta.appraisalPath)}
-                    >
-                      {normalizeRole(profileData.role) === "PRINCIPAL" ? "Open Dashboard" : "Open Appraisal"}
-                    </button>
-                  </article>
-                </div>
-              </section>
-            )}
-
-            <section className="profile-panel">
-              <header className="profile-panel-header">
-                <div>
-                  <p className="profile-panel-kicker">Session</p>
-                  <h3>Manage your current session</h3>
-                </div>
-              </header>
-              <div className="profile-panel-body">
-                <div className="profile-session-card">
-                  <div>
-                    <h4>Sign Out</h4>
-                    <p>End your current session and return to the login page.</p>
-                  </div>
-                  <button type="button" className="profile-danger-btn" onClick={() => setShowLogout(true)}>
-                    Log Out
-                  </button>
-                </div>
-              </div>
-            </section>
           </div>
         </section>
       </main>

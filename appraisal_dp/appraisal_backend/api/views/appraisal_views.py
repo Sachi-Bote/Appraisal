@@ -40,11 +40,6 @@ class CurrentFacultyAppraisalAPIView(APIView):
             Appraisal.objects
             .filter(
                 faculty=faculty,
-                status__in=[
-                    States.DRAFT,
-                    States.RETURNED_BY_HOD,
-                    States.RETURNED_BY_PRINCIPAL,
-                ],
                 is_hod_appraisal=is_hod
             )
             .order_by(

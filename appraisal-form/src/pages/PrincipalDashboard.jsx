@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API, { clearAuthAndRedirect } from "../api";
 import "../styles/HODDashboard.css";
@@ -414,12 +414,49 @@ export default function PrincipalDashboard() {
   if (selected) {
     return (
       <div className="hod-container">
-        <button className="back-btn" onClick={() => setSelected(null)}>
-          ? Back
-        </button>
+        <div className="hod-shell review-shell">
+          <div className="hod-topbar">
+            <div className="topbar-brand">
+              <div className="topbar-brand-icon">SA</div>
+              <div className="topbar-brand-text">
+                <span className="topbar-brand-title">Staff Appraisal System</span>
+                <span className="topbar-brand-subtitle">Principal Final Review</span>
+              </div>
+            </div>
+            <div className="topbar-nav">
+              <button type="button" className="topbar-nav-link" onClick={() => setSelected(null)}>
+                Dashboard
+              </button>
+              <button type="button" className="topbar-nav-link" onClick={() => navigate("/principal/profile")}>
+                My Profile
+              </button>
+            </div>
+            <div className="topbar-actions">
+              <span className="topbar-badge">Principal Review</span>
+              <button className="logout-btn" onClick={() => clearAuthAndRedirect()}>
+                Logout
+              </button>
+            </div>
+          </div>
 
-        <div className="card">
-          <h2>Appraisal Review (Final)</h2>
+          <section className="review-hero">
+            <div className="review-hero-copy">
+              <button className="review-back-link" onClick={() => setSelected(null)}>Back to Dashboard</button>
+              <p className="review-hero-label">Principal Review Panel</p>
+              <h1>Final Appraisal Review</h1>
+              <div className="review-hero-meta">
+                <span>{selected.faculty_name}</span>
+                <span>{selected.department}</span>
+                <span>AY {selected.academic_year}</span>
+              </div>
+            </div>
+            <div className="review-hero-status">
+              <span className="review-status-pill review-status-pill-pending">{selected.status?.replace(/_/g, " ")}</span>
+            </div>
+          </section>
+
+          <div className="card">
+            <h2>Appraisal Review (Final)</h2>
 
           <div className="info-grid">
             <div><b>Name:</b> {selected.faculty_name}</div>
@@ -612,6 +649,7 @@ export default function PrincipalDashboard() {
               Last saved verified grading: {new Date(verificationSavedAt).toLocaleString()}
             </p>
           )}
+          </div>
         </div>
       </div>
     );
@@ -620,30 +658,37 @@ export default function PrincipalDashboard() {
   /* ================= LIST VIEW ================= */
   return (
     <div className="hod-container">
-      <div className="hod-header-card">
-        <div>
-          <h1>Principal Dashboard</h1>
-          <p className="subtitle">Final Approval of Appraisal Forms</p>
+      <div className="hod-shell">
+        <div className="hod-topbar">
+          <div className="topbar-brand">
+            <div className="topbar-brand-icon">SA</div>
+            <div className="topbar-brand-text">
+              <span className="topbar-brand-title">Staff Appraisal System</span>
+              <span className="topbar-brand-subtitle">Principal Review Console</span>
+            </div>
+          </div>
+          <div className="topbar-nav">
+            <button type="button" className="topbar-nav-link topbar-nav-link-active">Dashboard</button>
+            <button type="button" className="topbar-nav-link" onClick={() => navigate("/principal/profile")}>My Profile</button>
+          </div>
+          <div className="topbar-actions">
+            <span className="topbar-badge">Principal Portal</span>
+            <button className="logout-btn" onClick={() => clearAuthAndRedirect()}>Logout</button>
+          </div>
         </div>
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <button
-            className="primary-btn"
-            onClick={() => navigate("/principal/dashboard")}
-          >
-            My Profile
-          </button>
-          <button
-            className="logout-btn"
-            onClick={() => {
-              clearAuthAndRedirect();
-            }}
-          >
-            Logout
-          </button>
-        </div>
-      </div>
 
-      <div className="tab-row">
+        <section className="hod-hero">
+          <div className="hod-hero-copy">
+            <p className="hero-greeting">Final approval desk</p>
+            <h1>Principal Dashboard</h1>
+            <p className="subtitle">Review, approve, finalize, and download appraisal forms.</p>
+          </div>
+          <div className="hod-hero-status">
+            <span className="hero-status-pill">Pending {submissions.pending.length}</span>
+          </div>
+        </section>
+
+      <div className="tab-row" style={{ marginTop: "16px" }}>
         <button
           className={`tab ${activeTab === "pending" ? "active" : ""}`}
           onClick={() => setActiveTab("pending")}
@@ -658,7 +703,7 @@ export default function PrincipalDashboard() {
         </button>
       </div>
 
-      {loading && <p className="empty">Loading�</p>}
+      {loading && <p className="empty">Loading…</p>}
       {error && <p className="empty">{error}</p>}
 
       <div className="list">
@@ -729,9 +774,12 @@ export default function PrincipalDashboard() {
             ))
           ))}
       </div>
+      </div>
     </div>
   );
 }
+
+
 
 
 

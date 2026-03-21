@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import API, { clearAuthAndRedirect } from "../../api";
 import "../../styles/dashboard.css";
+import "../../styles/profile.css";
 import { formatStatus } from "../../utils/textFormatters";
 import {
   clearStatusCache,
@@ -14,9 +15,13 @@ import {
 export default function FacultyDashboard() {
   const navigate = useNavigate();
 
-  const editableStatuses = ["DRAFT", "CHANGES_REQUESTED", "RETURNED_BY_HOD", "RETURNED_BY_PRINCIPAL"];
   const [appraisal, setAppraisal] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profileSummary, setProfileSummary] = useState({
+    full_name: "",
+    designation: "",
+    department: "",
+  });
 
   useEffect(() => {
     let alive = true;
@@ -40,6 +45,16 @@ export default function FacultyDashboard() {
     };
 
     fetchCurrentAppraisal();
+    API.get("me/")
+      .then((res) => {
+        const data = res?.data || {};
+        setProfileSummary({
+          full_name: data.full_name || data.username || "Faculty Member",
+          designation: data.designation || "Faculty Member",
+          department: data.department || "Department",
+        });
+      })
+      .catch(() => {});
 
     const refreshFromLatest = () => {
       clearStatusCache();
@@ -62,14 +77,12 @@ export default function FacultyDashboard() {
     };
   }, []);
 
-  const disableNewForm =
-    appraisal &&
-    appraisal.status &&
-    !editableStatuses.includes(String(appraisal.status).trim().toUpperCase());
-
   const statusClassName = appraisal?.status
     ? formatStatus(appraisal.status).toLowerCase().replace(/\s+/g, "-")
     : "draft";
+  const profileName = profileSummary.full_name || "Faculty Member";
+  const profileDesignation = profileSummary.designation || "Faculty Member";
+  const profileDepartment = profileSummary.department || "Department";
 
   return (
     <div className="dashboard-page">
@@ -105,15 +118,33 @@ export default function FacultyDashboard() {
           </div>
         </div>
 
-        <div className="dashboard-header-card">
-          <div className="dashboard-title-group">
-            <p className="portal-kicker">Staff Appraisal System</p>
-            <h2>Faculty Dashboard</h2>
-            <p className="dashboard-subtitle">
-              Access your profile, appraisal forms, and status
-            </p>
+        <section className="profile-hero" style={{ borderRadius: "0 0 24px 24px", paddingBottom: "54px" }}>
+          <div className="profile-hero-ring profile-hero-ring-left" />
+          <div className="profile-hero-ring profile-hero-ring-right" />
+          <div className="profile-hero-main">
+            <div className="profile-hero-identity">
+              <div className="profile-avatar-wrap">
+                <div className="profile-avatar-frame">
+                  <span className="profile-avatar-fallback">{String(profileName).trim().charAt(0).toUpperCase() || "F"}</span>
+                </div>
+              </div>
+              <div className="profile-hero-copy">
+                <p className="profile-hero-kicker">Dashboard Workspace</p>
+                <h1>{profileName}</h1>
+                <div className="profile-hero-meta">
+                  <span>{profileDesignation}</span>
+                  <span className="profile-meta-dot" />
+                  <span>{profileDepartment}</span>
+                </div>
+              </div>
+            </div>
+            <div className="profile-hero-actions">
+              <button type="button" className="profile-primary-action" onClick={() => navigate("/faculty/profile")}>
+                Open My Profile
+              </button>
+            </div>
           </div>
-        </div>
+        </section>
 
         <div className="dashboard-grid">
           <div className="dashboard-card" onClick={() => navigate("/faculty/profile")}>
@@ -121,23 +152,9 @@ export default function FacultyDashboard() {
             <p>View official details and update personal information</p>
           </div>
 
-          <div
-            className={`dashboard-card ${disableNewForm ? "disabled" : ""}`}
-            onClick={() => {
-              if (!disableNewForm) navigate("/faculty/appraisal");
-            }}
-          >
-            <h3>Appraisal Form</h3>
-            <p>
-              {loading
-                ? "Checking appraisal status..."
-                : !appraisal || !appraisal.status
-                  ? "Fill and submit your annual faculty appraisal"
-                  : editableStatuses.includes(String(appraisal.status).trim().toUpperCase()) &&
-                    String(appraisal.status).trim().toUpperCase() !== "DRAFT"
-                    ? "Edit and re-submit appraisal"
-                    : "Appraisal already submitted"}
-            </p>
+          <div className="dashboard-card" onClick={() => navigate("/faculty/appraisal/status")}>
+            <h3>Track Status & Download</h3>
+            <p>View review status and download approved SPPU/PBAS forms.</p>
           </div>
 
           <div className="dashboard-history-section">

@@ -2093,6 +2093,33 @@ export default function FacultyAppraisalForm() {
       subtitle: "Preview generated forms and complete final declaration",
     },
   };
+  const formTipsByStep = {
+    1: [
+      "Use official details exactly as recorded in service records.",
+      "Confirm academic year, designation, and department before moving ahead.",
+      "Keep contact details updated so review communication is not delayed.",
+    ],
+    2: [
+      "Enter assigned and conducted classes carefully for each course entry.",
+      "Map each SPPU activity to the correct section and enclosure reference.",
+      "Use consistent enclosure numbering across teaching and activity rows.",
+    ],
+    3: [
+      "Add accurate ACR details and supporting enclosure numbers.",
+      "Provide feedback values semester-wise for easier verification.",
+      "Use numeric values where required to avoid score calculation issues.",
+    ],
+    4: [
+      "Add research entries with publication/project details and year.",
+      "Use separate rows for each paper, patent, chapter, or funded project.",
+      "Keep enclosure references aligned with the corresponding research row.",
+    ],
+    5: [
+      "Preview both SPPU and PBAS forms before final submit.",
+      "Add final justification/notes clearly for reviewer context.",
+      "Submit only after declaration is checked and all sections are reviewed.",
+    ],
+  };
 
   const teachingTotals = (teachingActivities || []).reduce((acc, row) => {
     const assigned = Number(row.totalClassesAssigned || 0);
@@ -3903,9 +3930,12 @@ export default function FacultyAppraisalForm() {
                 <div className="appraisal-side-card-title">Form Tips</div>
               </div>
               <div className="appraisal-side-card-body">
-                <div className="appraisal-tip-item"><span className="appraisal-tip-num">1</span>Use your official details exactly as they appear in service records.</div>
-                <div className="appraisal-tip-item"><span className="appraisal-tip-num">2</span>Save drafts between steps so the latest data is preserved.</div>
-                <div className="appraisal-tip-item"><span className="appraisal-tip-num">3</span>Keep enclosure references consistent across teaching, feedback, and research entries.</div>
+                {(formTipsByStep[currentStep] || formTipsByStep[1]).map((tip, index) => (
+                  <div key={`${currentStep}-tip-${index + 1}`} className="appraisal-tip-item">
+                    <span className="appraisal-tip-num">{index + 1}</span>
+                    {tip}
+                  </div>
+                ))}
               </div>
             </div>
           </aside>
