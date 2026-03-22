@@ -927,9 +927,25 @@ export default function HODDashboard() {
                         <h3>{sub.faculty_name}</h3>
                         <p>{sub.department} | {sub.academic_year}</p>
                       </div>
-                      <button className="primary-btn" onClick={() => setSelectedSubmission(sub)}>
-                        Open
-                      </button>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        {sub.status === "FINALIZED" ? (
+                          <>
+                            <button type="button" className="view-btn" onClick={(e) => { e.stopPropagation(); downloadPdf(`/api/appraisal/${sub.appraisal_id}/pdf/sppu-enhanced/`, `SPPU_${sub.faculty_name.replace(/\s+/g, '_')}_${sub.academic_year}.pdf`); }}>
+                              SPPU
+                            </button>
+                            <button type="button" className="view-btn" onClick={(e) => { e.stopPropagation(); downloadPdf(`/api/appraisal/${sub.appraisal_id}/pdf/pbas-enhanced/`, `PBAS_${sub.faculty_name.replace(/\s+/g, '_')}_${sub.academic_year}.pdf`); }}>
+                              PBAS
+                            </button>
+                            <button type="button" className="primary-btn" onClick={() => setSelectedSubmission(sub)}>
+                              View
+                            </button>
+                          </>
+                        ) : (
+                          <button type="button" className="primary-btn" onClick={() => setSelectedSubmission(sub)}>
+                            Open
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
