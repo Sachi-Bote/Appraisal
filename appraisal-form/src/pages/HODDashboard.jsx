@@ -908,7 +908,7 @@ export default function HODDashboard() {
                         {hodOwnAppraisal.actual_status?.replace(/_/g, " ")}
                       </span>
                     </div>
-                    <button className="view-btn" onClick={() => setActiveTab("processed")}>
+                    <button className="view-btn" onClick={() => navigate("/hod/appraisal/status")}>
                       Track Status
                     </button>
                   </div>

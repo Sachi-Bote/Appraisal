@@ -246,7 +246,7 @@ export default function FacultyDashboard() {
                   <div className="ph">
                     <div className="ph-left"><div className="pa pa-blue"></div><div><div className="pt">My Appraisal Form</div><div className="ps">AY {currentAy} · Submission status</div></div></div>
                     <div style={{display:'flex', gap:'8px', flexWrap:'wrap', justifyContent:'flex-end'}}>
-                      <button className="btn-view-form" onClick={() => navigate("/faculty/appraisal/status")} disabled={!hasAppraisal}>👁 View Detail Status</button>
+                      <button className="btn-view-form" onClick={() => navigate("/faculty/appraisal/status")} disabled={!hasAppraisal}>👁 Track Status</button>
                       <button className="btn-continue-form" onClick={() => navigate("/faculty/appraisal")}>✎ {openFormText}</button>
                     </div>
                   </div>
