@@ -928,12 +928,12 @@ export default function HODDashboard() {
                         <p>{sub.department} | {sub.academic_year}</p>
                       </div>
                       <div style={{ display: "flex", gap: "8px" }}>
-                        {sub.status === "FINALIZED" ? (
+                        {sub.status === "FINALIZED" || sub.status === "PRINCIPAL_APPROVED" ? (
                           <>
-                            <button type="button" className="view-btn" onClick={(e) => { e.stopPropagation(); downloadPdf(`/api/appraisal/${sub.appraisal_id}/pdf/sppu-enhanced/`, `SPPU_${sub.faculty_name.replace(/\s+/g, '_')}_${sub.academic_year}.pdf`); }}>
+                            <button type="button" className="view-btn" onClick={(e) => { e.stopPropagation(); downloadWithAuth(`/api/appraisal/${sub.appraisal_id}/pdf/sppu-enhanced/`, `SPPU_${sub.faculty_name.replace(/\s+/g, '_')}_${sub.academic_year}.pdf`); }}>
                               SPPU
                             </button>
-                            <button type="button" className="view-btn" onClick={(e) => { e.stopPropagation(); downloadPdf(`/api/appraisal/${sub.appraisal_id}/pdf/pbas-enhanced/`, `PBAS_${sub.faculty_name.replace(/\s+/g, '_')}_${sub.academic_year}.pdf`); }}>
+                            <button type="button" className="view-btn" onClick={(e) => { e.stopPropagation(); downloadWithAuth(`/api/appraisal/${sub.appraisal_id}/pdf/pbas-enhanced/`, `PBAS_${sub.faculty_name.replace(/\s+/g, '_')}_${sub.academic_year}.pdf`); }}>
                               PBAS
                             </button>
                             <button type="button" className="primary-btn" onClick={() => setSelectedSubmission(sub)}>
@@ -963,9 +963,21 @@ export default function HODDashboard() {
                           {sub.status?.replace(/_/g, " ")}
                         </span>
                       </div>
-                      <button className="primary-btn" onClick={() => setSelectedSubmission(sub)}>
-                        View
-                      </button>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        {(sub.status === "FINALIZED" || sub.status === "PRINCIPAL_APPROVED") && (
+                          <>
+                            <button type="button" className="view-btn" onClick={(e) => { e.stopPropagation(); downloadWithAuth(`/api/appraisal/${sub.appraisal_id}/pdf/sppu-enhanced/`, `SPPU_${sub.faculty_name.replace(/\s+/g, '_')}_${sub.academic_year}.pdf`); }}>
+                              Download SPPU
+                            </button>
+                            <button type="button" className="view-btn" onClick={(e) => { e.stopPropagation(); downloadWithAuth(`/api/appraisal/${sub.appraisal_id}/pdf/pbas-enhanced/`, `PBAS_${sub.faculty_name.replace(/\s+/g, '_')}_${sub.academic_year}.pdf`); }}>
+                              Download PBAS
+                            </button>
+                          </>
+                        )}
+                        <button className="primary-btn" onClick={() => setSelectedSubmission(sub)}>
+                          View
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -976,53 +988,47 @@ export default function HODDashboard() {
           <aside className="quick-actions-card">
             <div className="quick-actions-header">
               <h3>Quick Actions</h3>
-              <p>Common HOD tasks and shortcuts</p>
+              <p>Own Downloads</p>
             </div>
-            <button type="button" className="quick-action-item" onClick={() => setActiveTab("pending")}>
-              <span className="quick-action-icon quick-action-icon-amber">RV</span>
-              <span className="quick-action-text">
-                <strong>Open Pending Forms</strong>
-                <small>{pendingCount} forms awaiting review</small>
-              </span>
-              <span className="quick-action-arrow">&gt;</span>
-            </button>
-            <button type="button" className="quick-action-item quick-action-item-featured" onClick={() => navigate("/hod/profile")}>
-              <span className="quick-action-icon quick-action-icon-green">TR</span>
-              <span className="quick-action-text">
-                <strong>Open My Profile</strong>
-                <small>Manage account and workspace access</small>
-              </span>
-              <span className="quick-action-arrow">&gt;</span>
-            </button>
-            <button type="button" className="quick-action-item" onClick={() => navigate("/hod/appraisal-form")}>
-              <span className="quick-action-icon quick-action-icon-blue">AF</span>
-              <span className="quick-action-text">
-                <strong>Open My Appraisal Form</strong>
-                <small>View or edit your appraisal based on workflow state</small>
-              </span>
-              <span className="quick-action-arrow">&gt;</span>
-            </button>
-            <button type="button" className="quick-action-item" onClick={() => navigate("/hod/appraisal/status")}>
-              <span className="quick-action-icon quick-action-icon-violet">ST</span>
-              <span className="quick-action-text">
-                <strong>Track Submission Status</strong>
-                <small>Open review status and download approved forms</small>
-              </span>
-              <span className="quick-action-arrow">&gt;</span>
-            </button>
-            {hodOwnAppraisal.appraisal_id && (
-              <button
-                type="button"
-                className="quick-action-item"
-                onClick={() => downloadPdf(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/sppu-enhanced/`, `HOD_SPPU_${hodOwnAppraisal.academicYear}.pdf`)}
-              >
-                <span className="quick-action-icon quick-action-icon-amber">DL</span>
-                <span className="quick-action-text">
-                  <strong>Download My Appraisal</strong>
-                  <small>Download latest SPPU form PDF</small>
-                </span>
-                <span className="quick-action-arrow">&gt;</span>
-              </button>
+            {hodOwnAppraisal.appraisal_id ? (
+              <>
+                <button
+                  type="button"
+                  className="quick-action-item"
+                  onClick={() => downloadWithAuth(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/sppu-enhanced/`, `HOD_SPPU_${hodOwnAppraisal.academicYear}.pdf`)}
+                >
+                  <span className="quick-action-icon quick-action-icon-green">📄</span>
+                  <span className="quick-action-text">
+                    <strong>Download My Filled SPPU Appraisal</strong>
+                    <small>Official SPPU PDF Format</small>
+                  </span>
+                  <span className="quick-action-arrow">&gt;</span>
+                </button>
+                <button
+                  type="button"
+                  className="quick-action-item"
+                  onClick={() => downloadWithAuth(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/pbas-enhanced/`, `HOD_PBAS_${hodOwnAppraisal.academicYear}.pdf`)}
+                >
+                  <span className="quick-action-icon quick-action-icon-violet">📑</span>
+                  <span className="quick-action-text">
+                    <strong>Download My Filled PBAS Form</strong>
+                    <small>PBAS Assessment PDF Format</small>
+                  </span>
+                  <span className="quick-action-arrow">&gt;</span>
+                </button>
+                <button type="button" className="quick-action-item" onClick={() => navigate("/hod/appraisal/status")}>
+                  <span className="quick-action-icon quick-action-icon-violet" style={{ background: '#ede9fe', color: '#7c3aed' }}>ST</span>
+                  <span className="quick-action-text">
+                    <strong>Track Submission Status</strong>
+                    <small>Open review status and download approved forms</small>
+                  </span>
+                  <span className="quick-action-arrow">&gt;</span>
+                </button>
+              </>
+            ) : (
+                <div style={{padding: '16px', color: 'var(--muted)', fontSize: '13px'}}>
+                  Once you start your own appraisal, download links will appear here.
+                </div>
             )}
           </aside>
         </section>
