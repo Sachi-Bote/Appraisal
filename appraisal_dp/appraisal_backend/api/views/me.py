@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
+from rest_framework.parsers import JSONParser
 
 
 from core.models import FacultyProfile, HODProfile, PrincipalProfile
@@ -24,22 +24,10 @@ def _parse_optional_date(value):
     except (TypeError, ValueError):
         return None
 
-
-def _build_media_url(request, image_field):
-    if not image_field:
-        return None
-    url = getattr(image_field, "url", "") or ""
-    if not url:
-        return None
-    if url.startswith("http://") or url.startswith("https://"):
-        return url
-    return request.build_absolute_uri(url)
-
-
 class MeView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    parser_classes = [JSONParser, MultiPartParser, FormParser]
+    parser_classes = [JSONParser]
 
     def get(self, request):
         started = perf_counter()
@@ -53,19 +41,16 @@ class MeView(APIView):
             "mobile_number": user.mobile_number,
         }
         date_of_joining = user.date_joined
-        profile_image = None
 
         if user.role == "FACULTY":
             profile = FacultyProfile.objects.filter(user=user).first()
             if profile:
                 date_of_joining = profile.date_of_joining or user.date_joined
-                profile_image = _build_media_url(request, profile.profile_image)
                 profile_data = {
                     "full_name": profile.full_name or user.full_name,
                     "designation": profile.designation or user.designation,
                     "email": profile.email or user.email or user.username,
                     "mobile_number": profile.mobile or user.mobile_number,
-                    "profile_image": profile_image,
                 }
 
         elif user.role == "HOD":
@@ -76,13 +61,11 @@ class MeView(APIView):
                     (faculty_profile.date_of_joining if faculty_profile else None)
                     or user.date_joined
                 )
-                profile_image = _build_media_url(request, profile.profile_image)
                 profile_data = {
                     "full_name": profile.full_name or user.full_name,
                     "designation": user.designation or "HOD",
                     "email": profile.email or user.email or user.username,
                     "mobile_number": profile.mobile or user.mobile_number,
-                    "profile_image": profile_image,
                 }
 
         elif user.role == "PRINCIPAL":
@@ -159,15 +142,6 @@ class MeView(APIView):
                 profile.mobile = mobile_number
             if email is not None and hasattr(profile, "email"):
                 profile.email = email
-
-            remove_image = str(request.data.get("remove_profile_image", "")).lower() in {"1", "true", "yes"}
-            if remove_image and getattr(profile, "profile_image", None):
-                profile.profile_image.delete(save=False)
-                profile.profile_image = None
-
-            uploaded_image = request.FILES.get("profile_image")
-            if uploaded_image:
-                profile.profile_image = uploaded_image
 
             if user.role == "FACULTY":
                 if designation is not None:

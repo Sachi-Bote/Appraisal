@@ -62,3 +62,27 @@ class ResearchCountTests(TestCase):
         self.assertEqual(result["breakdown"]["journal_papers"]["score"], 16)
         self.assertEqual(result["breakdown"]["book_national"]["score"], 10)
         self.assertEqual(result["total"], 26)
+
+    def test_research_paper_uses_impact_factor_and_author_category(self):
+        payload = {
+            "entries": [
+                {
+                    "type": "research_paper",
+                    "title": "Paper A",
+                    "impact_factor_category": "between_2_and_5",
+                    "author_category": "two_authors",
+                },
+                {
+                    "type": "research_paper",
+                    "title": "Paper B",
+                    "impact_factor_category": "greater_than_10",
+                    "author_category": "multi_author_joint",
+                },
+            ]
+        }
+
+        result = calculate_research_score(payload)
+
+        self.assertEqual(result["breakdown"]["research_paper"]["count"], 2)
+        self.assertEqual(result["breakdown"]["research_paper"]["score"], 23.0)
+        self.assertEqual(result["total"], 23.0)

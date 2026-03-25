@@ -11,16 +11,6 @@ const getCurrentAcademicYear = () => {
   return `${startYear}-${String(startYear + 1).slice(-2)}`;
 };
 
-const buildAcademicYearOptions = (currentAcademicYear) => {
-  const startYear = Number(String(currentAcademicYear).split("-")[0]);
-  if (!Number.isFinite(startYear)) return [currentAcademicYear];
-  return [
-    `${startYear - 1}-${String(startYear).slice(-2)}`,
-    currentAcademicYear,
-    `${startYear + 1}-${String(startYear + 2).slice(-2)}`,
-  ];
-};
-
 const DEFAULT_SPPU_ACTIVITY_SECTIONS = [
   {
     section_key: "a_administrative",
@@ -171,9 +161,63 @@ const EDITABLE_APPRAISAL_STATES = new Set([
   "CHANGES_REQUESTED",
 ]);
 
+const RESEARCH_PAPER_IMPACT_FACTOR_OPTIONS = [
+  {
+    value: "without_impact_factor",
+    label: "i) Paper in refereed journals without impact factor",
+  },
+  {
+    value: "less_than_1",
+    label: "ii) Paper with impact factor less than 1",
+  },
+  {
+    value: "between_1_and_2",
+    label: "iii) Paper with impact factor between 1 and 2",
+  },
+  {
+    value: "between_2_and_5",
+    label: "iv) Paper with impact factor between 2 and 5",
+  },
+  {
+    value: "between_5_and_10",
+    label: "v) Paper with impact factor between 5 and 10",
+  },
+  {
+    value: "greater_than_10",
+    label: "vi) Paper with impact factor >10",
+  },
+];
+
+const RESEARCH_PAPER_AUTHOR_CATEGORY_OPTIONS = [
+  {
+    value: "two_authors",
+    label: "a) Two authors",
+  },
+  {
+    value: "multi_author_principal",
+    label: "b) More than two authors - First / principal / corresponding author",
+  },
+  {
+    value: "multi_author_joint",
+    label: "b) More than two authors - Joint author",
+  },
+  {
+    value: "joint_project",
+    label: "c) Joint Project",
+  },
+];
+
 function normalizeFormStatus(workflowState) {
   const normalized = String(workflowState || "").trim().toUpperCase();
   return EDITABLE_APPRAISAL_STATES.has(normalized) ? "draft" : "submitted";
+}
+
+function getDateInputValue(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+  if (/^\d{4}$/.test(text)) return `${text}-01-01`;
+  return "";
 }
 
 
@@ -617,9 +661,8 @@ export default function FacultyAppraisalForm() {
       {
         title: "",
         journal: "",
-        ugcCare: "",
-        impactFactor: "",
-        authorship: "",
+        impactFactorCategory: "",
+        authorCategory: "",
         year: "",
         enclosureNo: ""
       }
@@ -956,7 +999,6 @@ export default function FacultyAppraisalForm() {
   const SEMESTERS = ["Sem 1", "Sem 2"];
   const TEACHING_TYPES = ["Lecture", "Tutorial", "Practical", "Lab"];
   const ACADEMIC_LEVELS = ["UG", "PG"];
-  const ACADEMIC_YEARS = buildAcademicYearOptions(CURRENT_ACADEMIC_YEAR);
 
 
   const deriveSppuFlagsFromSelections = (selections) => {
@@ -1012,7 +1054,19 @@ export default function FacultyAppraisalForm() {
   ]);
   const handleTeachingChange = (index, e) => {
     const updated = [...teachingActivities];
-    updated[index][e.target.name] = e.target.value;
+    const { name, value } = e.target;
+    let nextValue = value;
+
+    if (name === "totalClassesAssigned" || name === "classesConducted") {
+      if (value === "") {
+        nextValue = "";
+      } else {
+        const numericValue = Number(value);
+        nextValue = Number.isFinite(numericValue) ? String(Math.max(0, numericValue)) : "";
+      }
+    }
+
+    updated[index][name] = nextValue;
     setTeachingActivities(updated);
   };
 
@@ -1590,7 +1644,21 @@ export default function FacultyAppraisalForm() {
 
     research.papers.forEach((p) => {
       if (!p.title) return;
-      upsert("journal_papers", p.title, p.year, p.enclosureNo, 1);
+      const impactFactorCategory = p.impactFactorCategory || "";
+      const authorCategory = p.authorCategory || "";
+      if (!impactFactorCategory || !authorCategory) return;
+
+      const paperKey = `research_paper_${Object.keys(entriesMap).length + 1}`;
+      entriesMap[paperKey] = {
+        type: "research_paper",
+        count: 1,
+        title: p.title,
+        journal: p.journal || "",
+        impact_factor_category: impactFactorCategory,
+        author_category: authorCategory,
+        year: p.year || "",
+        enclosure_no: p.enclosureNo || ""
+      };
     });
 
     research.publications.forEach((p) => {
@@ -1689,13 +1757,28 @@ export default function FacultyAppraisalForm() {
       else upsert("invited_lecture_state_university", label, t.year, t.enclosureNo, 1);
     });
 
-    return Object.values(entriesMap).map((entry) => ({
-      type: entry.type,
-      count: entry.count,
-      title: entry._titles.length ? Array.from(new Set(entry._titles)).join("; ") : "",
-      year: entry.year || "",
-      enclosure_no: entry.enclosure_no || ""
-    }));
+    return Object.values(entriesMap).map((entry) => {
+      if (entry.type === "research_paper") {
+        return {
+          type: entry.type,
+          count: entry.count,
+          title: entry.title || "",
+          journal: entry.journal || "",
+          impact_factor_category: entry.impact_factor_category || "",
+          author_category: entry.author_category || "",
+          year: entry.year || "",
+          enclosure_no: entry.enclosure_no || ""
+        };
+      }
+
+      return {
+        type: entry.type,
+        count: entry.count,
+        title: entry._titles.length ? Array.from(new Set(entry._titles)).join("; ") : "",
+        year: entry.year || "",
+        enclosure_no: entry.enclosure_no || ""
+      };
+    });
   };
 
 
@@ -1768,8 +1851,18 @@ export default function FacultyAppraisalForm() {
     return {
       research: {
         journal_papers: research.papers.filter(
-          p => p.ugcCare === "Yes"
+          p => p.title && p.impactFactorCategory && p.authorCategory
         ).length,
+        papers: research.papers
+          .filter(p => p.title && p.impactFactorCategory && p.authorCategory)
+          .map((p) => ({
+            title: p.title,
+            journal: p.journal || "",
+            impact_factor_category: p.impactFactorCategory,
+            author_category: p.authorCategory,
+            year: p.year || "",
+            enclosure_no: p.enclosureNo || ""
+          })),
         conference_papers: 0
       },
 
@@ -2508,15 +2601,13 @@ export default function FacultyAppraisalForm() {
                   <div className="form-row">
                     <div className="form-group">
                       <label>Academic Year <span className="required">*</span></label>
-                      <select
+                      <input
+                        type="text"
                         name="academicYear"
+                        placeholder="e.g. 2025-26"
                         value={row.academicYear}
                         onChange={(e) => handleTeachingChange(index, e)}
-                      >
-                        {ACADEMIC_YEARS.map((year) => (
-                          <option key={year} value={year}>{year}</option>
-                        ))}
-                      </select>
+                      />
                     </div>
 
                     <div className="form-group">
@@ -2603,6 +2694,7 @@ export default function FacultyAppraisalForm() {
                       <label>Total Classes Assigned <span className="required">*</span></label>
                       <input
                         type="number"
+                        min="0"
                         placeholder="e.g: 3"
                         name="totalClassesAssigned"
                         value={row.totalClassesAssigned}
@@ -2614,6 +2706,7 @@ export default function FacultyAppraisalForm() {
                       <label>Classes Conducted <span className="required">*</span></label>
                       <input
                         type="number"
+                        min="0"
                         name="classesConducted"
                         placeholder="e.g: 45"
                         value={row.classesConducted}
@@ -3079,31 +3172,28 @@ export default function FacultyAppraisalForm() {
                   />
 
                   <select
-                    value={row.ugcCare}
-                    onChange={e => handleResearchChange("papers", index, "ugcCare", e.target.value)}
+                    value={row.impactFactorCategory || ""}
+                    onChange={e => handleResearchChange("papers", index, "impactFactorCategory", e.target.value)}
                   >
-                    <option value="">UGC CARE?</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
+                    <option value="">Impact Factor Category</option>
+                    {RESEARCH_PAPER_IMPACT_FACTOR_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
                   </select>
 
                   <select
-                    value={row.authorship}
-                    onChange={e => handleResearchChange("papers", index, "authorship", e.target.value)}
+                    value={row.authorCategory || ""}
+                    onChange={e => handleResearchChange("papers", index, "authorCategory", e.target.value)}
                   >
-                    <option value="">Authorship</option>
-                    <option value="Single">Single</option>
-                    <option value="First">First / Corresponding</option>
-                    <option value="Co-author">Co-author</option>
+                    <option value="">Author Category</option>
+                    {RESEARCH_PAPER_AUTHOR_CATEGORY_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
                   </select>
 
-                  <input placeholder="Impact Factor"
-                    value={row.impactFactor}
-                    onChange={e => handleResearchChange("papers", index, "impactFactor", e.target.value)}
-                  />
-
-                  <input placeholder="Year"
-                    value={row.year}
+                  <input
+                    type="date"
+                    value={getDateInputValue(row.year)}
                     onChange={e => handleResearchChange("papers", index, "year", e.target.value)}
                   />
 
@@ -3120,8 +3210,8 @@ export default function FacultyAppraisalForm() {
 
               <button className="btn-add" onClick={() =>
                 addResearchRow("papers", {
-                  title: "", journal: "", ugcCare: "",
-                  impactFactor: "", authorship: "",
+                  title: "", journal: "",
+                  impactFactorCategory: "", authorCategory: "",
                   year: "", enclosureNo: ""
                 })
               }>
@@ -3172,8 +3262,9 @@ export default function FacultyAppraisalForm() {
                     onChange={e => handleResearchChange("publications", index, "title", e.target.value)}
                   />
 
-                  <input placeholder="Year"
-                    value={row.year}
+                  <input
+                    type="date"
+                    value={getDateInputValue(row.year)}
                     onChange={e => handleResearchChange("publications", index, "year", e.target.value)}
                   />
 
@@ -3331,8 +3422,8 @@ export default function FacultyAppraisalForm() {
                   />
 
                   <input
-                    placeholder="Year"
-                    value={row.year}
+                    type="date"
+                    value={getDateInputValue(row.year)}
                     onChange={e =>
                       handleResearchChange("guidance", index, "year", e.target.value)
                     }
@@ -3418,8 +3509,8 @@ export default function FacultyAppraisalForm() {
                   />
 
                   <input
-                    placeholder="Year"
-                    value={row.year}
+                    type="date"
+                    value={getDateInputValue(row.year)}
                     onChange={e =>
                       handleResearchChange("moocsIct", index, "year", e.target.value)
                     }
@@ -3540,8 +3631,8 @@ export default function FacultyAppraisalForm() {
                   />
 
                   <input
-                    placeholder="Year"
-                    value={row.year}
+                    type="date"
+                    value={getDateInputValue(row.year)}
                     onChange={e =>
                       handleResearchChange("awards", index, "year", e.target.value)
                     }
@@ -3608,8 +3699,8 @@ export default function FacultyAppraisalForm() {
                   </select>
 
                   <input
-                    placeholder="Year"
-                    value={row.year}
+                    type="date"
+                    value={getDateInputValue(row.year)}
                     onChange={e =>
                       handleResearchChange("invitedTalks", index, "year", e.target.value)
                     }

@@ -209,7 +209,24 @@ def get_enhanced_pbas_pdf_data(appraisal: Appraisal) -> Dict:
             "enclosure_no": _get_first(entry, ["enclosure_no", "enclosure"], "-"),
         })
 
-    journal_count = sum(1 for e in normalized_research_entries if "journal" in str(e.get("type", "")).lower())
+    faculty_name = _get_first(general, ["faculty_name", "name"], base["faculty"]["name"])
+    research_paper_details = [
+        {
+            "title": _get_first(entry, ["title", "title_display", "name"], "-"),
+            "author_name": _get_first(entry, ["author_name", "faculty_name", "name"], faculty_name),
+            "publication": _get_first(entry, ["journal", "publication", "publication_name"], "-"),
+            "publication_date": _get_first(entry, ["publication_date", "date", "year"], "-"),
+        }
+        for entry in normalized_research_entries
+        if str(entry.get("type", "")).lower() == "research_paper"
+    ]
+
+    journal_count = sum(
+        1
+        for e in normalized_research_entries
+        if str(e.get("type", "")).lower() in {"research_paper", "journal_papers"}
+        or "journal" in str(e.get("type", "")).lower()
+    )
     conference_count = sum(1 for e in normalized_research_entries if "conference" in str(e.get("type", "")).lower())
 
     acr = raw.get("acr", {})
@@ -260,7 +277,7 @@ def get_enhanced_pbas_pdf_data(appraisal: Appraisal) -> Dict:
         "verified_grade": verified_grade,
         **base,
         "faculty_ext": {
-            "name": _get_first(general, ["faculty_name", "name"], base["faculty"]["name"]),
+            "name": faculty_name,
             "designation": _get_first(general, ["designation"], base["faculty"]["designation"]),
             "date_of_joining": _format_date_ddmmyyyy(_get_first(general, ["date_of_joining", "joining_date", "date_joining"], "")),
             "department_center": _get_first(general, ["department", "department_centre", "department_center"], base["faculty"]["department"]),
@@ -297,6 +314,7 @@ def get_enhanced_pbas_pdf_data(appraisal: Appraisal) -> Dict:
         },
         "research": {
             "entries": normalized_research_entries,
+            "paper_details": research_paper_details,
             "journal_count": journal_count,
             "conference_count": conference_count,
             "total": journal_count + conference_count,

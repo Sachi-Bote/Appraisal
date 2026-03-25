@@ -995,6 +995,30 @@ export default function HODDashboard() {
                 <button
                   type="button"
                   className="quick-action-item"
+                  onClick={() => previewPdf(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/sppu-enhanced/`)}
+                >
+                  <span className="quick-action-icon quick-action-icon-green">👁</span>
+                  <span className="quick-action-text">
+                    <strong>Preview My Filled SPPU Appraisal</strong>
+                    <small>Open the generated SPPU PDF in a new tab</small>
+                  </span>
+                  <span className="quick-action-arrow">&gt;</span>
+                </button>
+                <button
+                  type="button"
+                  className="quick-action-item"
+                  onClick={() => previewPdf(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/pbas-enhanced/`)}
+                >
+                  <span className="quick-action-icon quick-action-icon-violet">👁</span>
+                  <span className="quick-action-text">
+                    <strong>Preview My Filled PBAS Form</strong>
+                    <small>Open the generated PBAS PDF in a new tab</small>
+                  </span>
+                  <span className="quick-action-arrow">&gt;</span>
+                </button>
+                <button
+                  type="button"
+                  className="quick-action-item"
                   onClick={() => downloadWithAuth(`/api/appraisal/${hodOwnAppraisal.appraisal_id}/pdf/sppu-enhanced/`, `HOD_SPPU_${hodOwnAppraisal.academicYear}.pdf`)}
                 >
                   <span className="quick-action-icon quick-action-icon-green">📄</span>

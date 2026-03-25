@@ -129,6 +129,22 @@ export default function FacultyDashboard() {
     }
   };
 
+  const handlePreviewLatest = async (type, specificAppraisal) => {
+    const target = specificAppraisal || appraisal;
+    if (!target) return;
+    const endpoint = type === "PBAS"
+      ? `appraisal/${target.id}/pdf/pbas-enhanced/`
+      : `appraisal/${target.id}/pdf/sppu-enhanced/`;
+    try {
+      const response = await API.get(endpoint, { responseType: "blob" });
+      const pdfBlobUrl = window.URL.createObjectURL(response.data);
+      window.open(pdfBlobUrl, "_blank", "noopener,noreferrer");
+      setTimeout(() => window.URL.revokeObjectURL(pdfBlobUrl), 60000);
+    } catch {
+      alert("Preview not available yet.");
+    }
+  };
+
   const getStatusStepObj = () => {
     const s = normalizedStatus;
     // steps: Drafted(1), Submitted(2), HOD(3), Principal(4), Finalized(5)
@@ -354,38 +370,17 @@ export default function FacultyDashboard() {
 
               {/* SIDEBAR */}
               <div className="sidebar" style={{ marginTop: 0, paddingTop: 0 }}>
-                {/* deadline */}
-                <div className="deadline-card">
-                  <div className="dl-label">Submission Deadline</div>
-                  <div className="dl-date">31 March 2026</div>
-                  <div className="dl-sub">AY 2025–26 · SPPU</div>
-                  <div className="dl-countdown">
-                    <div className="dl-unit"><div className="dl-num">10</div><div className="dl-u">Days</div></div>
-                    <div className="dl-unit"><div className="dl-num">04</div><div className="dl-u">Hours</div></div>
-                    <div className="dl-unit"><div className="dl-num">22</div><div className="dl-u">Mins</div></div>
-                  </div>
-                </div>
-
                 {/* quick actions */}
                 <div className="side-card">
                   <div className="sc-hdr"><span className="sc-hdr-title">Quick Actions</span></div>
                   <div className="sc-body" style={{padding:'10px 12px'}}>
                     <button className="qa-item" onClick={() => navigate("/faculty/appraisal/status")} disabled={!hasAppraisal}><div className="qa-icon ic-blue">📄</div>Track Workflow Status<span className="qa-arrow">›</span></button>
                     <button className="qa-item" onClick={() => navigate("/faculty/appraisal")}><div className="qa-icon ic-purple">✎</div>{openFormText}<span className="qa-arrow">›</span></button>
+                    <button className="qa-item" onClick={() => handlePreviewLatest("SPPU")} disabled={stepObj.step < 4}><div className="qa-icon ic-green">👁</div>Preview SPPU Form<span className="qa-arrow">›</span></button>
+                    <button className="qa-item" onClick={() => handlePreviewLatest("PBAS")} disabled={stepObj.step < 4}><div className="qa-icon" style={{background:'#ede9fe', color: 'var(--purple)'}}>👁</div>Preview PBAS Form<span className="qa-arrow">›</span></button>
                     <button className="qa-item" onClick={() => handleDownloadLatest("SPPU")} disabled={stepObj.step < 4}><div className="qa-icon ic-green">↓</div>Download SPPU PDF<span className="qa-arrow">›</span></button>
                     <button className="qa-item" onClick={() => handleDownloadLatest("PBAS")} disabled={stepObj.step < 4}><div className="qa-icon" style={{background:'#ede9fe', color: 'var(--purple)'}}>↓</div>Download PBAS PDF<span className="qa-arrow">›</span></button>
                     <button className="qa-item" onClick={() => navigate("/faculty/profile")}><div className="qa-icon ic-amber">👤</div>Edit My Profile<span className="qa-arrow">›</span></button>
-                  </div>
-                </div>
-
-                {/* checklist */}
-                <div className="side-card">
-                  <div className="sc-hdr"><span className="sc-hdr-title">Form Checklist</span></div>
-                  <div className="sc-body">
-                    <div className="chk-item"><div className={`chk-icon ${hasAppraisal ? 'ci-done' : 'ci-act'}`}>{hasAppraisal ? '✓' : '→'}</div>General information</div>
-                    <div className="chk-item"><div className={`chk-icon ${hasAppraisal ? 'ci-done' : 'ci-todo'}`}>{hasAppraisal ? '✓' : ''}</div>Teaching activities</div>
-                    <div className="chk-item"><div className={`chk-icon ${hasAppraisal ? 'ci-done' : 'ci-todo'}`}>{hasAppraisal ? '✓' : ''}</div>Research &amp; publications</div>
-                    <div className="chk-item"><div className={`chk-icon ${hasAppraisal ? 'ci-done' : 'ci-todo'}`}>{hasAppraisal ? '✓' : ''}</div>Activities &amp; contributions</div>
                   </div>
                 </div>
 

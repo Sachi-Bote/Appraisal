@@ -3,7 +3,12 @@
 Validations for research/publication-related fields (PBAS - Section C).
 """
 
-from scoring.research import POINTS
+from scoring.research import (
+    POINTS,
+    RESEARCH_PAPER_AUTHOR_SHARES,
+    RESEARCH_PAPER_IMPACT_POINTS,
+    RESEARCH_PAPER_TYPE,
+)
 
 
 def validate_research_payload(payload: dict):
@@ -24,6 +29,18 @@ def validate_research_payload(payload: dict):
         activity_type = entry.get("type")
         if not activity_type:
             return False, f"Research entry {i+1} missing 'type'"
+
+        if activity_type == RESEARCH_PAPER_TYPE:
+            impact_category = entry.get("impact_factor_category")
+            author_category = entry.get("author_category")
+
+            if impact_category not in RESEARCH_PAPER_IMPACT_POINTS:
+                return False, (
+                    f"Research entry {i+1} has invalid 'impact_factor_category'"
+                )
+            if author_category not in RESEARCH_PAPER_AUTHOR_SHARES:
+                return False, f"Research entry {i+1} has invalid 'author_category'"
+            continue
 
         if activity_type not in POINTS:
             return False, f"Unknown research activity '{activity_type}'"

@@ -417,6 +417,36 @@
     </table>
 
 
+    <h4 style="margin-top: 12px;">RESEARCH PAPER DETAILS</h4>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 8%;">Sr. No.</th>
+                <th style="width: 32%;">Title</th>
+                <th style="width: 24%;">Author Name</th>
+                <th style="width: 22%;">Publication</th>
+                <th style="width: 14%;">Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for paper in research.paper_details %}
+            <tr>
+                <td class="center">{{ forloop.counter }}</td>
+                <td>{{ paper.title|default:"-" }}</td>
+                <td>{{ paper.author_name|default:faculty_ext.name|default:faculty.name|default:"-" }}</td>
+                <td>{{ paper.publication|default:"-" }}</td>
+                <td class="center">{{ paper.publication_date|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+            {% if research.paper_details|length == 0 %}
+            <tr>
+                <td colspan="5" class="center">No research paper details</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
 
     <!-- ================= CALCULATED SCORES SUMMARY ================= -->
     <h4 style="margin-top: 12px;">CALCULATED SCORES SUMMARY</h4>

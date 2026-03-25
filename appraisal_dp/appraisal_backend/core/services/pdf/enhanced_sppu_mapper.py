@@ -9,6 +9,7 @@ from core.services.sppu_verified import (
     TABLE2_VERIFIED_KEYS,
 )
 from scoring.activity_selection import derive_activity_flags
+from scoring.research import RESEARCH_PAPER_TYPE, calculate_research_paper_score
 
 
 def _has_meaningful_research_data(entry: Dict) -> bool:
@@ -132,7 +133,7 @@ def get_enhanced_sppu_pdf_data(appraisal: Appraisal) -> Dict:
     # Initialize Table 2 categories with counts and scores
     table2_categories = {
         # 1. Research Papers
-        "peer_reviewed_journals": {"count": 0, "score_per": 8, "total_score": 0},
+        "peer_reviewed_journals": {"count": 0, "score_per": 0, "total_score": 0},
         
         # 2. Publications
         "books_international": {"count": 0, "score_per": 12, "total_score": 0},
@@ -208,6 +209,15 @@ def get_enhanced_sppu_pdf_data(appraisal: Appraisal) -> Dict:
         entry_type = str(entry.get("type", "")).strip().lower()
         if not entry_type or not _has_meaningful_research_data(entry):
             continue
+
+        if entry_type == RESEARCH_PAPER_TYPE:
+            paper_score = calculate_research_paper_score(entry)
+            if paper_score["awarded_score"] <= 0:
+                continue
+            table2_categories["peer_reviewed_journals"]["count"] += 1
+            table2_categories["peer_reviewed_journals"]["total_score"] += paper_score["awarded_score"]
+            continue
+
         try:
             count = int(float(entry.get("count", 0)))
         except (TypeError, ValueError):
@@ -338,7 +348,10 @@ def get_enhanced_sppu_pdf_data(appraisal: Appraisal) -> Dict:
                 table2_categories["conference_state_university"]["count"] += count
     
     # Calculate scores for each category
-    for category_data in table2_categories.values():
+    for category_key, category_data in table2_categories.items():
+        if category_key == "peer_reviewed_journals":
+            category_data["total_score"] = round(category_data["total_score"], 2)
+            continue
         category_data["total_score"] = category_data["count"] * category_data["score_per"]
     
     # Calculate total Table 2 score

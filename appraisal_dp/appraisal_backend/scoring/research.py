@@ -1,8 +1,24 @@
-# scoring/research.py
+from decimal import Decimal, ROUND_HALF_UP
 
-# -------------------------------------------------------------------
-# POINTS CONFIG (as per provided appraisal tables)
-# -------------------------------------------------------------------
+
+RESEARCH_PAPER_TYPE = "research_paper"
+
+RESEARCH_PAPER_IMPACT_POINTS = {
+    "without_impact_factor": 5,
+    "less_than_1": 10,
+    "between_1_and_2": 15,
+    "between_2_and_5": 20,
+    "between_5_and_10": 25,
+    "greater_than_10": 30,
+}
+
+RESEARCH_PAPER_AUTHOR_SHARES = {
+    "two_authors": Decimal("0.70"),
+    "multi_author_principal": Decimal("0.70"),
+    "multi_author_joint": Decimal("0.30"),
+    "joint_project": Decimal("0.50"),
+}
+
 
 POINTS = {
     # 1. Research Papers
@@ -76,6 +92,30 @@ POINTS = {
 }
 
 
+def _to_decimal(value) -> Decimal:
+    try:
+        return Decimal(str(value))
+    except (TypeError, ValueError, ArithmeticError):
+        return Decimal("0")
+
+
+def calculate_research_paper_score(entry: dict) -> dict:
+    impact_category = str(entry.get("impact_factor_category", "")).strip()
+    author_category = str(entry.get("author_category", "")).strip()
+
+    base_points = Decimal(str(RESEARCH_PAPER_IMPACT_POINTS.get(impact_category, 0)))
+    share = RESEARCH_PAPER_AUTHOR_SHARES.get(author_category, Decimal("0"))
+    awarded_score = (base_points * share).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return {
+        "impact_factor_category": impact_category,
+        "author_category": author_category,
+        "base_points": float(base_points),
+        "share": float(share),
+        "awarded_score": float(awarded_score),
+    }
+
+
 def calculate_research_score(payload: dict) -> dict:
     """
     Expected input:
@@ -91,10 +131,36 @@ def calculate_research_score(payload: dict) -> dict:
     entries = payload.get("entries", [])
 
     breakdown = {}
-    total = 0
+    total = Decimal("0")
 
     for entry in entries:
         activity_type = entry.get("type")
+
+        if activity_type == RESEARCH_PAPER_TYPE:
+            paper_score = calculate_research_paper_score(entry)
+            if paper_score["awarded_score"] <= 0:
+                continue
+
+            if activity_type not in breakdown:
+                breakdown[activity_type] = {
+                    "count": 0,
+                    "score": 0,
+                    "papers": [],
+                }
+
+            breakdown[activity_type]["count"] += 1
+            breakdown[activity_type]["papers"].append({
+                "title": entry.get("title", ""),
+                "journal": entry.get("journal", ""),
+                "year": entry.get("year", ""),
+                "enclosure_no": entry.get("enclosure_no", ""),
+                **paper_score,
+            })
+            breakdown[activity_type]["score"] = round(
+                breakdown[activity_type]["score"] + paper_score["awarded_score"], 2
+            )
+            total += _to_decimal(paper_score["awarded_score"])
+            continue
 
         if activity_type not in POINTS:
             continue
@@ -117,10 +183,12 @@ def calculate_research_score(payload: dict) -> dict:
         breakdown[activity_type]["count"] += unit_count
 
     for _, data in breakdown.items():
+        if "points_per_unit" not in data:
+            continue
         data["score"] = data["count"] * data["points_per_unit"]
-        total += data["score"]
+        total += _to_decimal(data["score"])
 
     return {
         "breakdown": breakdown,
-        "total": total,
+        "total": float(total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)),
     }

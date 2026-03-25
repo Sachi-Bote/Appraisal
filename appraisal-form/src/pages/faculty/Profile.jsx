@@ -3,10 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import "../../styles/profile.css";
 import API, { clearAuthAndRedirect } from "../../api";
 import useSessionState from "../../hooks/useSessionState";
-import { buildApiUrl } from "../../utils/apiUrl";
 import { normalizeRole } from "../../utils/profileRoutes";
 
-const DEFAULT_AVATAR = "https://i.pravatar.cc/300?img=12";
 const accountSections = [
   { title: "System Information", fields: ["id", "username", "email", "role"] },
   { title: "Personal Information", fields: ["full_name", "mobile_number", "address"] },
@@ -24,12 +22,8 @@ const accountSections = [
   },
 ];
 
-const resolveProfileImageUrl = (url) => {
-  const raw = String(url || "").trim();
-  return raw ? buildApiUrl(raw) : DEFAULT_AVATAR;
-};
-const withCacheBust = (url) =>
-  url && url !== DEFAULT_AVATAR ? `${url}${url.includes("?") ? "&" : "?"}v=${Date.now()}` : url || DEFAULT_AVATAR;
+const GRADE_PAY_OPTIONS = ["5000", "6000", "7000", "8000", "9000", "10000"];
+const PROMOTION_DESIGNATION_OPTIONS = ["Professor", "Associate Professor"];
 const toISODate = (value) => {
   const text = String(value || "").trim();
   if (!text) return "";
@@ -110,16 +104,6 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useSessionState("profile.activeTab", normalizedTab);
   const [isEditing, setIsEditing] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
-  const [profileImage, setProfileImage] = useState(DEFAULT_AVATAR);
-  const [savedProfileImage, setSavedProfileImage] = useState(DEFAULT_AVATAR);
-  const [profileImageFile, setProfileImageFile] = useState(null);
-  const [profileImageRemoved, setProfileImageRemoved] = useState(false);
-  const [tempImage, setTempImage] = useState(null);
-  const [showImageEditor, setShowImageEditor] = useState(false);
-  const [cropArea, setCropArea] = useState({ x: 50, y: 50, size: 200 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   const initialProfile = {
     full_name: "",
@@ -171,15 +155,9 @@ export default function Profile() {
   useEffect(() => {
     API.get("me/")
       .then((res) => {
-        const { profile_image, ...profileFields } = res.data || {};
-        const normalized = normalizeProfileFields(profileFields);
+        const normalized = normalizeProfileFields(res.data || {});
         setProfileData(normalized);
         setEditData(normalized);
-        const imageUrl = withCacheBust(resolveProfileImageUrl(profile_image));
-        setProfileImage(imageUrl);
-        setSavedProfileImage(imageUrl);
-        setProfileImageFile(null);
-        setProfileImageRemoved(false);
       })
       .catch(() => navigate("/login"));
   }, [navigate]);
@@ -189,117 +167,35 @@ export default function Profile() {
     if (queryTab && activeTab !== normalizedTab) setActiveTab(normalizedTab);
   }, [activeTab, normalizedTab, queryTab, setActiveTab]);
 
-  useEffect(() => {
-    const move = (e) => {
-      if (isDragging) {
-        const container = document.querySelector(".profile-image-preview");
-        if (!container) return;
-        const rect = container.getBoundingClientRect();
-        const x = Math.max(0, Math.min(e.clientX - dragStart.x, rect.width - cropArea.size));
-        const y = Math.max(0, Math.min(e.clientY - dragStart.y, rect.height - cropArea.size));
-        setCropArea((prev) => ({ ...prev, x, y }));
-      }
-      if (isResizing) {
-        const container = document.querySelector(".profile-image-preview");
-        if (!container) return;
-        const rect = container.getBoundingClientRect();
-        const delta = Math.max(e.clientX - dragStart.x, e.clientY - dragStart.y);
-        const size = Math.max(100, Math.min(dragStart.size + delta, rect.width - cropArea.x, rect.height - cropArea.y));
-        setCropArea((prev) => ({ ...prev, size }));
-      }
-    };
-    const up = () => {
-      setIsDragging(false);
-      setIsResizing(false);
-    };
-    if (isDragging || isResizing) {
-      document.addEventListener("mousemove", move);
-      document.addEventListener("mouseup", up);
-    }
-    return () => {
-      document.removeEventListener("mousemove", move);
-      document.removeEventListener("mouseup", up);
-    };
-  }, [cropArea.size, cropArea.x, cropArea.y, dragStart, isDragging, isResizing]);
-
   const formLabel = (key) =>
     key
       .replace(/_/g, " ")
       .replace(/([a-z])([A-Z])/g, "$1 $2")
       .replace(/\b\w/g, (ch) => ch.toUpperCase());
 
+  const selectFieldOptions = {
+    gradePay: GRADE_PAY_OPTIONS,
+    promotion_designation: PROMOTION_DESIGNATION_OPTIONS,
+  };
+
   const displayValue = (key, value) => {
     if (!value) return "Not specified";
     return dateFields.has(key) ? formatDateDisplay(value) : value;
   };
 
-  const handleImageSelect = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      setTempImage(reader.result);
-      setCropArea({ x: 50, y: 50, size: 200 });
-      setShowImageEditor(true);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const saveImage = () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 300;
-    canvas.height = 300;
-    const ctx = canvas.getContext("2d");
-    const img = new Image();
-    img.src = tempImage;
-    img.onload = () => {
-      const container = document.querySelector(".profile-image-preview");
-      if (!container || !ctx) return;
-      const rect = container.getBoundingClientRect();
-      const scaleX = img.width / rect.width;
-      const scaleY = img.height / rect.height;
-      ctx.drawImage(
-        img,
-        cropArea.x * scaleX,
-        cropArea.y * scaleY,
-        cropArea.size * scaleX,
-        cropArea.size * scaleY,
-        0,
-        0,
-        300,
-        300
-      );
-      const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-      canvas.toBlob((blob) => {
-        setProfileImage(dataUrl);
-        if (blob) {
-          setProfileImageFile(new File([blob], `profile-${Date.now()}.jpg`, { type: "image/jpeg" }));
-          setProfileImageRemoved(false);
-        }
-        setTempImage(null);
-        setShowImageEditor(false);
-      }, "image/jpeg", 0.9);
-    };
-  };
-
   const startEdit = () => {
     setEditData(profileData);
-    setProfileImageFile(null);
-    setProfileImageRemoved(false);
     setIsEditing(true);
   };
 
   const cancelEdit = () => {
     setEditData(profileData);
-    setProfileImage(savedProfileImage || DEFAULT_AVATAR);
-    setProfileImageFile(null);
-    setProfileImageRemoved(false);
     setIsEditing(false);
   };
 
   const saveProfile = async () => {
     try {
-      const formData = new FormData();
+      const payload = {};
       [
         "full_name",
         "mobile_number",
@@ -311,20 +207,14 @@ export default function Profile() {
         "eligibility_date",
         "assessment_period",
         "date_of_joining",
-      ].forEach((field) => formData.append(field, editData[field] || ""));
-      if (profileImageFile) formData.append("profile_image", profileImageFile);
-      if (profileImageRemoved) formData.append("remove_profile_image", "true");
-      await API.patch("me/", formData, { headers: { "Content-Type": "multipart/form-data" } });
+      ].forEach((field) => {
+        payload[field] = editData[field] || "";
+      });
+      await API.patch("me/", payload);
       const res = await API.get("me/");
-      const { profile_image, ...profileFields } = res.data || {};
-      const normalized = normalizeProfileFields(profileFields);
+      const normalized = normalizeProfileFields(res.data || {});
       setProfileData(normalized);
       setEditData(normalized);
-      const imageUrl = withCacheBust(resolveProfileImageUrl(profile_image));
-      setProfileImage(imageUrl);
-      setSavedProfileImage(imageUrl);
-      setProfileImageFile(null);
-      setProfileImageRemoved(false);
       setIsEditing(false);
     } catch (err) {
       console.error(err.response?.data);
@@ -398,18 +288,8 @@ export default function Profile() {
           <div className="profile-hero-identity">
             <div className="profile-avatar-wrap">
               <div className="profile-avatar-frame">
-                {profileImage && profileImage !== DEFAULT_AVATAR ? (
-                  <img src={profileImage} alt={displayName} className="profile-avatar-image" />
-                ) : (
-                  <span className="profile-avatar-fallback">{avatarInitials}</span>
-                )}
+                <span className="profile-avatar-fallback">{avatarInitials}</span>
               </div>
-              {isEditing && (
-                <label className="profile-avatar-edit">
-                  Edit
-                  <input type="file" accept="image/*" onChange={handleImageSelect} />
-                </label>
-              )}
             </div>
             <div className="profile-hero-copy">
               <p className="profile-hero-kicker">Account Profile</p>
@@ -452,11 +332,7 @@ export default function Profile() {
           <aside className="profile-sidecard">
             <div className="profile-sidecard-head">
               <div className="profile-side-avatar">
-                {profileImage && profileImage !== DEFAULT_AVATAR ? (
-                  <img src={profileImage} alt={displayName} className="profile-side-avatar-image" />
-                ) : (
-                  <span>{avatarInitials}</span>
-                )}
+                <span>{avatarInitials}</span>
               </div>
               <h2>{displayName}</h2>
               <p>{displayRole}</p>
@@ -504,18 +380,6 @@ export default function Profile() {
                 </header>
 
                 <div className="profile-panel-body">
-                  {isEditing && (
-                    <div className="profile-photo-toolbar">
-                      <label className="profile-photo-btn">
-                        Change Photo
-                        <input type="file" accept="image/*" onChange={handleImageSelect} />
-                      </label>
-                      <button type="button" className="profile-photo-delete" onClick={() => { setProfileImage(DEFAULT_AVATAR); setProfileImageFile(null); setProfileImageRemoved(true); }}>
-                        Remove Photo
-                      </button>
-                    </div>
-                  )}
-
                   {accountSections.map((section) => (
                     <div key={section.title} className="profile-form-section">
                       <div className="profile-form-section-title">{section.title}</div>
@@ -540,6 +404,19 @@ export default function Profile() {
                                   disabled={isReadOnly}
                                   className="profile-input"
                                 />
+                              ) : selectFieldOptions[field] ? (
+                                <select
+                                  name={field}
+                                  value={value}
+                                  onChange={(e) => setEditData((prev) => ({ ...prev, [field]: e.target.value }))}
+                                  disabled={isReadOnly}
+                                  className="profile-input"
+                                >
+                                  <option value="">Select {formLabel(field)}</option>
+                                  {selectFieldOptions[field].map((option) => (
+                                    <option key={option} value={option}>{option}</option>
+                                  ))}
+                                </select>
                               ) : (
                                 <input
                                   name={field}
@@ -621,42 +498,6 @@ export default function Profile() {
           </div>
         </section>
       </main>
-
-      {showImageEditor && (
-        <div className="profile-modal">
-          <div className="profile-modal-card">
-            <h3>Edit Photo</h3>
-            <div className="profile-image-preview">
-              <img src={tempImage} alt="Preview" className="profile-preview-image" draggable="false" />
-              <div
-                className="profile-crop-overlay"
-                style={{ left: cropArea.x, top: cropArea.y, width: cropArea.size, height: cropArea.size, cursor: isDragging ? "grabbing" : "grab" }}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  setIsDragging(true);
-                  setDragStart({ x: e.clientX - cropArea.x, y: e.clientY - cropArea.y });
-                }}
-              >
-                <div className="profile-crop-border" />
-                <div
-                  className="profile-crop-resize"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setIsResizing(true);
-                    setDragStart({ x: e.clientX, y: e.clientY, size: cropArea.size });
-                  }}
-                />
-              </div>
-            </div>
-            <p className="profile-modal-hint">Drag to reposition. Drag the corner to resize the crop area.</p>
-            <div className="profile-modal-actions">
-              <button type="button" className="profile-muted-btn" onClick={() => { setTempImage(null); setShowImageEditor(false); }}>Cancel</button>
-              <button type="button" className="profile-filled-btn" onClick={saveImage}>Save Photo</button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showLogout && (
         <div className="profile-modal">
