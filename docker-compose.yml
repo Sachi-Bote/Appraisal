@@ -32,7 +32,7 @@ services:
       DJANGO_SESSION_COOKIE_SECURE: "0"
       DJANGO_CSRF_COOKIE_SECURE: "0"
       DJANGO_SECURE_HSTS_SECONDS: "0"
-
+      DJANGO_SETTINGS_MODULE: appraisal_backend.settings
 
     depends_on:
       db:
