@@ -696,7 +696,6 @@ export default function FacultyAppraisalForm() {
       }
     ],
 
-    // THIS WAS MISSING
     guidance: [
       {
         degree: "",
@@ -707,19 +706,56 @@ export default function FacultyAppraisalForm() {
       }
     ],
 
-    moocsIct: [
+    // 6(a) — Pedagogy Development
+    pedagogy: [
       {
-        category: "",
-        role: "",
-        creditClaimed: "",
+        title: "",
         year: "",
         enclosureNo: ""
       }
     ],
 
-    consultancyPolicy: [
+    // 6(b) — Curricula / Course Design
+    curriculum: [
       {
-        category: "",
+        type: "", // "New Curriculum" | "New Course"
+        title: "",
+        year: "",
+        enclosureNo: ""
+      }
+    ],
+
+    // 6(c) — MOOCs
+    moocsIct: [
+      {
+        role: "",
+        quadrants: "",
+        year: "",
+        enclosureNo: ""
+      }
+    ],
+
+    // 6(d) — E-Content
+    eContent: [
+      {
+        role: "",
+        year: "",
+        enclosureNo: ""
+      }
+    ],
+
+    // 7 — Consultancy (standalone)
+    consultancy: [
+      {
+        amount: "",
+        year: "",
+        enclosureNo: ""
+      }
+    ],
+
+    // 8 — Policy Document
+    policyDocument: [
+      {
         level: "",
         enclosureNo: ""
       }
@@ -3043,7 +3079,10 @@ export default function FacultyAppraisalForm() {
 
               <hr />
 
-              <h4>B. Student Feedback (Max Point 25)</h4>
+              <h4>B. Student Feedback</h4>
+              <p className="section-note">
+                Maximum score: 25 points
+              </p>
 
               {studentFeedback.map((row, index) => (
                 <div className="activity-card" key={index}>
@@ -3155,8 +3194,13 @@ export default function FacultyAppraisalForm() {
               style={{ border: "none", padding: 0 }}
             >
               {/* ========== 1. RESEARCH PAPERS ========== */}
-              <h4>1. Research Papers</h4>
-
+              <h4>1. (*) Research Papers in Peer-Reviewed or UGC listed Journals</h4>
+              <p className="section-note">
+                Base Score: 08 pts &nbsp;|&nbsp; IF Bonus: &lt;1: +5, 1–2: +10, 2–5: +15, 5–10: +20, &gt;10: +25
+                <span style={{ display: 'block', marginTop: '2px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                  Formula: (8 &times; Author Share) + IF Bonus &nbsp;[ Example (70% share, no IF): 5.6 pts | (70% share, IF 2-5): 20.6 pts ]
+                </span>
+              </p>
 
               {research.papers.map((row, index) => (
                 <div className="research-card" key={index}>
@@ -3221,7 +3265,14 @@ export default function FacultyAppraisalForm() {
               <hr />
 
               {/* ========== 2. PUBLICATIONS ========== */}
-              <h4>2. Books / Chapters / Publications</h4>
+              <h4>2. Publication (other than Research Papers)</h4>
+              <p className="section-note">
+                (a) Books authored &amp; Chapters — International publisher: 12 pts &nbsp;|&nbsp; National: 10 pts &nbsp;|&nbsp;
+                Chapter in edited book: 05 pts &nbsp;|&nbsp; Editor (Int'l): 10 pts &nbsp;|&nbsp; Editor (Nat'l): 08 pts
+                <span style={{ display: 'block', marginTop: '2px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                  (b) Translations in Indian/Foreign Languages — Chapter/Research paper: 03 pts &nbsp;|&nbsp; Book: 08 pts
+                </span>
+              </p>
 
               {research.publications.map((row, index) => (
                 <div className="research-card" key={index}>
@@ -3231,10 +3282,17 @@ export default function FacultyAppraisalForm() {
                     onChange={e => handleResearchChange("publications", index, "type", e.target.value)}
                   >
                     <option value="">Type</option>
-                    <option value="Book">Book</option>
-                    <option value="Chapter">Chapter</option>
-                    <option value="Editor">Editor</option>
-                    <option value="Translation">Translation</option>
+                    <optgroup label="(a) Books Authored">
+                      <option value="book_international">Book — International Publisher (12 pts)</option>
+                      <option value="book_national">Book — National Publisher (10 pts)</option>
+                      <option value="chapter_edited">Chapter in Edited Book (05 pts)</option>
+                      <option value="editor_international">Editor of Book — International Publisher (10 pts)</option>
+                      <option value="editor_national">Editor of Book — National Publisher (08 pts)</option>
+                    </optgroup>
+                    <optgroup label="(b) Translation Works">
+                      <option value="translation_chapter">Translation — Chapter / Research Paper (03 pts)</option>
+                      <option value="translation_book">Translation — Book (08 pts)</option>
+                    </optgroup>
                   </select>
 
                   <select
@@ -3291,6 +3349,12 @@ export default function FacultyAppraisalForm() {
 
               {/* ========== 3. RESEARCH PROJECTS ========== */}
               <h4>3. Research Projects</h4>
+              <p className="section-note">
+                Completed — &gt;10 Lakhs: 10 pts &nbsp;|&nbsp; &lt;10 Lakhs: 05 pts
+                <span style={{ display: 'block', marginTop: '2px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                  Ongoing — &gt;10 Lakhs: 05 pts &nbsp;|&nbsp; &lt;10 Lakhs: 02 pts
+                </span>
+              </p>
 
               {research.projects.map((row, index) => (
                 <div className="research-card" key={index}>
@@ -3344,6 +3408,9 @@ export default function FacultyAppraisalForm() {
 
               {/* ========== 4. PATENTS ========== */}
               <h4>4. Patents</h4>
+              <p className="section-note">
+                International — 10 pts &nbsp;|&nbsp; National — 07 pts
+              </p>
 
               {research.patents.map((row, index) => (
                 <div className="research-card" key={index}>
@@ -3384,8 +3451,14 @@ export default function FacultyAppraisalForm() {
               </button>
 
               <hr />
-              <hr />
+              {/* ========== 5. RESEARCH GUIDANCE ========== */}
               <h4>5. Research Guidance</h4>
+              <p className="section-note">
+                Ph.D. — 10 pts per degree awarded &nbsp;|&nbsp; 05 pts per thesis submitted
+                <span style={{ display: 'block', marginTop: '2px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                  M.Phil / P.G. Dissertation — 02 pts per degree awarded
+                </span>
+              </p>
 
               {research.guidance.map((row, index) => (
                 <div className="research-card" key={index}>
@@ -3398,7 +3471,7 @@ export default function FacultyAppraisalForm() {
                   >
                     <option value="">Degree</option>
                     <option value="PhD">Ph.D</option>
-                    <option value="PG">PG</option>
+                    <option value="MPhil">M.Phil / P.G. Dissertation</option>
                   </select>
 
                   <select
@@ -3461,267 +3534,329 @@ export default function FacultyAppraisalForm() {
                 + Add Research Guidance
               </button>
               <hr />
-              <h4>6. MOOCs / ICT Enabled Content</h4>
 
-              {research.moocsIct.map((row, index) => (
+              {/* ========== 6. ICT / PEDAGOGY / MOOCs / E-CONTENT ========== */}
+              <h4 style={{ lineHeight: 1.4 }}>
+                6. Creation of ICT mediated Teaching Learning pedagogy and
+                content and development of new and innovative course and curricula
+              </h4>
+
+              {/* ---- 6(a) Pedagogy Development ---- */}
+              <p className="section-note">
+                (a) Development of Innovative Pedagogy — 05 points each
+              </p>
+
+              {(research.pedagogy || []).map((row, index) => (
                 <div className="research-card" key={index}>
+                  <input
+                    placeholder="Title / Description"
+                    value={row.title}
+                    onChange={e => handleResearchChange("pedagogy", index, "title", e.target.value)}
+                  />
+                  <input
+                    type="date"
+                    value={getDateInputValue(row.year)}
+                    onChange={e => handleResearchChange("pedagogy", index, "year", e.target.value)}
+                  />
+                  <input
+                    placeholder="Enclosure No"
+                    value={row.enclosureNo}
+                    onChange={e => handleResearchChange("pedagogy", index, "enclosureNo", e.target.value)}
+                  />
+                  {(research.pedagogy || []).length > 1 && (
+                    <button className="btn-remove-small" onClick={() => removeResearchRow("pedagogy", index)}>✕</button>
+                  )}
+                </div>
+              ))}
+              <button className="btn-add" onClick={() => addResearchRow("pedagogy", { title: "", year: "", enclosureNo: "" })}>
+                + Add Pedagogy Entry
+              </button>
 
+              {/* ---- 6(b) Design of New Curricula and Courses ---- */}
+              <p className="section-note">
+                (b) Design of new curricula and courses — 02 points per curricula/course
+              </p>
+
+              {(research.curriculum || []).map((row, index) => (
+                <div className="research-card" key={index}>
                   <select
-                    value={row.category}
-                    onChange={e =>
-                      handleResearchChange("moocsIct", index, "category", e.target.value)
-                    }
+                    value={row.type}
+                    onChange={e => handleResearchChange("curriculum", index, "type", e.target.value)}
                   >
-                    <option value="">Category</option>
-                    <option value="MOOC">MOOC</option>
-                    <option value="E-Content">E-Content</option>
-                    <option value="Curriculum Design">Curriculum Design</option>
+                    <option value="">Type</option>
+                    <option value="New Curriculum">New Curriculum</option>
+                    <option value="New Course">New Course</option>
                   </select>
+                  <input
+                    placeholder="Title / Subject"
+                    value={row.title}
+                    onChange={e => handleResearchChange("curriculum", index, "title", e.target.value)}
+                  />
+                  <input
+                    type="date"
+                    value={getDateInputValue(row.year)}
+                    onChange={e => handleResearchChange("curriculum", index, "year", e.target.value)}
+                  />
+                  <input
+                    placeholder="Enclosure No"
+                    value={row.enclosureNo}
+                    onChange={e => handleResearchChange("curriculum", index, "enclosureNo", e.target.value)}
+                  />
+                  {(research.curriculum || []).length > 1 && (
+                    <button className="btn-remove-small" onClick={() => removeResearchRow("curriculum", index)}>✕</button>
+                  )}
+                </div>
+              ))}
+              <button className="btn-add" onClick={() => addResearchRow("curriculum", { type: "", title: "", year: "", enclosureNo: "" })}>
+                + Add Curricula / Course Entry
+              </button>
 
+              {/* ---- 6(c) MOOCs ---- */}
+              <p className="section-note">
+                (c) MOOCs — 20 pts (Complete) | 08 pts (Coordinator) | 05 pts (Module) | 02 pts (Content)
+              </p>
+
+              {(research.moocsIct || []).map((row, index) => (
+                <div className="research-card" key={index}>
                   <select
                     value={row.role}
-                    onChange={e =>
-                      handleResearchChange("moocsIct", index, "role", e.target.value)
-                    }
+                    onChange={e => handleResearchChange("moocsIct", index, "role", e.target.value)}
                   >
-                    <option value="">Role</option>
-                    <option value="4 Quadrant Course">4 Quadrant Course</option>
-                    <option value="Course Coordinator">Course Coordinator</option>
-                    <option value="Content Developer">Content Developer</option>
-                    <option value="Module Writer">Module Writer</option>
-                    <option value="Subject Expert">Subject Expert</option>
-                    <option value="Complete Course">Complete Course</option>
-                    <option value="Per Module">Per Module</option>
-                    <option value="Contribution">Contribution</option>
-                    <option value="Editor">Editor</option>
-                    <option value="Development of Innovative Pedagogy">Development of Innovative Pedagogy</option>
+                    <option value="">Role / Type</option>
+                    <option value="mooc_complete_4_quadrant">Development of complete MOOCs in 4 quadrants (4 credit course) — 20 pts</option>
+                    <option value="mooc_module">MOOCs (developed in 4 quadrant) per module/lecture — 05 pts</option>
+                    <option value="mooc_content_writer">Content writer / subject matter expert for each module (at least one quadrant) — 02 pts</option>
+                    <option value="mooc_course_coordinator">Course Coordinator for MOOCs (4 credit course) — 08 pts</option>
                   </select>
-
                   <input
                     type="number"
                     placeholder="Number of Quadrants (1–4)"
                     min="1"
                     max="4"
-                    value={row.creditClaimed}
-                    onChange={e =>
-                      handleResearchChange("moocsIct", index, "creditClaimed", e.target.value)
-                    }
+                    value={row.quadrants}
+                    onChange={e => handleResearchChange("moocsIct", index, "quadrants", e.target.value)}
                   />
-
                   <input
                     type="date"
                     value={getDateInputValue(row.year)}
-                    onChange={e =>
-                      handleResearchChange("moocsIct", index, "year", e.target.value)
-                    }
+                    onChange={e => handleResearchChange("moocsIct", index, "year", e.target.value)}
                   />
-
                   <input
                     placeholder="Enclosure No"
                     value={row.enclosureNo}
-                    onChange={e =>
-                      handleResearchChange("moocsIct", index, "enclosureNo", e.target.value)
-                    }
+                    onChange={e => handleResearchChange("moocsIct", index, "enclosureNo", e.target.value)}
                   />
-
-                  <button
-                    className="btn-remove-small"
-                    onClick={() => removeResearchRow("moocsIct", index)}
-                  >
-                    ✕
-                  </button>
+                  {(research.moocsIct || []).length > 1 && (
+                    <button className="btn-remove-small" onClick={() => removeResearchRow("moocsIct", index)}>✕</button>
+                  )}
                 </div>
               ))}
-
-              <button
-                className="btn-add"
-                onClick={() =>
-                  addResearchRow("moocsIct", {
-                    category: "",
-                    role: "",
-                    creditClaimed: "",
-                    year: "",
-                    enclosureNo: ""
-                  })
-                }
-              >
-                + Add MOOCs / ICT Entry
+              <button className="btn-add" onClick={() => addResearchRow("moocsIct", { role: "", quadrants: "", year: "", enclosureNo: "" })}>
+                + Add MOOCs Entry
               </button>
-              <hr />
-              <h4>7. Consultancy</h4>
 
-              {research.consultancyPolicy.map((row, index) => (
+              {/* ---- 6(d) E-Content ---- */}
+              <p className="section-note">
+                (d) E-Content — 12 pts (Complete) | 10 pts (Editor) | 05 pts (Module) | 02 pts (Contribution)
+              </p>
+
+              {(research.eContent || []).map((row, index) => (
                 <div className="research-card" key={index}>
-
                   <select
-                    value={row.category}
-                    onChange={e =>
-                      handleResearchChange("consultancyPolicy", index, "category", e.target.value)
-                    }
+                    value={row.role}
+                    onChange={e => handleResearchChange("eContent", index, "role", e.target.value)}
                   >
-                    <option value="">Type</option>
-                    <option value="Consultancy">Consultancy</option>
-                    <option value="Policy Document">Policy Document</option>
+                    <option value="">Role / Type</option>
+                    <option value="econtent_complete_course">Development of e-Content in 4 quadrant for a complete course/e-book — 12 pts</option>
+                    <option value="econtent_module">e-Content (developed in 4 quadrants) per module — 05 pts</option>
+                    <option value="econtent_contribution">Contribution to development of e-content module (at least one quadrant) — 02 pts</option>
+                    <option value="econtent_editor">Editor of e-content for complete course/paper/e-book — 10 pts</option>
                   </select>
+                  <input
+                    type="date"
+                    value={getDateInputValue(row.year)}
+                    onChange={e => handleResearchChange("eContent", index, "year", e.target.value)}
+                  />
+                  <input
+                    placeholder="Enclosure No"
+                    value={row.enclosureNo}
+                    onChange={e => handleResearchChange("eContent", index, "enclosureNo", e.target.value)}
+                  />
+                  {(research.eContent || []).length > 1 && (
+                    <button className="btn-remove-small" onClick={() => removeResearchRow("eContent", index)}>✕</button>
+                  )}
+                </div>
+              ))}
+              <button className="btn-add" onClick={() => addResearchRow("eContent", { role: "", year: "", enclosureNo: "" })}>
+                + Add E-Content Entry
+              </button>
 
+              <hr />
+
+              {/* ========== 7. CONSULTANCY ========== */}
+              <h4>7. Consultancy</h4>
+              <p className="section-note">
+                03 points each
+              </p>
+
+              {(research.consultancy || []).map((row, index) => (
+                <div className="research-card" key={index}>
+                  <input
+                    placeholder="Amount / Description (optional)"
+                    value={row.amount}
+                    onChange={e => handleResearchChange("consultancy", index, "amount", e.target.value)}
+                  />
+                  <input
+                    type="date"
+                    value={getDateInputValue(row.year)}
+                    onChange={e => handleResearchChange("consultancy", index, "year", e.target.value)}
+                  />
+                  <input
+                    placeholder="Enclosure No"
+                    value={row.enclosureNo}
+                    onChange={e => handleResearchChange("consultancy", index, "enclosureNo", e.target.value)}
+                  />
+                  {(research.consultancy || []).length > 1 && (
+                    <button className="btn-remove-small" onClick={() => removeResearchRow("consultancy", index)}>✕</button>
+                  )}
+                </div>
+              ))}
+              <button className="btn-add" onClick={() => addResearchRow("consultancy", { amount: "", year: "", enclosureNo: "" })}>
+                + Add Consultancy Entry
+              </button>
+
+              <hr />
+
+              {/* ========== 8. POLICY DOCUMENT ========== */}
+              <h4 style={{ lineHeight: 1.4 }}>
+                8. *Policy Document (Submitted to an International body/organization
+                like UNO/UNESCO/World Bank/International Monetary Fund etc. or
+                Central Government or State Government)
+              </h4>
+              <p className="section-note">
+                International — 10 pts &nbsp;|&nbsp; National — 07 pts &nbsp;|&nbsp; State — 04 pts
+              </p>
+
+              {(research.policyDocument || []).map((row, index) => (
+                <div className="research-card" key={index}>
                   <select
                     value={row.level}
-                    onChange={e =>
-                      handleResearchChange("consultancyPolicy", index, "level", e.target.value)
-                    }
+                    onChange={e => handleResearchChange("policyDocument", index, "level", e.target.value)}
                   >
                     <option value="">Level</option>
-                    <option value="International">International</option>
-                    <option value="National">National</option>
-                    <option value="State">State</option>
+                    <option value="International">International — 10 pts</option>
+                    <option value="National">National — 07 pts</option>
+                    <option value="State">State — 04 pts</option>
                   </select>
-
                   <input
                     placeholder="Enclosure No"
                     value={row.enclosureNo}
-                    onChange={e =>
-                      handleResearchChange("consultancyPolicy", index, "enclosureNo", e.target.value)
-                    }
+                    onChange={e => handleResearchChange("policyDocument", index, "enclosureNo", e.target.value)}
                   />
-
-                  <button
-                    className="btn-remove-small"
-                    onClick={() => removeResearchRow("consultancyPolicy", index)}
-                  >
-                    ✕
-                  </button>
+                  {(research.policyDocument || []).length > 1 && (
+                    <button className="btn-remove-small" onClick={() => removeResearchRow("policyDocument", index)}>✕</button>
+                  )}
                 </div>
               ))}
-
-              <button
-                className="btn-add"
-                onClick={() =>
-                  addResearchRow("consultancyPolicy", {
-                    category: "",
-                    level: "",
-                    enclosureNo: ""
-                  })
-                }
-              >
-                + Add Consultancy / Policy Document
+              <button className="btn-add" onClick={() => addResearchRow("policyDocument", { level: "", enclosureNo: "" })}>
+                + Add Policy Document Entry
               </button>
+
               <hr />
-              <h4>8. Awards / Fellowship</h4>
+
+              {/* ========== 9. AWARDS / FELLOWSHIP ========== */}
+              <h4>9. Awards / Fellowship</h4>
+              <p className="section-note">
+                International — 07 pts &nbsp;|&nbsp; National — 05 pts
+              </p>
 
               {research.awards.map((row, index) => (
                 <div className="research-card" key={index}>
-
                   <select
                     value={row.level}
-                    onChange={e =>
-                      handleResearchChange("awards", index, "level", e.target.value)
-                    }
+                    onChange={e => handleResearchChange("awards", index, "level", e.target.value)}
                   >
                     <option value="">Level</option>
                     <option value="International">International</option>
                     <option value="National">National</option>
                   </select>
-
                   <input
                     placeholder="Award Title"
                     value={row.title}
-                    onChange={e =>
-                      handleResearchChange("awards", index, "title", e.target.value)
-                    }
+                    onChange={e => handleResearchChange("awards", index, "title", e.target.value)}
                   />
-
                   <input
                     type="date"
                     value={getDateInputValue(row.year)}
-                    onChange={e =>
-                      handleResearchChange("awards", index, "year", e.target.value)
-                    }
+                    onChange={e => handleResearchChange("awards", index, "year", e.target.value)}
                   />
-
                   <input
                     placeholder="Enclosure No"
                     value={row.enclosureNo}
-                    onChange={e =>
-                      handleResearchChange("awards", index, "enclosureNo", e.target.value)
-                    }
+                    onChange={e => handleResearchChange("awards", index, "enclosureNo", e.target.value)}
                   />
-
-                  <button
-                    className="btn-remove-small"
-                    onClick={() => removeResearchRow("awards", index)}
-                  >
-                    ✕
-                  </button>
+                  <button className="btn-remove-small" onClick={() => removeResearchRow("awards", index)}>✕</button>
                 </div>
               ))}
               <button
                 className="btn-add"
-                onClick={() =>
-                  addResearchRow("awards", {
-                    level: "",
-                    title: "",
-                    year: "",
-                    enclosureNo: ""
-                  })
-                }
+                onClick={() => addResearchRow("awards", { level: "", title: "", year: "", enclosureNo: "" })}
               >
                 + Add Award / Fellowship
               </button>
+
               <hr />
-              <h4>9. Invited Lectures / Resource Person</h4>
+
+              {/* ========== 10. INVITED LECTURES ========== */}
+              <h4 style={{ lineHeight: 1.5 }}>
+                10. Invited lectures / Resource Person / paper presentation in
+                Seminars / Conferences / full paper in Conference Proceeding
+                <span style={{ display: 'block', fontSize: '13px', fontWeight: 400, color: 'var(--text-secondary)', marginTop: '4px' }}>
+                  (Paper presented in Seminars / Conferences and also published as full paper in
+                  Conference Proceedings will be counted only once)
+                </span>
+              </h4>
+              <p className="section-note">
+                International (Abroad) — 07 pts &nbsp;|&nbsp; International (within Country) — 05 pts &nbsp;|&nbsp; National — 03 pts &nbsp;|&nbsp; State / University — 02 pts
+              </p>
 
               {research.invitedTalks.map((row, index) => (
                 <div className="research-card" key={index}>
-
                   <select
                     value={row.level}
-                    onChange={e =>
-                      handleResearchChange("invitedTalks", index, "level", e.target.value)
-                    }
+                    onChange={e => handleResearchChange("invitedTalks", index, "level", e.target.value)}
                   >
                     <option value="">Level</option>
-                    <option value="International Abroad">International (Abroad)</option>
-                    <option value="International India">International (India)</option>
-                    <option value="National">National</option>
-                    <option value="State">State / University</option>
+                    <option value="International Abroad">International (Abroad) — 07 pts</option>
+                    <option value="International India">International (within Country) — 05 pts</option>
+                    <option value="National">National — 03 pts</option>
+                    <option value="State">State / University — 02 pts</option>
                   </select>
-
                   <select
                     value={row.role}
-                    onChange={e =>
-                      handleResearchChange("invitedTalks", index, "role", e.target.value)
-                    }
+                    onChange={e => handleResearchChange("invitedTalks", index, "role", e.target.value)}
                   >
                     <option value="">Role</option>
                     <option value="Invited Lecture">Invited Lecture</option>
                     <option value="Resource Person">Resource Person</option>
                     <option value="Paper Presentation">Paper Presentation</option>
+                    <option value="Full Paper in Conference Proceeding">Full Paper in Conference Proceeding</option>
                   </select>
-
                   <input
                     type="date"
                     value={getDateInputValue(row.year)}
-                    onChange={e =>
-                      handleResearchChange("invitedTalks", index, "year", e.target.value)
-                    }
+                    onChange={e => handleResearchChange("invitedTalks", index, "year", e.target.value)}
                   />
-
                   <input
                     placeholder="Enclosure No"
                     value={row.enclosureNo}
-                    onChange={e =>
-                      handleResearchChange("invitedTalks", index, "enclosureNo", e.target.value)
-                    }
+                    onChange={e => handleResearchChange("invitedTalks", index, "enclosureNo", e.target.value)}
                   />
-
-                  <button
-                    className="btn-remove-small"
-                    onClick={() => removeResearchRow("invitedTalks", index)}
-                  >
-                    ✕
-                  </button>
+                  <button className="btn-remove-small" onClick={() => removeResearchRow("invitedTalks", index)}>✕</button>
                 </div>
               ))}
+
+
               <button
                 className="btn-add"
                 onClick={() =>
@@ -3733,8 +3868,10 @@ export default function FacultyAppraisalForm() {
                   })
                 }
               >
-                + Add Invited Lecture
+                + Add Invited Lecture / Resource Person
               </button>
+
+
 
             </fieldset>
             {/* ========== NAVIGATION ========== */}

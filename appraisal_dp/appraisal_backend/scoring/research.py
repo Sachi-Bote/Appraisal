@@ -4,12 +4,12 @@ from decimal import Decimal, ROUND_HALF_UP
 RESEARCH_PAPER_TYPE = "research_paper"
 
 RESEARCH_PAPER_IMPACT_POINTS = {
-    "without_impact_factor": 5,
-    "less_than_1": 10,
-    "between_1_and_2": 15,
-    "between_2_and_5": 20,
-    "between_5_and_10": 25,
-    "greater_than_10": 30,
+    "without_impact_factor": 0,
+    "less_than_1": 5,
+    "between_1_and_2": 10,
+    "between_2_and_5": 15,
+    "between_5_and_10": 20,
+    "greater_than_10": 25,
 }
 
 RESEARCH_PAPER_AUTHOR_SHARES = {
@@ -99,18 +99,33 @@ def _to_decimal(value) -> Decimal:
         return Decimal("0")
 
 
+# Base score per journal paper (UGC/Peer-reviewed)
+BASE_JOURNAL_PAPER_SCORE = Decimal("8")
+
+
 def calculate_research_paper_score(entry: dict) -> dict:
+    """
+    Formula: awarded_score = impact_factor_points + (author_share × 8)
+
+    Example: IF between 2 and 5, two authors
+      = 20 + (0.70 × 8) = 20 + 5.6 = 25.6
+
+    The impact factor points are the primary score; the author share
+    determines the fraction of the base paper score (8) added on top.
+    """
     impact_category = str(entry.get("impact_factor_category", "")).strip()
     author_category = str(entry.get("author_category", "")).strip()
 
-    base_points = Decimal(str(RESEARCH_PAPER_IMPACT_POINTS.get(impact_category, 0)))
+    impact_points = Decimal(str(RESEARCH_PAPER_IMPACT_POINTS.get(impact_category, 0)))
     share = RESEARCH_PAPER_AUTHOR_SHARES.get(author_category, Decimal("0"))
-    awarded_score = (base_points * share).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    author_contribution = (BASE_JOURNAL_PAPER_SCORE * share).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    awarded_score = (impact_points + author_contribution).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     return {
         "impact_factor_category": impact_category,
         "author_category": author_category,
-        "base_points": float(base_points),
+        "impact_points": float(impact_points),
+        "author_contribution": float(author_contribution),
         "share": float(share),
         "awarded_score": float(awarded_score),
     }

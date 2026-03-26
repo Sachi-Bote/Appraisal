@@ -64,6 +64,12 @@ class ResearchCountTests(TestCase):
         self.assertEqual(result["total"], 26)
 
     def test_research_paper_uses_impact_factor_and_author_category(self):
+        """
+        New formula: awarded_score = impact_factor_points + (author_share × 8)
+          Paper A: IF between_2_and_5 (15) + two_authors (0.70 × 8 = 5.60) = 20.60
+          Paper B: IF greater_than_10 (25) + multi_author_joint (0.30 × 8 = 2.40) = 27.40
+          Combined total = 48.00
+        """
         payload = {
             "entries": [
                 {
@@ -84,5 +90,23 @@ class ResearchCountTests(TestCase):
         result = calculate_research_score(payload)
 
         self.assertEqual(result["breakdown"]["research_paper"]["count"], 2)
-        self.assertEqual(result["breakdown"]["research_paper"]["score"], 23.0)
-        self.assertEqual(result["total"], 23.0)
+        self.assertEqual(result["breakdown"]["research_paper"]["score"], 48.0)
+        self.assertEqual(result["total"], 48.0)
+
+    def test_research_paper_without_impact_factor_two_authors(self):
+        """
+        Paper in refereed journal without impact factor (0 pts) + two_authors (0.70 × 8 = 5.60) = 5.60
+        """
+        payload = {
+            "entries": [
+                {
+                    "type": "research_paper",
+                    "title": "Basic Paper",
+                    "impact_factor_category": "without_impact_factor",
+                    "author_category": "two_authors",
+                }
+            ]
+        }
+        result = calculate_research_score(payload)
+        self.assertEqual(result["breakdown"]["research_paper"]["score"], 10.6)
+        self.assertEqual(result["total"], 10.6)

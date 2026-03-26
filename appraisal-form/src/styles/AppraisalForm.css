@@ -1,4 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Lora:wght@500;600&display=swap");
+/* =====================================================
+   APPRAISAL FORM DESIGN SYSTEM
+   Google Fonts loaded in global.css — do NOT add @import here.
+===================================================== */
 
 /* =====================================================
    GLOBAL DESIGN SYSTEM
@@ -64,35 +67,11 @@ html {
   scroll-behavior: smooth;
 }
 
-body {
-  background-color: var(--background);
-  font-family: var(--app-font);
-  font-size: var(--font-body);
-  color: var(--text-primary);
-  line-height: 1.6;
-}
+/* body styles live in global.css — do not duplicate here */
 
 #root {
   min-height: 100vh;
 }
-
-*,
-*::before,
-*::after,
-input,
-select,
-textarea,
-button,
-option,
-label {
-  font-family: inherit;
-  font-weight: 400;
-}
-
-/* =====================================================
-   HEADINGS
-===================================================== */
-
 h1, h2, h3, h4 {
   font-weight: 600;
   color: var(--text-primary);
@@ -976,6 +955,48 @@ select {
 }
 
 .activity-card input::placeholder,
+
+.activity-row:last-child {
+  margin-bottom: 0;
+}
+
+.activity-card input,
+.activity-card select {
+  height: 42px;
+  padding: 10px 14px;
+  font-size: var(--font-body);
+  font-weight: 400;
+}
+
+.activity-card input[type="number"] {
+  text-align: center;
+}
+
+/* =====================================================
+   🔒 FINAL FONT LOCK — STEP 3 NORMALIZATION
+===================================================== */
+
+.activity-card,
+.activity-row,
+.activity-card input,
+.activity-card select,
+.activity-card textarea,
+.activity-row input,
+.activity-row select,
+.activity-row textarea {
+  font-size: var(--font-body);
+  font-weight: 400;
+  color: var(--text-primary);
+}
+
+.activity-card label,
+.activity-row label {
+  font-size: var(--font-label);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.activity-card input::placeholder,
 .activity-row input::placeholder {
   font-size: var(--font-body);
   color: var(--text-tertiary);
@@ -984,6 +1005,20 @@ select {
 /* =====================================================
    RESEARCH CARDS - UNIFIED STYLE
 ===================================================== */
+
+/* Sub-section label with points hint — used in ICT/MOOC section sub-headings */
+.section-note {
+  margin: 12px 0 10px;
+  padding: 8px 14px;
+  background: var(--primary-light);
+  border-left: 3px solid var(--primary);
+  border-radius: 0 6px 6px 0;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
 
 .research-card {
   background: var(--surface);

@@ -1,8 +1,16 @@
+/* =====================================================
+   GLOBAL CSS — loaded once in main.jsx before all components
+   Fonts and base body styles centralized here to prevent
+   flash of unstyled content (FOUC) on page refresh.
+===================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Lora:wght@500;600&display=swap");
+
 :root {
-  --ui-font: "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
-  --ui-heading: "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
-  --ui-text: #132238;
-  --ui-muted: #526075;
+  --ui-font: "DM Sans", "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --ui-heading: "DM Sans", "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --ui-text: #1a1f2e;
+  --ui-muted: #475569;
 }
 
 html {
@@ -13,9 +21,11 @@ html {
 
 body {
   margin: 0;
+  padding: 0;
   font-family: var(--ui-font);
   color: var(--ui-text);
-  background: #edf2f7;
+  background: #f4f6fb;
+  line-height: 1.6;
 }
 
 button,
