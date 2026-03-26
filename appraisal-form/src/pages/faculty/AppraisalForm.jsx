@@ -232,6 +232,10 @@ export default function FacultyAppraisalForm() {
   const isHOD = location.pathname.startsWith("/hod") || user.role === "HOD";
   const refreshStateKey = `appraisal-form-refresh-v1:${isHOD ? "hod" : "faculty"}:${user.id || user.username || "anon"}`;
 
+  const queryParams = new URLSearchParams(location.search);
+  const isForcedNew = queryParams.get("new") === "true";
+  const forcedAy = queryParams.get("ay");
+
   const submitEndpoint = isHOD
     ? "/hod/submit/"
     : "/faculty/submit/";
@@ -838,6 +842,7 @@ export default function FacultyAppraisalForm() {
           payLevel: data.gradePay || "",
           promotionDesignation: data.promotion_designation || "",
           eligibilityDate: (data.eligibility_date || "").toString().split("T")[0],
+          academicYear: isForcedNew && forcedAy ? forcedAy : prev.academicYear
         }));
       })
       .catch(err => console.error("Failed to fetch profile", err));
@@ -848,6 +853,12 @@ export default function FacultyAppraisalForm() {
         if (Array.isArray(res.data?.activity_sections) && res.data.activity_sections.length > 0) {
           setActivitySections(normalizeActivitySections(res.data.activity_sections));
         }
+
+        if (isForcedNew) {
+           console.log("🛠 Forced new appraisal session for AY:", forcedAy);
+           return;
+        }
+
         if (res.data && res.data.appraisal_data) {
           const aid = res.data.id || res.data.appraisal_id;
           setAppraisalId(aid);
@@ -1152,6 +1163,10 @@ export default function FacultyAppraisalForm() {
 
   useEffect(() => {
     try {
+      if (isForcedNew) {
+        sessionStorage.removeItem(refreshStateKey);
+        return;
+      }
       const raw = sessionStorage.getItem(refreshStateKey);
       if (!raw) return;
       const cached = JSON.parse(raw);
@@ -1699,17 +1714,7 @@ export default function FacultyAppraisalForm() {
 
     research.publications.forEach((p) => {
       if (!p.type) return;
-      if (p.type !== "Translation" && !p.publisherType) return;
-      const title = p.title || p.type;
-      if (p.type === "Book" && p.publisherType === "International") upsert("book_international", title, p.year, p.enclosureNo, 1);
-      if (p.type === "Book" && p.publisherType === "National") upsert("book_national", title, p.year, p.enclosureNo, 1);
-      if (p.type === "Chapter") upsert("edited_book_chapter", title, p.year, p.enclosureNo, 1);
-      if (p.type === "Editor" && p.publisherType === "International") upsert("editor_book_international", title, p.year, p.enclosureNo, 1);
-      if (p.type === "Editor" && p.publisherType === "National") upsert("editor_book_national", title, p.year, p.enclosureNo, 1);
-      if (p.type === "Translation") {
-        if (p.translationType === "Book") upsert("translation_book", title, p.year, p.enclosureNo, 1);
-        else upsert("translation_chapter_or_paper", title, p.year, p.enclosureNo, 1);
-      }
+      upsert(p.type, p.title || p.type, p.year, p.enclosureNo, 1);
     });
 
     research.projects.forEach((p) => {
@@ -1729,45 +1734,40 @@ export default function FacultyAppraisalForm() {
       const count = Number(g.count || 0) || 1;
       const label = `${g.degree || ""} ${g.status || ""}`.trim();
       if (g.degree === "PhD" && g.status === "Awarded") upsert("phd_awarded", label, g.year, g.enclosureNo, count);
-      if (g.degree === "PhD" && g.status === "Submitted") upsert("mphil_submitted", label, g.year, g.enclosureNo, count);
-      if (g.degree === "PG") upsert("pg_dissertation_awarded", label, g.year, g.enclosureNo, count);
+      else if (g.degree === "PhD" && g.status === "Submitted") upsert("mphil_submitted", label, g.year, g.enclosureNo, count);
+      else if (g.degree === "MPhil") upsert("pg_dissertation_awarded", label, g.year, g.enclosureNo, count);
     });
 
+    // Section 6a & 6b
+    research.pedagogy.forEach((p) => {
+      if (!p.title) return;
+      upsert("innovative_pedagogy", p.title, p.year, p.enclosureNo, 1);
+    });
+    research.curriculum.forEach((c) => {
+      if (!c.type || !c.title) return;
+      const key = c.type === "New Curriculum" ? "new_curriculum" : "new_course";
+      upsert(key, c.title, c.year, c.enclosureNo, 1);
+    });
+
+    // Section 6c & 6d
     research.moocsIct.forEach((m) => {
-      if (!m.category || !m.role) return;
-      const label = `${m.category || ""} ${m.role || ""}`.trim();
-      if (m.category === "MOOC") {
-        if (m.role === "Course Coordinator") upsert("mooc_course_coordinator", label, m.year, m.enclosureNo, 1);
-        else if (m.role === "Per Module") upsert("mooc_per_module", label, m.year, m.enclosureNo, 1);
-        else if (m.role === "4 Quadrant Course") upsert("mooc_complete_4_quadrant", label, m.year, m.enclosureNo, 1);
-        else upsert("mooc_content_writer", label, m.year, m.enclosureNo, 1);
-      }
-      if (m.category === "E-Content") {
-        if (m.role === "Complete Course") upsert("econtent_complete_course", label, m.year, m.enclosureNo, 1);
-        else if (m.role === "Per Module") upsert("econtent_4quadrant_per_module", label, m.year, m.enclosureNo, 1);
-        else if (m.role === "Contribution") upsert("econtent_module_contribution", label, m.year, m.enclosureNo, 1);
-        else if (m.role === "Editor") upsert("econtent_editor", label, m.year, m.enclosureNo, 1);
-        else upsert("econtent_module_contribution", label, m.year, m.enclosureNo, 1);
-      }
-      if (m.category === "Curriculum Design") {
-        if (m.role === "Development of Innovative Pedagogy") {
-          upsert("innovative_pedagogy_development", label, m.year, m.enclosureNo, 1);
-        } else {
-          upsert("new_curriculum", label, m.year, m.enclosureNo, 1);
-        }
-      }
+      if (!m.role) return;
+      upsert(m.role, m.role, m.year, m.enclosureNo, 1);
+    });
+    research.eContent.forEach((e) => {
+      if (!e.role) return;
+      upsert(e.role, e.role, e.year, e.enclosureNo, 1);
     });
 
-    research.consultancyPolicy.forEach((c) => {
-      if (!c.category) return;
-      const label = `${c.category || ""} ${c.level || ""}`.trim();
-      if (c.category === "Consultancy") upsert("consultancy", label, "", c.enclosureNo, 1);
-      if (c.category === "Policy Document") {
-        if (!c.level) return;
-        if (c.level === "International") upsert("policy_international", label, "", c.enclosureNo, 1);
-        else if (c.level === "National") upsert("policy_national", label, "", c.enclosureNo, 1);
-        else if (c.level === "State") upsert("policy_state", label, "", c.enclosureNo, 1);
-      }
+    // Section 7 & 8
+    research.consultancy.forEach((c) => {
+      if (!c.year) return;
+      upsert("consultancy", c.amount || "Consultancy", c.year, c.enclosureNo, 1);
+    });
+    research.policyDocument.forEach((p) => {
+      if (!p.level) return;
+      const key = `policy_${p.level.toLowerCase()}`;
+      upsert(key, `Policy Document (${p.level})`, "", p.enclosureNo, 1);
     });
 
     research.awards.forEach((a) => {
@@ -1903,48 +1903,60 @@ export default function FacultyAppraisalForm() {
       },
 
       publications: {
-        book_national: research.publications.filter(
-          p => p.type === "Book" && p.publisherType === "National"
-        ).length,
-
-        book_international: research.publications.filter(
-          p => p.type === "Book" && p.publisherType === "International"
-        ).length
+        book_national: research.publications.filter(p => p.type === "book_national").length,
+        book_international: research.publications.filter(p => p.type === "book_international").length,
+        chapter_edited: research.publications.filter(p => p.type === "edited_book_chapter").length,
+        editor_international: research.publications.filter(p => p.type === "editor_book_international").length,
+        editor_national: research.publications.filter(p => p.type === "editor_book_national").length,
+        translation: research.publications.filter(p => p.type.startsWith("translation")).length
       },
 
       ict: {
-        innovative_pedagogy: research.moocsIct.filter(
-          m => m.category === "Curriculum Design"
-        ).length,
-
+        innovative_pedagogy: research.pedagogy.length,
+        curriculum_design: research.curriculum.length,
         mooc: {
-          module: research.moocsIct.reduce(
-            (sum, m) => sum + Number(m.creditClaimed || 0),
-            0
-          )
+          module: research.moocsIct.length,
+          coordinator: research.moocsIct.filter(m => m.role === "mooc_course_coordinator").length,
+          quadrants: research.moocsIct.filter(m => m.role === "mooc_complete_4_quadrant").length,
+        },
+        econtent: {
+          complete: research.eContent.filter(e => e.role === "econtent_complete_course").length,
+          module: research.eContent.filter(e => e.role === "econtent_module").length,
         }
       },
 
       research_guidance: {
         phd_awarded: research.guidance.reduce(
-          (sum, g) =>
-            g.degree === "PhD" && g.status === "Awarded"
-              ? sum + Number(g.count || 0)
-              : sum,
+          (sum, g) => (g.degree === "PhD" && g.status === "Awarded" ? sum + Number(g.count || 0) : sum),
+          0
+        ),
+        mphil_submitted: research.guidance.reduce(
+          (sum, g) => (g.degree === "PhD" && g.status === "Submitted" ? sum + Number(g.count || 0) : sum),
+          0
+        ),
+        pg_dissertation: research.guidance.reduce(
+          (sum, g) => (g.degree === "PG" || g.degree === "MPhil" ? sum + Number(g.count || 0) : sum),
           0
         )
       },
 
-      patents: {
-        international: research.patents.filter(
-          p => p.type === "International" && p.status === "Granted"
-        ).length
+      projects: {
+        completed: research.projects.filter(p => p.status === "Completed").length,
+        ongoing: research.projects.filter(p => p.status === "Ongoing").length,
+        consultancy: research.consultancy.length
+      },
+
+      patents_policy_awards: {
+        patents: research.patents.length,
+        policy: research.policyDocument.length,
+        awards: research.awards.length
       },
 
       invited_lectures: {
-        national: research.invitedTalks.filter(
-          t => t.level === "National"
-        ).length
+        international_abroad: research.invitedTalks.filter(t => t.level === "International Abroad").length,
+        international_india: research.invitedTalks.filter(t => t.level === "International India").length,
+        national: research.invitedTalks.filter(t => t.level === "National").length,
+        state: research.invitedTalks.filter(t => t.level === "State").length,
       }
     };
   };
@@ -3285,12 +3297,12 @@ export default function FacultyAppraisalForm() {
                     <optgroup label="(a) Books Authored">
                       <option value="book_international">Book — International Publisher (12 pts)</option>
                       <option value="book_national">Book — National Publisher (10 pts)</option>
-                      <option value="chapter_edited">Chapter in Edited Book (05 pts)</option>
-                      <option value="editor_international">Editor of Book — International Publisher (10 pts)</option>
-                      <option value="editor_national">Editor of Book — National Publisher (08 pts)</option>
+                      <option value="edited_book_chapter">Chapter in Edited Book (05 pts)</option>
+                      <option value="editor_book_international">Editor of Book — International Publisher (10 pts)</option>
+                      <option value="editor_book_national">Editor of Book — National Publisher (08 pts)</option>
                     </optgroup>
                     <optgroup label="(b) Translation Works">
-                      <option value="translation_chapter">Translation — Chapter / Research Paper (03 pts)</option>
+                      <option value="translation_chapter_or_paper">Translation — Chapter / Research Paper (03 pts)</option>
                       <option value="translation_book">Translation — Book (08 pts)</option>
                     </optgroup>
                   </select>

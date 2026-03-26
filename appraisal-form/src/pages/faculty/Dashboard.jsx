@@ -160,6 +160,16 @@ export default function FacultyDashboard() {
   const stepObj = getStatusStepObj();
   const openFormText = !hasAppraisal ? "Start Appraisal" : isEditable ? "Continue Appraisal" : "View Appraisal";
 
+  const getSystemAcademicYear = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const startYear = now.getMonth() >= 5 ? year : year - 1;
+    return `${startYear}-${String(startYear + 1).slice(-2)}`;
+  };
+
+  const systemCurrentAy = getSystemAcademicYear();
+  const isNewYearAvailable = appraisal?.academic_year !== systemCurrentAy && !loading;
+
   return (
     <div className="profile-page-shell">
       <nav className="profile-topnav">
@@ -217,10 +227,22 @@ export default function FacultyDashboard() {
             </div>
           </div>
           <div className="profile-hero-actions">
-            <span className="profile-year-pill">AY {currentAy} Active</span>
-            <button type="button" className="profile-primary-action" style={{marginLeft: '8px'}} onClick={() => navigate("/faculty/appraisal")}>
-              📄 {openFormText}
-            </button>
+            {isNewYearAvailable ? (
+              <button 
+                type="button" 
+                className="profile-primary-action" 
+                onClick={() => navigate(`/faculty/appraisal?new=true&ay=${systemCurrentAy}`)}
+              >
+                ✨ Start AY {systemCurrentAy} Appraisal
+              </button>
+            ) : (
+              <>
+                <span className="profile-year-pill">AY {currentAy} Active</span>
+                <button type="button" className="profile-primary-action" style={{marginLeft: '8px'}} onClick={() => navigate("/faculty/appraisal")}>
+                  📄 {openFormText}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </section>
