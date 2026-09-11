@@ -2453,8 +2453,6 @@ export default function FacultyAppraisalForm() {
           <div>
             <div className="appraisal-nav-title">Staff Appraisal System</div>
           </div>
-          </>
-          )}
         </div>
 
         <div className="appraisal-nav-links">
@@ -2786,6 +2784,8 @@ export default function FacultyAppraisalForm() {
               Next →
             </button>
           </div>
+          </>
+          )}
         </div>
       )
       }

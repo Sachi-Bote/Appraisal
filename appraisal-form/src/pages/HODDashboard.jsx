@@ -109,7 +109,6 @@ export default function HODDashboard() {
     pending: [],
     processed: [],
   });
-  const [batchState, setBatchState] = useState({});
 
   /* ================= LOAD HOD SELF APPRAISAL ================= */
   useEffect(() => {
@@ -182,20 +181,6 @@ export default function HODDashboard() {
 
     fetchAppraisals();
   }, []);
-
-  /* ================= FETCH DETAILS FOR REVIEW ================= */
-  useEffect(() => {
-    const init = {};
-    submissions.pending.forEach((sub) => {
-      const pct = sub.sppu_review_data?.table1_teaching?.percentage;
-      init[sub.appraisal_id] = {
-        teachingGrade: suggestGrade(pct),
-        activityGrade: sub.sppu_review_data?.table1_activities?.self_grade || "Good",
-        remarks: "",
-      };
-    });
-    setBatchState(init);
-  }, [submissions.pending]);
 
   useEffect(() => {
     if (!selectedSubmission) return;
@@ -432,65 +417,6 @@ export default function HODDashboard() {
     );
   };
 
-  const updateBatch = (id, field, value) => {
-    setBatchState((prev) => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        [field]: value,
-      },
-    }));
-  };
-
-  const handleBatchApprove = async (sub, teachingGrade, activityGrade, rowRemarks) => {
-    if (!teachingGrade || !activityGrade) {
-      alert("Please set both grades before approving.");
-      return;
-    }
-
-    try {
-      if (sub.status === "SUBMITTED") {
-        await API.post(`hod/appraisal/${sub.appraisal_id}/start-review/`);
-      }
-      await API.post(`hod/appraisal/${sub.appraisal_id}/verify-grade/`, {
-        table1_verified_teaching: teachingGrade,
-        table1_verified_activities: activityGrade,
-        table2_verified_scores: {},
-        hod_remarks: rowRemarks,
-        hod_comments_table1: "",
-        hod_comments_table2: "",
-        hod_justification_not_satisfactory: "",
-      });
-      await API.post(`hod/appraisal/${sub.appraisal_id}/approve/`, {
-        table1_verified_teaching: teachingGrade,
-        table1_verified_activities: activityGrade,
-        table2_verified_scores: {},
-        hod_remarks: rowRemarks,
-      });
-      notifyAppraisalStatusChanged();
-      await refreshDashboardData();
-    } catch (err) {
-      console.error(err);
-      alert("Batch approval failed");
-    }
-  };
-
-  const handleBatchReturn = async (sub, rowRemarks) => {
-    if (!rowRemarks.trim()) {
-      alert("Remarks required before returning.");
-      return;
-    }
-
-    try {
-      await API.post(`hod/appraisal/${sub.appraisal_id}/return/`, { remarks: rowRemarks });
-      notifyAppraisalStatusChanged();
-      await refreshDashboardData();
-    } catch (err) {
-      console.error(err);
-      alert("Failed to return appraisal");
-    }
-  };
-
   const selfTeaching = deriveSelfTeaching(
     selectedSubmission?.sppu_review_data,
     selectedSubmission?.appraisal_data
@@ -557,6 +483,12 @@ export default function HODDashboard() {
   const heroDesignation = profileSummary.designation || "Head of Department";
   const heroDepartment = profileSummary.department || "Department";
   const reviewStatusLabel = selectedSubmission?.status?.replace(/_/g, " ") || "Awaiting Review";
+
+  useEffect(() => {
+    if (activeTab === "batch") {
+      setActiveTab("pending");
+    }
+  }, [activeTab, setActiveTab]);
 
 
 
@@ -1009,9 +941,6 @@ export default function HODDashboard() {
                   <button className={activeTab === "pending" ? "tab active" : "tab"} onClick={() => setActiveTab("pending")}>
                     Pending
                   </button>
-                  <button className={activeTab === "batch" ? "tab active" : "tab"} onClick={() => setActiveTab("batch")}>
-                    Batch Review ({pendingCount})
-                  </button>
                   <button className={activeTab === "processed" ? "tab active" : "tab"} onClick={() => setActiveTab("processed")}>
                     Processed
                   </button>
@@ -1067,107 +996,6 @@ export default function HODDashboard() {
                       </div>
                     </div>
                   ))}
-                </div>
-              )}
-
-              {activeTab === "batch" && (
-                <div className="hod-batch-panel">
-                  {loading && <p>Loading appraisals...</p>}
-                  {error && <p className="error">{error}</p>}
-                  {!loading && submissions.pending.length === 0 && <p>No pending appraisals.</p>}
-                  {!loading && submissions.pending.length > 0 && (
-                    <div className="hod-batch-table-wrap">
-                      <table className="hod-batch-table">
-                        <thead>
-                          <tr>
-                            <th>Faculty</th>
-                            <th>Score</th>
-                            <th>Teaching</th>
-                            <th>Activity</th>
-                            <th>Remarks</th>
-                            <th>Action</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {submissions.pending.map((sub) => {
-                            const state = batchState[sub.appraisal_id] || {};
-                            const score =
-                              sub.calculated_total_score === null || sub.calculated_total_score === undefined
-                                ? "-"
-                                : Number(sub.calculated_total_score).toFixed(2);
-
-                            return (
-                              <tr key={sub.appraisal_id}>
-                                <td>
-                                  <strong>{sub.faculty_name}</strong>
-                                  <span>{sub.department} | AY {sub.academic_year}</span>
-                                </td>
-                                <td>
-                                  <span className="hod-batch-score">{score}</span>
-                                </td>
-                                <td>
-                                  <select
-                                    className="hod-batch-select"
-                                    value={state.teachingGrade || ""}
-                                    onChange={(e) => updateBatch(sub.appraisal_id, "teachingGrade", e.target.value)}
-                                  >
-                                    <option value="Good">Good</option>
-                                    <option value="Satisfactory">Satisfactory</option>
-                                    <option value="Not Satisfactory">Not Satisfactory</option>
-                                  </select>
-                                </td>
-                                <td>
-                                  <select
-                                    className="hod-batch-select"
-                                    value={state.activityGrade || ""}
-                                    onChange={(e) => updateBatch(sub.appraisal_id, "activityGrade", e.target.value)}
-                                  >
-                                    <option value="Good">Good</option>
-                                    <option value="Satisfactory">Satisfactory</option>
-                                    <option value="Not Satisfactory">Not Satisfactory</option>
-                                  </select>
-                                </td>
-                                <td>
-                                  <textarea
-                                    className="hod-batch-remarks"
-                                    rows={2}
-                                    value={state.remarks || ""}
-                                    onChange={(e) => updateBatch(sub.appraisal_id, "remarks", e.target.value)}
-                                    placeholder="HOD remarks"
-                                  />
-                                </td>
-                                <td>
-                                  <div className="hod-batch-actions">
-                                    <button
-                                      type="button"
-                                      className="approve-btn"
-                                      onClick={() =>
-                                        handleBatchApprove(
-                                          sub,
-                                          state.teachingGrade,
-                                          state.activityGrade,
-                                          state.remarks || ""
-                                        )
-                                      }
-                                    >
-                                      Approve
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="reject-btn"
-                                      onClick={() => handleBatchReturn(sub, state.remarks || "")}
-                                    >
-                                      Return
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
                 </div>
               )}
 
