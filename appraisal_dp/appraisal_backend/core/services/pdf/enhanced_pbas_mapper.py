@@ -207,6 +207,7 @@ def get_enhanced_pbas_pdf_data(appraisal: Appraisal) -> Dict:
             "name": _get_first(entry, ["name"], title_value),
             "year": _get_first(entry, ["year"], "-"),
             "enclosure_no": _get_first(entry, ["enclosure_no", "enclosure"], "-"),
+            "reference_link": _get_first(entry, ["reference_link", "referenceLink", "link", "url", "doi"], ""),
         })
 
     faculty_name = _get_first(general, ["faculty_name", "name"], base["faculty"]["name"])

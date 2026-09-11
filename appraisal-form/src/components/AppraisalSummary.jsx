@@ -164,7 +164,14 @@ export default function AppraisalSummary({ data }) {
                         <tbody>
                             {research.papers.map((p, i) => (
                                 <tr key={i}>
-                                    <td>{p.title}</td>
+                                    <td>
+                                        {p.title}
+                                        {p.referenceLink && (
+                                            <div style={{ fontSize: '0.85em', color: '#1a56db', wordBreak: 'break-all', marginTop: '2px' }}>
+                                                Ref/DOI: <a href={p.referenceLink.startsWith('http') ? p.referenceLink : (p.referenceLink.startsWith('10.') || p.referenceLink.startsWith('doi:') ? `https://doi.org/${p.referenceLink.replace(/^doi:\s*/i, '')}` : `https://${p.referenceLink}`)} target="_blank" rel="noopener noreferrer">{p.referenceLink}</a>
+                                            </div>
+                                        )}
+                                    </td>
                                     <td>{p.journal}</td>
                                     <td>{p.year}</td>
                                 </tr>
@@ -187,7 +194,14 @@ export default function AppraisalSummary({ data }) {
                             {research.entries.map((e, i) => (
                                 <tr key={i}>
                                     <td>{formatKeyLabel(e.type)}</td>
-                                    <td>{e.title || "Count: " + e.count}</td>
+                                    <td>
+                                        {e.title || "Count: " + e.count}
+                                        {e.reference_link && (
+                                            <div style={{ fontSize: '0.85em', color: '#1a56db', wordBreak: 'break-all', marginTop: '2px' }}>
+                                                Ref/DOI: <a href={e.reference_link.startsWith('http') ? e.reference_link : (e.reference_link.startsWith('10.') || e.reference_link.startsWith('doi:') ? `https://doi.org/${e.reference_link.replace(/^doi:\s*/i, '')}` : `https://${e.reference_link}`)} target="_blank" rel="noopener noreferrer">{e.reference_link}</a>
+                                            </div>
+                                        )}
+                                    </td>
                                     <td>{e.year}</td>
                                 </tr>
                             ))}
@@ -205,7 +219,14 @@ export default function AppraisalSummary({ data }) {
                         <tbody>
                             {research.projects.map((p, i) => (
                                 <tr key={i}>
-                                    <td>{p.role}</td>
+                                    <td>
+                                        {p.role}
+                                        {p.referenceLink && (
+                                            <div style={{ fontSize: '0.85em', color: '#1a56db', wordBreak: 'break-all', marginTop: '2px' }}>
+                                                Ref/DOI: <a href={p.referenceLink.startsWith('http') ? p.referenceLink : (p.referenceLink.startsWith('10.') || p.referenceLink.startsWith('doi:') ? `https://doi.org/${p.referenceLink.replace(/^doi:\s*/i, '')}` : `https://${p.referenceLink}`)} target="_blank" rel="noopener noreferrer">{p.referenceLink}</a>
+                                            </div>
+                                        )}
+                                    </td>
                                     <td>{p.status}</td>
                                     <td>{p.amountSlab}</td>
                                 </tr>

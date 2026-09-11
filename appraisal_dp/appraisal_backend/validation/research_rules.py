@@ -3,12 +3,46 @@
 Validations for research/publication-related fields (PBAS - Section C).
 """
 
+import re
+from urllib.parse import urlparse
+
 from scoring.research import (
     POINTS,
     RESEARCH_PAPER_AUTHOR_SHARES,
     RESEARCH_PAPER_IMPACT_POINTS,
     RESEARCH_PAPER_TYPE,
 )
+
+
+def is_valid_reference_link(link) -> bool:
+    """
+    Validates that a reference link, if provided, is a valid URL or DOI.
+    Empty, None, and whitespace-only values are accepted as valid (field is optional).
+    """
+    if link is None:
+        return True
+    if not isinstance(link, str):
+        return False
+    trimmed = link.strip()
+    if not trimmed:
+        return True
+    if len(trimmed) > 2048:
+        return False
+    # Standard DOI check (e.g. 10.1000/182, doi:10.1000/182)
+    if re.match(r"^(doi:\s*)?10\.\d{4,9}/[-._;()/:A-Za-z0-9]+$", trimmed, re.IGNORECASE):
+        return True
+    # Standard URL check (http://, https://, ftp://)
+    if trimmed.startswith(("http://", "https://", "ftp://")):
+        parsed = urlparse(trimmed)
+        return bool(parsed.netloc)
+    # www. prefix
+    if trimmed.startswith("www."):
+        parsed = urlparse("https://" + trimmed)
+        return bool(parsed.netloc)
+    # Generic domain/path format e.g. "example.org/docs/123"
+    if re.match(r"^[a-zA-Z0-9][-a-zA-Z0-9.]*\.[a-zA-Z]{2,}(/.*)?$", trimmed):
+        return True
+    return False
 
 
 def validate_research_payload(payload: dict):
@@ -29,6 +63,12 @@ def validate_research_payload(payload: dict):
         activity_type = entry.get("type")
         if not activity_type:
             return False, f"Research entry {i+1} missing 'type'"
+
+        ref_link = entry.get("reference_link")
+        if ref_link is None:
+            ref_link = entry.get("referenceLink")
+        if not is_valid_reference_link(ref_link):
+            return False, f"Research entry {i+1} has an invalid Reference Link / DOI format"
 
         if activity_type == RESEARCH_PAPER_TYPE:
             impact_category = entry.get("impact_factor_category")

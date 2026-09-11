@@ -757,6 +757,18 @@ export default function FacultyAppraisalForm() {
     return rows;
   };
 
+  const isValidReferenceLink = (link) => {
+    if (!link) return true;
+    const trimmed = String(link).trim();
+    if (!trimmed) return true;
+    if (trimmed.length > 2048) return false;
+    if (/^(doi:\s*)?10\.\d{4,9}\/[-._;()/:A-Za-z0-9]+$/i.test(trimmed)) return true;
+    if (/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(trimmed)) return true;
+    if (/^www\.[^\s/$.?#].[^\s]*$/i.test(trimmed)) return true;
+    if (/^[a-zA-Z0-9][-a-zA-Z0-9.]*\.[a-zA-Z]{2,}(\/.*)?$/.test(trimmed)) return true;
+    return false;
+  };
+
   const createDefaultResearchState = () => ({
     papers: [
       {
@@ -765,7 +777,8 @@ export default function FacultyAppraisalForm() {
         impactFactorCategory: "",
         authorCategory: "",
         year: "",
-        enclosureNo: ""
+        enclosureNo: "",
+        referenceLink: ""
       }
     ],
 
@@ -776,7 +789,8 @@ export default function FacultyAppraisalForm() {
         publisherType: "",
         translationType: "",
         year: "",
-        enclosureNo: ""
+        enclosureNo: "",
+        referenceLink: ""
       }
     ],
 
@@ -785,7 +799,8 @@ export default function FacultyAppraisalForm() {
         status: "",
         amountSlab: "",
         role: "",
-        enclosureNo: ""
+        enclosureNo: "",
+        referenceLink: ""
       }
     ],
 
@@ -793,7 +808,8 @@ export default function FacultyAppraisalForm() {
       {
         type: "",
         status: "",
-        enclosureNo: ""
+        enclosureNo: "",
+        referenceLink: ""
       }
     ],
 
@@ -803,7 +819,8 @@ export default function FacultyAppraisalForm() {
         status: "",
         count: "",
         year: "",
-        enclosureNo: ""
+        enclosureNo: "",
+        referenceLink: ""
       }
     ],
 
@@ -812,7 +829,8 @@ export default function FacultyAppraisalForm() {
       {
         title: "",
         year: "",
-        enclosureNo: ""
+        enclosureNo: "",
+        referenceLink: ""
       }
     ],
 
@@ -822,7 +840,8 @@ export default function FacultyAppraisalForm() {
         type: "", // "New Curriculum" | "New Course"
         title: "",
         year: "",
-        enclosureNo: ""
+        enclosureNo: "",
+        referenceLink: ""
       }
     ],
 
@@ -832,7 +851,8 @@ export default function FacultyAppraisalForm() {
         role: "",
         quadrants: "",
         year: "",
-        enclosureNo: ""
+        enclosureNo: "",
+        referenceLink: ""
       }
     ],
 
@@ -841,7 +861,8 @@ export default function FacultyAppraisalForm() {
       {
         role: "",
         year: "",
-        enclosureNo: ""
+        enclosureNo: "",
+        referenceLink: ""
       }
     ],
 
@@ -850,7 +871,8 @@ export default function FacultyAppraisalForm() {
       {
         amount: "",
         year: "",
-        enclosureNo: ""
+        enclosureNo: "",
+        referenceLink: ""
       }
     ],
 
@@ -858,7 +880,8 @@ export default function FacultyAppraisalForm() {
     policyDocument: [
       {
         level: "",
-        enclosureNo: ""
+        enclosureNo: "",
+        referenceLink: ""
       }
     ],
 
@@ -867,7 +890,8 @@ export default function FacultyAppraisalForm() {
         level: "",
         title: "",
         year: "",
-        enclosureNo: ""
+        enclosureNo: "",
+        referenceLink: ""
       }
     ],
 
@@ -876,7 +900,8 @@ export default function FacultyAppraisalForm() {
         level: "",
         role: "",
         year: "",
-        enclosureNo: ""
+        enclosureNo: "",
+        referenceLink: ""
       }
     ]
   });
@@ -888,10 +913,26 @@ export default function FacultyAppraisalForm() {
     const normalized = { ...defaults };
     Object.keys(defaults).forEach((key) => {
       if (Array.isArray(value[key]) && value[key].length > 0) {
-        normalized[key] = value[key];
+        normalized[key] = value[key].map((item) => ({
+          referenceLink: item?.referenceLink || item?.reference_link || "",
+          ...(item || {}),
+        }));
       }
     });
     return normalized;
+  };
+
+  const validateResearchLinks = () => {
+    for (const [sectionKey, items] of Object.entries(research)) {
+      if (!Array.isArray(items)) continue;
+      for (let i = 0; i < items.length; i++) {
+        const link = items[i]?.referenceLink;
+        if (link && !isValidReferenceLink(link)) {
+          return `Invalid Reference Link / DOI in ${sectionKey} (entry #${i + 1}). Please enter a valid URL (http/https/www) or DOI.`;
+        }
+      }
+    }
+    return null;
   };
 
   const [research, setResearch] = useState(createDefaultResearchState);
@@ -1785,7 +1826,7 @@ export default function FacultyAppraisalForm() {
 
   const buildResearchEntries = () => {
     const entriesMap = {};
-    const upsert = (type, title = "", year = "", enclosureNo = "", countInc = 1) => {
+    const upsert = (type, title = "", year = "", enclosureNo = "", countInc = 1, referenceLink = "") => {
       if (!type) return;
       if (!entriesMap[type]) {
         entriesMap[type] = {
@@ -1794,13 +1835,17 @@ export default function FacultyAppraisalForm() {
           title: "",
           year: "",
           enclosure_no: "",
-          _titles: []
+          reference_link: "",
+          _titles: [],
+          _links: []
         };
       }
       entriesMap[type].count += Number(countInc || 1);
       if (title) entriesMap[type]._titles.push(String(title).trim());
+      if (referenceLink) entriesMap[type]._links.push(String(referenceLink).trim());
       if (!entriesMap[type].year && year) entriesMap[type].year = year;
       if (!entriesMap[type].enclosure_no && enclosureNo) entriesMap[type].enclosure_no = enclosureNo;
+      if (!entriesMap[type].reference_link && referenceLink) entriesMap[type].reference_link = referenceLink;
     };
 
     research.papers.forEach((p) => {
@@ -1818,24 +1863,25 @@ export default function FacultyAppraisalForm() {
         impact_factor_category: impactFactorCategory,
         author_category: authorCategory,
         year: p.year || "",
-        enclosure_no: p.enclosureNo || ""
+        enclosure_no: p.enclosureNo || "",
+        reference_link: p.referenceLink || ""
       };
     });
 
     research.publications.forEach((p) => {
       if (!p.type) return;
-      upsert(p.type, p.title || p.type, p.year, p.enclosureNo, 1);
+      upsert(p.type, p.title || p.type, p.year, p.enclosureNo, 1, p.referenceLink);
     });
 
     research.projects.forEach((p) => {
       if (!p.status || !p.amountSlab) return;
       const label = `${p.status || ""} ${p.amountSlab || ""} ${p.role || ""}`.trim();
       if (p.status === "Completed") {
-        if (p.amountSlab === ">10L") upsert("project_completed_gt_10_lakhs", label, "", p.enclosureNo, 1);
-        else upsert("project_completed_lt_10_lakhs", label, "", p.enclosureNo, 1);
+        if (p.amountSlab === ">10L") upsert("project_completed_gt_10_lakhs", label, "", p.enclosureNo, 1, p.referenceLink);
+        else upsert("project_completed_lt_10_lakhs", label, "", p.enclosureNo, 1, p.referenceLink);
       } else if (p.status === "Ongoing") {
-        if (p.amountSlab === ">10L") upsert("project_ongoing_gt_10_lakhs", label, "", p.enclosureNo, 1);
-        else upsert("project_ongoing_lt_10_lakhs", label, "", p.enclosureNo, 1);
+        if (p.amountSlab === ">10L") upsert("project_ongoing_gt_10_lakhs", label, "", p.enclosureNo, 1, p.referenceLink);
+        else upsert("project_ongoing_lt_10_lakhs", label, "", p.enclosureNo, 1, p.referenceLink);
       }
     });
 
@@ -1843,64 +1889,64 @@ export default function FacultyAppraisalForm() {
       if (!g.degree || !g.status) return;
       const count = Number(g.count || 0) || 1;
       const label = `${g.degree || ""} ${g.status || ""}`.trim();
-      if (g.degree === "PhD" && g.status === "Awarded") upsert("phd_awarded", label, g.year, g.enclosureNo, count);
-      else if (g.degree === "PhD" && g.status === "Submitted") upsert("mphil_submitted", label, g.year, g.enclosureNo, count);
-      else if (g.degree === "MPhil") upsert("pg_dissertation_awarded", label, g.year, g.enclosureNo, count);
+      if (g.degree === "PhD" && g.status === "Awarded") upsert("phd_awarded", label, g.year, g.enclosureNo, count, g.referenceLink);
+      else if (g.degree === "PhD" && g.status === "Submitted") upsert("mphil_submitted", label, g.year, g.enclosureNo, count, g.referenceLink);
+      else if (g.degree === "MPhil") upsert("pg_dissertation_awarded", label, g.year, g.enclosureNo, count, g.referenceLink);
     });
 
     // Section 6a & 6b
     research.pedagogy.forEach((p) => {
       if (!p.title) return;
-      upsert("innovative_pedagogy", p.title, p.year, p.enclosureNo, 1);
+      upsert("innovative_pedagogy", p.title, p.year, p.enclosureNo, 1, p.referenceLink);
     });
     research.curriculum.forEach((c) => {
       if (!c.type || !c.title) return;
       const key = c.type === "New Curriculum" ? "new_curriculum" : "new_course";
-      upsert(key, c.title, c.year, c.enclosureNo, 1);
+      upsert(key, c.title, c.year, c.enclosureNo, 1, c.referenceLink);
     });
 
     // Section 6c & 6d
     research.moocsIct.forEach((m) => {
       if (!m.role) return;
-      upsert(m.role, m.role, m.year, m.enclosureNo, 1);
+      upsert(m.role, m.role, m.year, m.enclosureNo, 1, m.referenceLink);
     });
     research.eContent.forEach((e) => {
       if (!e.role) return;
-      upsert(e.role, e.role, e.year, e.enclosureNo, 1);
+      upsert(e.role, e.role, e.year, e.enclosureNo, 1, e.referenceLink);
     });
 
     // Section 7 & 8
     research.consultancy.forEach((c) => {
       if (!c.year) return;
-      upsert("consultancy", c.amount || "Consultancy", c.year, c.enclosureNo, 1);
+      upsert("consultancy", c.amount || "Consultancy", c.year, c.enclosureNo, 1, c.referenceLink);
     });
     research.policyDocument.forEach((p) => {
       if (!p.level) return;
       const key = `policy_${p.level.toLowerCase()}`;
-      upsert(key, `Policy Document (${p.level})`, "", p.enclosureNo, 1);
+      upsert(key, `Policy Document (${p.level})`, "", p.enclosureNo, 1, p.referenceLink);
     });
 
     research.awards.forEach((a) => {
       if (!a.level) return;
       const label = a.title || a.level || "Award";
-      if (a.level === "International") upsert("award_international", label, a.year, a.enclosureNo, 1);
-      else upsert("award_national", label, a.year, a.enclosureNo, 1);
+      if (a.level === "International") upsert("award_international", label, a.year, a.enclosureNo, 1, a.referenceLink);
+      else upsert("award_national", label, a.year, a.enclosureNo, 1, a.referenceLink);
     });
 
     research.patents.forEach((p) => {
       if (!p.type) return;
       const label = `${p.type || ""} ${p.status || ""}`.trim();
-      if (p.type === "International") upsert("patent_international", label, "", p.enclosureNo, 1);
-      else upsert("patent_national", label, "", p.enclosureNo, 1);
+      if (p.type === "International") upsert("patent_international", label, "", p.enclosureNo, 1, p.referenceLink);
+      else upsert("patent_national", label, "", p.enclosureNo, 1, p.referenceLink);
     });
 
     research.invitedTalks.forEach((t) => {
       if (!t.level) return;
       const label = `${t.role || ""} ${t.level || ""}`.trim();
-      if (t.level === "International Abroad") upsert("invited_lecture_international_abroad", label, t.year, t.enclosureNo, 1);
-      else if (t.level === "International India") upsert("invited_lecture_international_india", label, t.year, t.enclosureNo, 1);
-      else if (t.level === "National") upsert("invited_lecture_national", label, t.year, t.enclosureNo, 1);
-      else upsert("invited_lecture_state_university", label, t.year, t.enclosureNo, 1);
+      if (t.level === "International Abroad") upsert("invited_lecture_international_abroad", label, t.year, t.enclosureNo, 1, t.referenceLink);
+      else if (t.level === "International India") upsert("invited_lecture_international_india", label, t.year, t.enclosureNo, 1, t.referenceLink);
+      else if (t.level === "National") upsert("invited_lecture_national", label, t.year, t.enclosureNo, 1, t.referenceLink);
+      else upsert("invited_lecture_state_university", label, t.year, t.enclosureNo, 1, t.referenceLink);
     });
 
     return Object.values(entriesMap).map((entry) => {
@@ -1913,7 +1959,8 @@ export default function FacultyAppraisalForm() {
           impact_factor_category: entry.impact_factor_category || "",
           author_category: entry.author_category || "",
           year: entry.year || "",
-          enclosure_no: entry.enclosure_no || ""
+          enclosure_no: entry.enclosure_no || "",
+          reference_link: entry.reference_link || ""
         };
       }
 
@@ -1922,7 +1969,8 @@ export default function FacultyAppraisalForm() {
         count: entry.count,
         title: entry._titles.length ? Array.from(new Set(entry._titles)).join("; ") : "",
         year: entry.year || "",
-        enclosure_no: entry.enclosure_no || ""
+        enclosure_no: entry.enclosure_no || "",
+        reference_link: entry._links?.length ? Array.from(new Set(entry._links)).join("; ") : (entry.reference_link || "")
       };
     });
   };
@@ -2099,6 +2147,13 @@ export default function FacultyAppraisalForm() {
       setErrors((prev) => ({ ...prev, ...step3CreditErrors }));
       setCurrentStep(3);
       showValidationSummary(step3CreditErrors);
+      return;
+    }
+
+    const researchLinkError = validateResearchLinks();
+    if (researchLinkError) {
+      setCurrentStep(4);
+      alert(researchLinkError);
       return;
     }
     // 1️⃣ Declaration check
@@ -3401,6 +3456,13 @@ export default function FacultyAppraisalForm() {
                     onChange={e => handleResearchChange("papers", index, "enclosureNo", e.target.value)}
                   />
 
+                  <input
+                    className="research-link-input"
+                    placeholder="Reference Link / DOI / Public Document URL (Optional)"
+                    value={row.referenceLink || ""}
+                    onChange={e => handleResearchChange("papers", index, "referenceLink", e.target.value)}
+                  />
+
                   {research.papers.length > 1 && (
                     <button className="btn-remove-small" onClick={() => removeResearchRow("papers", index)}>✕</button>
                   )}
@@ -3411,7 +3473,7 @@ export default function FacultyAppraisalForm() {
                 addResearchRow("papers", {
                   title: "", journal: "",
                   impactFactorCategory: "", authorCategory: "",
-                  year: "", enclosureNo: ""
+                  year: "", enclosureNo: "", referenceLink: ""
                 })
               }>
                 + Add Paper
@@ -3490,6 +3552,13 @@ export default function FacultyAppraisalForm() {
                     onChange={e => handleResearchChange("publications", index, "enclosureNo", e.target.value)}
                   />
 
+                  <input
+                    className="research-link-input"
+                    placeholder="Reference Link / DOI / Public Document URL (Optional)"
+                    value={row.referenceLink || ""}
+                    onChange={e => handleResearchChange("publications", index, "referenceLink", e.target.value)}
+                  />
+
                   <button className="btn-remove-small" onClick={() => removeResearchRow("publications", index)}>✕</button>
                 </div>
               ))}
@@ -3498,7 +3567,7 @@ export default function FacultyAppraisalForm() {
                 addResearchRow("publications", {
                   type: "", title: "",
                   publisherType: "", translationType: "", year: "",
-                  enclosureNo: ""
+                  enclosureNo: "", referenceLink: ""
                 })
               }>
                 + Add Publication
@@ -3554,6 +3623,13 @@ export default function FacultyAppraisalForm() {
                     onChange={e => handleResearchChange("projects", index, "enclosureNo", e.target.value)}
                   />
 
+                  <input
+                    className="research-link-input"
+                    placeholder="Reference Link / DOI / Public Document URL (Optional)"
+                    value={row.referenceLink || ""}
+                    onChange={e => handleResearchChange("projects", index, "referenceLink", e.target.value)}
+                  />
+
                   <button className="btn-remove-small" onClick={() => removeResearchRow("projects", index)}>✕</button>
                 </div>
               ))}
@@ -3561,7 +3637,7 @@ export default function FacultyAppraisalForm() {
               <button className="btn-add" onClick={() =>
                 addResearchRow("projects", {
                   status: "", amountSlab: "",
-                  role: "", enclosureNo: ""
+                  role: "", enclosureNo: "", referenceLink: ""
                 })
               }>
                 + Add Project
@@ -3605,13 +3681,20 @@ export default function FacultyAppraisalForm() {
                     onChange={e => handleResearchChange("patents", index, "enclosureNo", e.target.value)}
                   />
 
+                  <input
+                    className="research-link-input"
+                    placeholder="Reference Link / DOI / Public Document URL (Optional)"
+                    value={row.referenceLink || ""}
+                    onChange={e => handleResearchChange("patents", index, "referenceLink", e.target.value)}
+                  />
+
                   <button className="btn-remove-small" onClick={() => removeResearchRow("patents", index)}>✕</button>
                 </div>
               ))}
 
               <button className="btn-add" onClick={() =>
                 addResearchRow("patents", {
-                  type: "", status: "", enclosureNo: ""
+                  type: "", status: "", enclosureNo: "", referenceLink: ""
                 })
               }>
                 + Add Patent
@@ -3681,6 +3764,13 @@ export default function FacultyAppraisalForm() {
                     }
                   />
 
+                  <input
+                    className="research-link-input"
+                    placeholder="Reference Link / DOI / Public Document URL (Optional)"
+                    value={row.referenceLink || ""}
+                    onChange={e => handleResearchChange("guidance", index, "referenceLink", e.target.value)}
+                  />
+
                   <button
                     className="btn-remove-small"
                     onClick={() => removeResearchRow("guidance", index)}
@@ -3698,7 +3788,8 @@ export default function FacultyAppraisalForm() {
                     status: "",
                     count: "",
                     year: "",
-                    enclosureNo: ""
+                    enclosureNo: "",
+                    referenceLink: ""
                   })
                 }
               >
@@ -3738,12 +3829,18 @@ export default function FacultyAppraisalForm() {
                     value={row.enclosureNo}
                     onChange={e => handleResearchChange("pedagogy", index, "enclosureNo", e.target.value)}
                   />
+                  <input
+                    className="research-link-input"
+                    placeholder="Reference Link / DOI / Public Document URL (Optional)"
+                    value={row.referenceLink || ""}
+                    onChange={e => handleResearchChange("pedagogy", index, "referenceLink", e.target.value)}
+                  />
                   {(research.pedagogy || []).length > 1 && (
                     <button className="btn-remove-small" onClick={() => removeResearchRow("pedagogy", index)}>✕</button>
                   )}
                 </div>
               ))}
-              <button className="btn-add" onClick={() => addResearchRow("pedagogy", { title: "", year: "", enclosureNo: "" })}>
+              <button className="btn-add" onClick={() => addResearchRow("pedagogy", { title: "", year: "", enclosureNo: "", referenceLink: "" })}>
                 + Add Pedagogy Entry
               </button>
                 </>
@@ -3781,12 +3878,18 @@ export default function FacultyAppraisalForm() {
                     value={row.enclosureNo}
                     onChange={e => handleResearchChange("curriculum", index, "enclosureNo", e.target.value)}
                   />
+                  <input
+                    className="research-link-input"
+                    placeholder="Reference Link / DOI / Public Document URL (Optional)"
+                    value={row.referenceLink || ""}
+                    onChange={e => handleResearchChange("curriculum", index, "referenceLink", e.target.value)}
+                  />
                   {(research.curriculum || []).length > 1 && (
                     <button className="btn-remove-small" onClick={() => removeResearchRow("curriculum", index)}>✕</button>
                   )}
                 </div>
               ))}
-              <button className="btn-add" onClick={() => addResearchRow("curriculum", { type: "", title: "", year: "", enclosureNo: "" })}>
+              <button className="btn-add" onClick={() => addResearchRow("curriculum", { type: "", title: "", year: "", enclosureNo: "", referenceLink: "" })}>
                 + Add Curricula / Course Entry
               </button>
                 </>
@@ -3829,12 +3932,18 @@ export default function FacultyAppraisalForm() {
                     value={row.enclosureNo}
                     onChange={e => handleResearchChange("moocsIct", index, "enclosureNo", e.target.value)}
                   />
+                  <input
+                    className="research-link-input"
+                    placeholder="Reference Link / DOI / Public Document URL (Optional)"
+                    value={row.referenceLink || ""}
+                    onChange={e => handleResearchChange("moocsIct", index, "referenceLink", e.target.value)}
+                  />
                   {(research.moocsIct || []).length > 1 && (
                     <button className="btn-remove-small" onClick={() => removeResearchRow("moocsIct", index)}>✕</button>
                   )}
                 </div>
               ))}
-              <button className="btn-add" onClick={() => addResearchRow("moocsIct", { role: "", quadrants: "", year: "", enclosureNo: "" })}>
+              <button className="btn-add" onClick={() => addResearchRow("moocsIct", { role: "", quadrants: "", year: "", enclosureNo: "", referenceLink: "" })}>
                 + Add MOOCs Entry
               </button>
                 </>
@@ -3869,12 +3978,18 @@ export default function FacultyAppraisalForm() {
                     value={row.enclosureNo}
                     onChange={e => handleResearchChange("eContent", index, "enclosureNo", e.target.value)}
                   />
+                  <input
+                    className="research-link-input"
+                    placeholder="Reference Link / DOI / Public Document URL (Optional)"
+                    value={row.referenceLink || ""}
+                    onChange={e => handleResearchChange("eContent", index, "referenceLink", e.target.value)}
+                  />
                   {(research.eContent || []).length > 1 && (
                     <button className="btn-remove-small" onClick={() => removeResearchRow("eContent", index)}>✕</button>
                   )}
                 </div>
               ))}
-              <button className="btn-add" onClick={() => addResearchRow("eContent", { role: "", year: "", enclosureNo: "" })}>
+              <button className="btn-add" onClick={() => addResearchRow("eContent", { role: "", year: "", enclosureNo: "", referenceLink: "" })}>
                 + Add E-Content Entry
               </button>
                 </>
@@ -3907,12 +4022,18 @@ export default function FacultyAppraisalForm() {
                     value={row.enclosureNo}
                     onChange={e => handleResearchChange("consultancy", index, "enclosureNo", e.target.value)}
                   />
+                  <input
+                    className="research-link-input"
+                    placeholder="Reference Link / DOI / Public Document URL (Optional)"
+                    value={row.referenceLink || ""}
+                    onChange={e => handleResearchChange("consultancy", index, "referenceLink", e.target.value)}
+                  />
                   {(research.consultancy || []).length > 1 && (
                     <button className="btn-remove-small" onClick={() => removeResearchRow("consultancy", index)}>✕</button>
                   )}
                 </div>
               ))}
-              <button className="btn-add" onClick={() => addResearchRow("consultancy", { amount: "", year: "", enclosureNo: "" })}>
+              <button className="btn-add" onClick={() => addResearchRow("consultancy", { amount: "", year: "", enclosureNo: "", referenceLink: "" })}>
                 + Add Consultancy Entry
               </button>
                 </>
@@ -3948,12 +4069,18 @@ export default function FacultyAppraisalForm() {
                     value={row.enclosureNo}
                     onChange={e => handleResearchChange("policyDocument", index, "enclosureNo", e.target.value)}
                   />
+                  <input
+                    className="research-link-input"
+                    placeholder="Reference Link / DOI / Public Document URL (Optional)"
+                    value={row.referenceLink || ""}
+                    onChange={e => handleResearchChange("policyDocument", index, "referenceLink", e.target.value)}
+                  />
                   {(research.policyDocument || []).length > 1 && (
                     <button className="btn-remove-small" onClick={() => removeResearchRow("policyDocument", index)}>✕</button>
                   )}
                 </div>
               ))}
-              <button className="btn-add" onClick={() => addResearchRow("policyDocument", { level: "", enclosureNo: "" })}>
+              <button className="btn-add" onClick={() => addResearchRow("policyDocument", { level: "", enclosureNo: "", referenceLink: "" })}>
                 + Add Policy Document Entry
               </button>
                 </>
@@ -3994,12 +4121,18 @@ export default function FacultyAppraisalForm() {
                     value={row.enclosureNo}
                     onChange={e => handleResearchChange("awards", index, "enclosureNo", e.target.value)}
                   />
+                  <input
+                    className="research-link-input"
+                    placeholder="Reference Link / DOI / Public Document URL (Optional)"
+                    value={row.referenceLink || ""}
+                    onChange={e => handleResearchChange("awards", index, "referenceLink", e.target.value)}
+                  />
                   <button className="btn-remove-small" onClick={() => removeResearchRow("awards", index)}>✕</button>
                 </div>
               ))}
               <button
                 className="btn-add"
-                onClick={() => addResearchRow("awards", { level: "", title: "", year: "", enclosureNo: "" })}
+                onClick={() => addResearchRow("awards", { level: "", title: "", year: "", enclosureNo: "", referenceLink: "" })}
               >
                 + Add Award / Fellowship
               </button>
@@ -4055,6 +4188,12 @@ export default function FacultyAppraisalForm() {
                     value={row.enclosureNo}
                     onChange={e => handleResearchChange("invitedTalks", index, "enclosureNo", e.target.value)}
                   />
+                  <input
+                    className="research-link-input"
+                    placeholder="Reference Link / DOI / Public Document URL (Optional)"
+                    value={row.referenceLink || ""}
+                    onChange={e => handleResearchChange("invitedTalks", index, "referenceLink", e.target.value)}
+                  />
                   <button className="btn-remove-small" onClick={() => removeResearchRow("invitedTalks", index)}>✕</button>
                 </div>
               ))}
@@ -4067,7 +4206,8 @@ export default function FacultyAppraisalForm() {
                     level: "",
                     role: "",
                     year: "",
-                    enclosureNo: ""
+                    enclosureNo: "",
+                    referenceLink: ""
                   })
                 }
               >
@@ -4088,6 +4228,11 @@ export default function FacultyAppraisalForm() {
               <button
                 className="btn-primary"
                 onClick={async () => {
+                  const linkErr = validateResearchLinks();
+                  if (linkErr) {
+                    alert(linkErr);
+                    return;
+                  }
                   const saved = await handleSaveDraft(true);
                   if (!saved) {
                     alert("Please save before moving to the next step.");

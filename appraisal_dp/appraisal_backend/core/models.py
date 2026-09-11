@@ -347,6 +347,7 @@ class Document(models.Model):
 
     document_type = models.CharField(max_length=50, null=True, blank=True)
     file_path = models.TextField()
+    reference_link = models.TextField(null=True, blank=True)
 
     uploaded_by = models.ForeignKey(
         User,

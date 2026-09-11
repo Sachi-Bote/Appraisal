@@ -395,7 +395,12 @@
                 <td class="center">{{ forloop.counter }}</td>
                 <td>{{ entry.type_display|default:entry.type }}</td>
                 <td class="center">{{ entry.count }}</td>
-                <td>{% firstof entry.title_display entry.title entry.name "-" %}</td>
+                <td>
+                    {% firstof entry.title_display entry.title entry.name "-" %}
+                    {% if entry.reference_link %}
+                    <br /><span style="font-size: 7.5pt; color: #0056b3; word-break: break-all;">Link/DOI: {{ entry.reference_link }}</span>
+                    {% endif %}
+                </td>
                 <td class="center">{{ entry.year|default:"-" }}</td>
                 <td class="center">{{ entry.enclosure_no|default:"-" }}</td>
             </tr>
